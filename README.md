@@ -1,10 +1,9 @@
 <div align="center">
   <img src="assets/icons/focusflow_icon.svg" alt="FocusFlow Icon" width="200" style="vertical-align: middle; margin-right: 20px; padding: 15px"/>
-  <span style="font-size: 40px; font-weight: bold; vertical-align: middle;">FocusFlow</span>
 </div>
 
 <div align="justify" style="padding: 10px">
-  FocusFlow is a cross-platform productivity application built with Flutter and integrated with Firebase. It helps users enhance focus, track distractions, monitor moods and receive personalized recommendations from AI and human coaches. The system also leverages the Gemini API to power intelligent insights, generate adaptive focus tips and analyze user productivity patterns, making the experience more personalized and data-driven.
+  <b>FocusFlow</b> is a cross-platform productivity application built with Flutter and integrated with Firebase. It helps users enhance focus, track distractions, monitor moods and receive personalized recommendations from AI and human coaches. The system also leverages the Gemini API to power intelligent insights, generate adaptive focus tips and analyze user productivity patterns, making the experience more personalized and data-driven.
 </div>
 
 ---

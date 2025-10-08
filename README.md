@@ -53,6 +53,15 @@ FocusFlow/
 | `utils/`       | Stores constants, helper functions, and theme configurations                 |
 | `widgets/`     | Reusable UI components shared across multiple screens                        |
 
+# 🔧 Firebase Configuration
+
+Before running the app, make sure the following Firebase configuration files are placed in the correct locations:
+
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+
+These files are required for Firebase services to function properly
+
 # ⚠️ Git Notes
 - Some folders currently contains a `.gitkeep` file to ensure it's tracked in the repository
 
@@ -95,10 +104,17 @@ Before you start working, make sure you are in your own branch:
 ```bash
 # Available branches
 
-git checkout wei-ling
-git checkout pei-ying
-git checkout pik-rou
+git checkout wl
+git checkout py
+git checkout pr
 ```
+| Branch | Owner     |
+|:--------|:-----------|
+| `wl`    | Wei Ling   |
+| `py`    | Pei Ying   |
+| `pr`    | Pik Rou    |
+
+---
 
 Always pull the latest updates from the `main` branch before starting work:
 ```bash

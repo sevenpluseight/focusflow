@@ -55,3 +55,7 @@ app.*.map.json
 # Temporary system files
 *.lock
 *.temp
+
+# Firebase config files
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

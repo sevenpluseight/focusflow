@@ -96,109 +96,115 @@ Future<void> _register() async {
 
 @override
 Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: const Color(0xFF222428),
-    body: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // App icon
-              Image.asset(
-                'assets/icons/focusflow_icon.png',  // <-- your icon image
-                width: 100,
-                height: 100,
-              ),
-              const SizedBox(height: 20),
-
-              const Text(
-                "FocusFlow",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+  return Theme(
+    data: ThemeData(
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: Color(0xFFBFFB4F),            // blinking text cursor
+        selectionColor: Color(0x55BFFB4F),         // text highlight (semi-transparent)
+        selectionHandleColor: Color(0xFFBFFB4F),   // selection handles
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white10,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.white30),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFBFFB4F), width: 2),
+        ),
+      ),
+    ),
+    child: Scaffold(
+      backgroundColor: const Color(0xFF222428),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // App icon
+                Image.asset(
+                  'assets/icons/focusflow_icon.png',
+                  width: 100,
+                  height: 100,
                 ),
-              ),
-              const SizedBox(height: 40),
+                const SizedBox(height: 20),
 
-              // Email Field
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  filled: true,
-                  fillColor: Colors.white10,
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                const Text(
+                  "FocusFlow",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 40),
 
-              // Password Field
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  filled: true,
-                  fillColor: Colors.white10,
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Email Field
+                TextField(
+                  controller: _emailController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: "Email"),
+                ),
+                const SizedBox(height: 16),
+
+                // Password Field
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: "Password"),
+                ),
+                const SizedBox(height: 20),
+
+                // Error Message
+                if (_errorMessage != null)
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.redAccent),
                   ),
-                ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Error Message
-              if (_errorMessage != null)
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.redAccent),
-                ),
-              const SizedBox(height: 20),
-
-              // Buttons
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: _signIn,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFBFFB4F),
-                            minimumSize: const Size.fromHeight(48),
-                            foregroundColor: Colors.black,
+                // Buttons
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: _signIn,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFBFFB4F),
+                              minimumSize: const Size.fromHeight(48),
+                              foregroundColor: Colors.black,
+                            ),
+                            child: const Text(
+                              "Sign In",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
-                          child: const Text(
-                            "Sign In",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        OutlinedButton(
-                          onPressed: _register,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFBFFB4F)),
-                            minimumSize: const Size.fromHeight(48),
-                          ),
-                          child: const Text(
-                            "Create Account",
-                            style: TextStyle(
-                              color: Color(0xFFBFFB4F),
-                              fontWeight: FontWeight.bold
+                          const SizedBox(height: 10),
+                          OutlinedButton(
+                            onPressed: _register,
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFBFFB4F)),
+                              minimumSize: const Size.fromHeight(48),
+                            ),
+                            child: const Text(
+                              "Create Account",
+                              style: TextStyle(
+                                color: Color(0xFFBFFB4F),
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-            ],
+                        ],
+                      ),
+              ],
+            ),
           ),
         ),
       ),

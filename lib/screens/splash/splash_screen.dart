@@ -25,21 +25,21 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // 🌈 Fade + Scale Animation
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
+
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
     );
+
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
 
     _controller.forward();
-
     _initializeApp();
   }
 
@@ -49,27 +49,23 @@ class _SplashScreenState extends State<SplashScreen>
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      print("✅ Firebase initialized successfully!");
 
       setState(() => _statusText = "🤖 Connecting to Gemini...");
       await _testGeminiAPI();
 
-      // Wait briefly to let animation complete
       await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => const LoginScreen(),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
           ),
         );
       }
     } catch (e) {
-      print("❌ Initialization failed: $e");
       if (mounted) {
         setState(() => _statusText = "❌ Initialization failed: $e");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +83,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (apiKey == null || apiKey.isEmpty) {
       setState(() => _statusText = "❌ Missing GEMINI_API_KEY in .env file");
-      print(_statusText);
       throw Exception("Missing GEMINI_API_KEY in .env");
     }
 
@@ -96,44 +91,63 @@ class _SplashScreenState extends State<SplashScreen>
 
     try {
       final response = await model.generateContent([Content.text(prompt)]);
-      final text = response.text ?? "⚠️ No response from Gemini.";
-      print("✅ Gemini connected successfully: $text");
       setState(() => _statusText = "✅ Gemini connected!");
+      debugPrint("✅ Gemini connected: ${response.text}");
     } catch (e) {
-      print("❌ Gemini connection failed: $e");
       throw Exception("Gemini connection failed: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xFF222428),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SvgPicture.asset(
-                  'assets/icons/focusflow_icon.svg',
-                  width: 140,
-                  height: 140,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  flex: 3,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SvgPicture.asset(
+                        'assets/icons/focusflow_icon.svg',
+                        width: size.width * 0.35,
+                        height: size.width * 0.35,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 40),
+                const Text(
+                  "FocusFlow",
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  _statusText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(flex: 2),
+              ],
             ),
-            const SizedBox(height: 30),
-            Text(
-              _statusText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

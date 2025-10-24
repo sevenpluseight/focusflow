@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:focusflow/screens/auth/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _obscurePassword = true;
 
   Future<void> _signIn() async {
     final email = _emailController.text.trim();
@@ -53,48 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _register() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = "Email and password cannot be blank.");
-      return;
-    }
-    if (password.length < 6) {
-      setState(() => _errorMessage = "Password must be at least 6 characters.");
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'email-already-in-use':
-          _errorMessage = "This email is already registered.";
-          break;
-        case 'invalid-email':
-          _errorMessage = "Please enter a valid email.";
-          break;
-        case 'weak-password':
-          _errorMessage = "Password too weak. Try adding numbers or symbols.";
-          break;
-        default:
-          _errorMessage = e.message;
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
@@ -111,7 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -122,6 +83,33 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       setState(() {
         _errorMessage = "Google sign-in failed: $e";
+      });
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      setState(() => _errorMessage = "Please enter your email to reset password.");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      setState(() {
+        _errorMessage = "Password reset link sent to $email";
+      });
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
       });
     } finally {
       setState(() => _isLoading = false);
@@ -160,14 +148,12 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // 🟡 App icon
                   Image.asset(
-                    'assets/icons/focusflow_icon.png',
+                    'assets/icons/png/focusflow_icon.png',
                     width: 100,
                     height: 100,
                   ),
                   const SizedBox(height: 20),
-
                   const Text(
                     "FocusFlow",
                     style: TextStyle(
@@ -178,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // 📧 Email Field
+                  // EMAIL
                   TextField(
                     controller: _emailController,
                     style: const TextStyle(color: Colors.white),
@@ -186,24 +172,54 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 🔒 Password Field
+                  // PASSWORD with toggle
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(labelText: "Password"),
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.white70,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
                   ),
+
+                  // Forgot password aligned slightly to the right
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, right: 4),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _resetPassword,
+                        child: const Text(
+                          "Forgot Password?",
+                          style: TextStyle(color: Colors.white54),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 20),
 
-                  // ⚠️ Error Message
                   if (_errorMessage != null)
                     Text(
                       _errorMessage!,
                       style: const TextStyle(color: Colors.redAccent),
                     ),
+
                   const SizedBox(height: 20),
 
-                  // 🔘 Buttons
                   _isLoading
                       ? const CircularProgressIndicator()
                       : Column(
@@ -220,42 +236,75 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 20),
+                            const Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.white70)),
+                                Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text("Or continue with",
+                                      style:
+                                          TextStyle(color: Colors.white70)),
+                                ),
+                                Expanded(child: Divider(color: Colors.white70)),
+                              ],
+                            ),
+                            const SizedBox(height: 30),
                             OutlinedButton(
-                              onPressed: _register,
+                              onPressed: _signInWithGoogle,
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Color(0xFFBFFB4F)),
+                                side:
+                                    const BorderSide(color: Color(0xFFBFFB4F)),
                                 minimumSize: const Size.fromHeight(48),
                               ),
-                              child: const Text(
-                                "Create Account",
-                                style: TextStyle(
-                                  color: Color(0xFFBFFB4F),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/icons/png/google.png',
+                                    height: 24,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Text(
+                                    "Sign in with Google",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 20),
-                            const Text("Or continue with",
-                                style: TextStyle(color: Colors.white70)),
-                            const SizedBox(height: 10),
-                            OutlinedButton.icon(
-                              icon: Image.asset(
-                                'assets/icons/google.png',
-                                height: 24,
-                              ),
-                              label: const Text(
-                                "Sign in with Google",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+
+                            // 👇 Add this new Sign Up link
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Don’t have an account?",
+                                  style: TextStyle(color: Colors.white70),
                                 ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Color(0xFFBFFB4F)),
-                                minimumSize: const Size.fromHeight(48),
-                              ),
-                              onPressed: _signInWithGoogle,
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SignUpScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      color: Color(0xFFBFFB4F),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

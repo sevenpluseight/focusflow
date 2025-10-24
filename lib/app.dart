@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:focusflow/services/firebase_service.dart';
+import 'package:focusflow/services/services.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/theme/app_theme.dart';
 
@@ -63,10 +63,13 @@ class _AppState extends State<App> {
 
           if (snapshot.hasData) {
             return const Scaffold(
-              body: Center(child: Text("Welcome!")),
+              body: Center(child: Text("Welcome! Will update later.")),
             );
           } else {
-            return LoginScreen(onToggleTheme: _toggleTheme);
+            return LoginScreen(
+              onToggleTheme: _toggleTheme,
+              isDarkMode: _isDarkMode,
+              );
           }
         },
       ),

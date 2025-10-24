@@ -4,7 +4,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:focusflow/screens/auth/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final VoidCallback? onToggleTheme;
+
+  const LoginScreen({super.key, this.onToggleTheme});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -118,198 +120,159 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        textSelectionTheme: const TextSelectionThemeData(
-          cursorColor: Color(0xFFBFFB4F),
-          selectionColor: Color(0x55BFFB4F),
-          selectionHandleColor: Color(0xFFBFFB4F),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white10,
-          labelStyle: const TextStyle(color: Colors.white70),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.white30),
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.brightness_6),
+            onPressed: widget.onToggleTheme,
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFBFFB4F), width: 2),
-          ),
-        ),
+        ],
       ),
-      child: Scaffold(
-        backgroundColor: const Color(0xFF222428),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/icons/png/focusflow_icon.png',
-                    width: 100,
-                    height: 100,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "FocusFlow",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // EMAIL
-                  TextField(
-                    controller: _emailController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(labelText: "Email"),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // PASSWORD with toggle
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.white70,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/icons/png/focusflow_icon.png',
+                  width: 100,
+                  height: 100,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "FocusFlow",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                  ),
+                ),
+                const SizedBox(height: 40),
 
-                  // Forgot password aligned slightly to the right
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, right: 4),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: _resetPassword,
-                        child: const Text(
-                          "Forgot Password?",
-                          style: TextStyle(color: Colors.white54),
-                        ),
+                // Email
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
+                ),
+                const SizedBox(height: 16),
+
+                // Password
+                TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 20),
-
-                  if (_errorMessage != null)
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent),
+                // Forgot password
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 4),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _resetPassword,
+                      child: const Text("Forgot Password?"),
                     ),
+                  ),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                  _isLoading
-                      ? const CircularProgressIndicator()
-                      : Column(
-                          children: [
-                            ElevatedButton(
-                              onPressed: _signIn,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFBFFB4F),
-                                minimumSize: const Size.fromHeight(48),
-                                foregroundColor: Colors.black,
-                              ),
-                              child: const Text(
-                                "Sign In",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            const Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.white70)),
-                                Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text("Or continue with",
-                                      style:
-                                          TextStyle(color: Colors.white70)),
-                                ),
-                                Expanded(child: Divider(color: Colors.white70)),
-                              ],
-                            ),
-                            const SizedBox(height: 30),
-                            OutlinedButton(
-                              onPressed: _signInWithGoogle,
-                              style: OutlinedButton.styleFrom(
-                                side:
-                                    const BorderSide(color: Color(0xFFBFFB4F)),
-                                minimumSize: const Size.fromHeight(48),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/icons/png/google.png',
-                                    height: 24,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  const Text(
-                                    "Sign in with Google",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
+                if (_errorMessage != null)
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
 
-                            // 👇 Add this new Sign Up link
-                            Row(
+                const SizedBox(height: 20),
+
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: _signIn,
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                            ),
+                            child: const Text(
+                              "Sign In",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text("Or continue with"),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 30),
+                          OutlinedButton(
+                            onPressed: _signInWithGoogle,
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                            ),
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  "Don’t have an account?",
-                                  style: TextStyle(color: Colors.white70),
+                                Image.asset(
+                                  'assets/icons/png/google.png',
+                                  height: 24,
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SignUpScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text(
-                                    "Sign Up",
-                                    style: TextStyle(
-                                      color: Color(0xFFBFFB4F),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                const SizedBox(width: 10),
+                                const Text(
+                                  "Sign in with Google",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                ],
-              ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Sign Up link
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("Don’t have an account?"),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SignUpScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign Up",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+              ],
             ),
           ),
         ),

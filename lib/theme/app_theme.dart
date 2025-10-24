@@ -7,7 +7,7 @@ class AppTheme {
   static const Color lightBackground = Colors.white;
 
   // Dark theme
-  static final ThemeData darkTheme = FormTheme.formFieldTheme().copyWith(
+  static final ThemeData darkTheme = FormTheme.formFieldTheme(isDarkMode: true).copyWith(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: darkBackground,
     colorScheme: const ColorScheme.dark(
@@ -34,7 +34,7 @@ class AppTheme {
         backgroundColor: primaryColor,
         foregroundColor: Colors.black,
         minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
@@ -42,7 +42,7 @@ class AppTheme {
   );
 
   // Light theme
-  static final ThemeData lightTheme = FormTheme.formFieldTheme().copyWith(
+  static final ThemeData lightTheme = FormTheme.formFieldTheme(isDarkMode: false).copyWith(
     brightness: Brightness.light,
     scaffoldBackgroundColor: lightBackground,
     colorScheme: const ColorScheme.light(
@@ -69,7 +69,7 @@ class AppTheme {
         backgroundColor: primaryColor,
         foregroundColor: Colors.black,
         minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),

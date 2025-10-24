@@ -7,7 +7,14 @@ import '../../firebase_options.dart';
 import '../auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool isDarkMode;
+  final VoidCallback? onToggleTheme;
+
+  const SplashScreen({
+    super.key,
+    required this.isDarkMode,
+    this.onToggleTheme,
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -58,8 +65,11 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const LoginScreen(),
-            transitionsBuilder: (_, animation, __, child) =>
+            pageBuilder: (_, _, _) => LoginScreen(
+              isDarkMode: widget.isDarkMode,
+              onToggleTheme: widget.onToggleTheme,
+            ),
+            transitionsBuilder: (_, animation, _, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
           ),

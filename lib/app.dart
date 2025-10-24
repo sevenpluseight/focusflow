@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/services/firebase_service.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:focusflow/theme/app_theme.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -12,6 +13,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   bool _initialized = false;
+  bool _isDarkMode = true; // Default to dark mode
 
   @override
   void initState() {
@@ -22,6 +24,10 @@ class _AppState extends State<App> {
   Future<void> _initialize() async {
     await FirebaseService.initializeFirebase();
     setState(() => _initialized = true);
+  }
+
+  void _toggleTheme() {
+    setState(() => _isDarkMode = !_isDarkMode);
   }
 
   @override
@@ -39,6 +45,10 @@ class _AppState extends State<App> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'FocusFlow',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -56,7 +66,7 @@ class _AppState extends State<App> {
               body: Center(child: Text("Welcome!")),
             );
           } else {
-            return const LoginScreen();
+            return LoginScreen(onToggleTheme: _toggleTheme);
           }
         },
       ),

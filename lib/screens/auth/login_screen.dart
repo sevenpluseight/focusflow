@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:focusflow/screens/auth/signup_screen.dart';
+import 'package:pixelarticons/pixelarticons.dart';
+import 'package:focusflow/utils/utils.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
+  final bool isDarkMode;
 
-  const LoginScreen({super.key, this.onToggleTheme});
+  const LoginScreen({
+    super.key,
+    this.onToggleTheme,
+    required this.isDarkMode,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -64,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         setState(() {
           _isLoading = false;
@@ -73,9 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
+      final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -93,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _resetPassword() async {
     final email = _emailController.text.trim();
-
     if (email.isEmpty) {
       setState(() => _errorMessage = "Please enter your email to reset password.");
       return;
@@ -118,19 +122,52 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
+    final isDark = widget.isDarkMode;
+
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: isDark ? const Color(0xFF2C2F33) : Colors.white,
+      labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: SizeConfig.font(2)),
+      hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: SizeConfig.font(1.8)),
+      suffixIcon: suffixIcon,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
+        borderSide: BorderSide(color: isDark ? Colors.white30 : Colors.black38),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
+        borderSide: const BorderSide(color: Color(0xFFBFFB4F), width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
+
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: theme.appBarTheme.elevation,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: widget.onToggleTheme,
+          Padding(
+            padding: EdgeInsets.only(right: SizeConfig.wp(1.2)),
+            child: IconButton(
+              icon: Icon(
+                widget.isDarkMode ? Pixel.sunalt : Pixel.moon,
+                size: SizeConfig.wp(6.8),
+              ),
+              onPressed: widget.onToggleTheme,
+            ),
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(SizeConfig.wp(6)),
         child: Center(
           child: SingleChildScrollView(
             child: Column(
@@ -138,68 +175,81 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Image.asset(
                   'assets/icons/png/focusflow_icon.png',
-                  width: 100,
-                  height: 100,
+                  width: SizeConfig.wp(25),
+                  height: SizeConfig.wp(25),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: SizeConfig.hp(4)),
                 Text(
                   "FocusFlow",
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: SizeConfig.font(4.5),
+                    fontWeight: FontWeight.bold,
+                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                  ),
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: SizeConfig.hp(5)),
 
                 // Email
                 TextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
+                  decoration: _inputDecoration("Email"),
+                  keyboardType: TextInputType.emailAddress,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                    fontSize: SizeConfig.font(2),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: SizeConfig.hp(2)),
 
                 // Password
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: "Password",
+                  decoration: _inputDecoration(
+                    "Password",
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
+                        color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                        size: SizeConfig.wp(5),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      onPressed: () => setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      }),
                     ),
+                  ),
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                    fontSize: SizeConfig.font(2),
                   ),
                 ),
 
                 // Forgot password
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, right: 4),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _resetPassword,
-                      child: const Text("Forgot Password?"),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _resetPassword,
+                    child: Text(
+                      "Forgot Password?",
+                      style: TextStyle(
+                        color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                        fontSize: SizeConfig.font(1.8),
+                      ),
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 20),
+                SizedBox(height: SizeConfig.hp(3)),
 
                 if (_errorMessage != null)
                   Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.redAccent),
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: SizeConfig.font(1.8),
+                    ),
                   ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: SizeConfig.hp(3)),
 
                 _isLoading
                     ? const CircularProgressIndicator()
@@ -208,64 +258,84 @@ class _LoginScreenState extends State<LoginScreen> {
                           ElevatedButton(
                             onPressed: _signIn,
                             style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
+                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
                             ),
-                            child: const Text(
+                            child: Text(
                               "Sign In",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: SizeConfig.font(2),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          const Row(
+                          SizedBox(height: SizeConfig.hp(2)),
+                          Row(
                             children: [
                               Expanded(child: Divider()),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text("Or continue with"),
+                                padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
+                                child: Text(
+                                  "Or continue with",
+                                  style: TextStyle(fontSize: SizeConfig.font(1.8)),
+                                ),
                               ),
                               Expanded(child: Divider()),
                             ],
                           ),
-                          const SizedBox(height: 30),
+                          SizedBox(height: SizeConfig.hp(3)),
                           OutlinedButton(
                             onPressed: _signInWithGoogle,
                             style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
+                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Image.asset(
                                   'assets/icons/png/google.png',
-                                  height: 24,
+                                  height: SizeConfig.hp(3),
                                 ),
-                                const SizedBox(width: 10),
-                                const Text(
+                                SizedBox(width: SizeConfig.wp(2)),
+                                Text(
                                   "Sign in with Google",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: SizeConfig.font(2),
+                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: SizeConfig.hp(2)),
 
                           // Sign Up link
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Don’t have an account?"),
+                              Text(
+                                "Don’t have an account?",
+                                style: TextStyle(fontSize: SizeConfig.font(1.8)),
+                              ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const SignUpScreen(),
+                                      builder: (context) => SignUpScreen(
+                                        isDarkMode: widget.isDarkMode,
+                                        onToggleTheme: widget.onToggleTheme,
+                                      ),
                                     ),
                                   );
                                 },
-                                child: const Text(
+                                child: Text(
                                   "Sign Up",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: SizeConfig.font(2),
+                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
+                                  ),
                                 ),
                               ),
                             ],

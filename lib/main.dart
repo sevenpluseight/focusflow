@@ -1,27 +1,38 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'screens/splash/splash_screen.dart';
+
+
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+
+//   print("🚀 Starting app initialization...");
+//   await dotenv.load(fileName: ".env");
+//   print("✅ .env file loaded successfully.");
+
+//   // ⚙️ Don't initialize Firebase here anymore
+//   // We'll do it inside SplashScreen for better UX.
+
+//   print("🟢 Launching app...");
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return const MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: SplashScreen(),
+//     );
+//   }
+// }
+
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:focusflow/app.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("Firebase with .env")),
-        body: Center(child: Text("Firebase Initialized!")),
-      ),
-    );
-  }
+  runApp(const App());
 }

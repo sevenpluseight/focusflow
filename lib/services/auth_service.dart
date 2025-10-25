@@ -5,12 +5,19 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Email sign-up
-  Future<User?> signUp(String email, String password) async {
+  // Email sign-up with username
+  Future<User?> signUp({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
     final userCredential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+
+    // Update display name
+    await userCredential.user?.updateDisplayName(username);
     return userCredential.user;
   }
 
@@ -38,5 +45,11 @@ class AuthService {
     return userCredential.user;
   }
 
+  // Reset password
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  // Auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

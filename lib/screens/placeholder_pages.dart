@@ -1,4 +1,3 @@
-// lib/screens/placeholder_pages.dart
 import 'package:flutter/material.dart';
 
 class PlaceholderPage extends StatelessWidget {

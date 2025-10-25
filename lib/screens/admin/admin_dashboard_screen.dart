@@ -1,4 +1,3 @@
-// lib/screens/admin/admin_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:pixelarticons/pixelarticons.dart'; // Import icons
 
@@ -8,17 +7,16 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF222428), // Dark charcoal background
+      backgroundColor: const Color(0xFF222428), 
       appBar: AppBar(
         title: const Text('Admin Dashboard', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF222428),
         elevation: 0,
-        automaticallyImplyLeading: false, // No back button
-        // --- ADDED ACTIONS SECTION ---
+        automaticallyImplyLeading: false, 
         actions: [
           IconButton(
-            icon: const Icon(Pixel.notification, color: Colors.white, size: 26), // Adjusted size slightly
-            tooltip: 'View Reports/Alerts', // Optional: Tooltip
+            icon: const Icon(Pixel.notification, color: Colors.white, size: 26), 
+            tooltip: 'View Reports/Alerts', 
             onPressed: () {
               // TODO: Implement navigation to a screen for admin notifications/reports
               print('Admin Notification Icon Tapped');
@@ -27,7 +25,6 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 10), // Padding on the right
         ],
-        // --- END ADDED ACTIONS SECTION ---
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),

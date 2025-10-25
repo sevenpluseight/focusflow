@@ -112,9 +112,11 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:focusflow/theme/app_theme.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/services/services.dart';
+import 'package:focusflow/providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -173,15 +175,20 @@ class _FocusFlowAppState extends State<FocusFlowApp> {
           );
         } else {
           // Firebase initialized successfully
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'FocusFlow',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: LoginScreen(
-              isDarkMode: _isDarkMode,
-              onToggleTheme: _toggleTheme,
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => AuthProvider()),
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'FocusFlow',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              home: LoginScreen(
+                isDarkMode: _isDarkMode,
+                onToggleTheme: _toggleTheme,
+              ),
             ),
           );
         }

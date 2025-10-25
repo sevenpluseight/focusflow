@@ -1,61 +1,40 @@
-name: Flutter CI
+name: Dart & Flutter CI
 
 on:
   push:
-    branches: 
-      - main
-      - dev
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: 
-      - main
-      - dev
+    branches: [ "main", "dev" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
+      # Checkout the repo
       - uses: actions/checkout@v4
 
-      # Cache Flutter SDK
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/flutter
-          key: flutter-sdk-${{ runner.os }}-stable
-          restore-keys: |
-            flutter-sdk-${{ runner.os }}-
-
-      # Install Flutter SDK (stable)
+      # Install Flutter
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '^3.8.1'
 
-      # Disable Flutter analytics
-      - run: flutter config --no-analytics
+      # Verify Flutter setup
+      - name: Flutter doctor
+        run: flutter doctor
 
-      # Cache pub packages
-      - name: Cache pub packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.pub-cache
-          key: pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            pub-cache-
-
-      # Install dependencies
+      # Get project dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Analyze code
-      - name: Analyze project source
+      # Run Dart analyzer
+      - name: Analyze project
         run: flutter analyze
 
       # Run tests
       - name: Run tests
-        run: flutter test --coverage
+        run: flutter test
 
-      # Optional: Verify code formatting
+      # Optional: check formatting
       # - name: Verify formatting
       #   run: flutter format --set-exit-if-changed .

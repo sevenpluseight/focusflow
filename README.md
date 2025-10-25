@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/icons/focusflow_icon.svg" alt="FocusFlow Icon" width="200" style="vertical-align: middle; margin-right: 20px; padding: 15px"/>
+  <img src="assets/icons/svg/focusflow_icon.svg" alt="FocusFlow Icon" width="200" style="vertical-align: middle; margin-right: 20px; padding: 15px"/>
 </div>
 
 <div align="justify" style="padding: 10px">

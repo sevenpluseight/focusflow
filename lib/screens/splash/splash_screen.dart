@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
 import '../../firebase_options.dart';
 import '../auth/login_screen.dart';
-
+import '../main_navigation_controller.dart';
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool isDarkMode;
+  final VoidCallback? onToggleTheme;
+
+  const SplashScreen({
+    super.key,
+    required this.isDarkMode,
+    this.onToggleTheme,
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -49,16 +58,39 @@ class _SplashScreenState extends State<SplashScreen>
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      // Firebase is initialized,  check auth state
+      User? user = FirebaseAuth.instance.currentUser;
 
       setState(() => _statusText = "🤖 Connecting to Gemini...");
-      await _testGeminiAPI();
+      await _testGeminiAPI(); // Keep Gemini check
 
-      await Future.delayed(const Duration(seconds: 1));
+      Widget nextScreen;
+
+      if (user == null) {
+        // User is LOGGED OUT
+        setState(() => _statusText = "🔒 Redirecting to Login...");
+        nextScreen = LoginScreen( // Go to Login
+          isDarkMode: widget.isDarkMode,
+          onToggleTheme: widget.onToggleTheme,
+        );
+      } else {
+        // User is LOGGED IN
+        setState(() => _statusText = "🔓 User authenticated. Loading app...");
+
+        // ---- TODO: DETERMINE USER ROLE ----
+        // This is where you need logic (likely using FirebaseAuth custom claims
+        // or Firestore) to figure out if the user is UserRole.user, .coach, or .admin.
+        // For now, we default to UserRole.user
+        UserRole userRole = UserRole.user;
+        nextScreen = MainNavigationController(currentUserRole: userRole); // Go to Main App
+      }
+
+      await Future.delayed(const Duration(milliseconds: 500)); // Short delay for status text
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const LoginScreen(),
+            pageBuilder: (_, __, ___) => nextScreen, // Navigate to the determined screen
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
@@ -74,6 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
             backgroundColor: Colors.redAccent,
           ),
         );
+        // Maybe navigate to an error screen or retry? Or just stay here.
       }
     }
   }
@@ -86,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
       throw Exception("Missing GEMINI_API_KEY in .env");
     }
 
-    final model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey); // Using flash model for speed
     const prompt = "Say hello from FocusFlow startup check!";
 
     try {
@@ -94,7 +127,11 @@ class _SplashScreenState extends State<SplashScreen>
       setState(() => _statusText = "✅ Gemini connected!");
       debugPrint("✅ Gemini connected: ${response.text}");
     } catch (e) {
-      throw Exception("Gemini connection failed: $e");
+      // Don't throw here if Gemini failing shouldn't stop the app
+      // Log the error instead or show a non-fatal warning
+      setState(() => _statusText = "⚠️ Gemini connection failed (continuing...)");
+      debugPrint("⚠️ Gemini connection failed: $e");
+      // throw Exception("Gemini connection failed: $e"); // Only throw if it's critical
     }
   }
 
@@ -118,7 +155,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: SvgPicture.asset(
-                        'assets/icons/focusflow_icon.svg',
+                        'assets/icons/svg/focusflow_icon.svg', // Ensure path is correct
                         width: size.width * 0.35,
                         height: size.width * 0.35,
                       ),

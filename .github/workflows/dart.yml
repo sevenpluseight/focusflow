@@ -1,5 +1,6 @@
 name: Dart & Flutter CI
 
+# Trigger on push or pull request to main and dev branches
 on:
   push:
     branches: [ "main", "dev" ]
@@ -11,30 +12,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repo
+      # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Install Flutter
+      # Install specific Flutter version (bundles Dart 3.8.1)
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.0'
+          flutter-version: '3.13.0'  # Flutter version with Dart 3.8.1
 
-      # Verify Flutter setup
-      - name: Flutter doctor
-        run: flutter doctor
+      # Enable flutter analytics opt-out (optional)
+      - name: Disable Flutter Analytics
+        run: flutter config --no-analytics
 
-      # Get project dependencies
+      # Get Flutter dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Run Dart analyzer
-      - name: Analyze project
+      # Run code formatting check (optional)
+      # - name: Verify formatting
+      #   run: flutter format --set-exit-if-changed .
+
+      # Analyze the project source
+      - name: Analyze project source
         run: flutter analyze
 
       # Run tests
       - name: Run tests
         run: flutter test
-
-      # Optional: check formatting
-      # - name: Verify formatting
-      #   run: flutter format --set-exit-if-changed .

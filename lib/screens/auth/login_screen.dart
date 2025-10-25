@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/auth/signup_screen.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
@@ -22,115 +22,30 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
   bool _obscurePassword = true;
 
-  Future<void> _signIn() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = "Please fill in both email and password.");
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().clearError();
     });
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'user-not-found':
-          _errorMessage = "No user found with that email.";
-          break;
-        case 'wrong-password':
-          _errorMessage = "Incorrect password.";
-          break;
-        case 'invalid-email':
-          _errorMessage = "Invalid email address.";
-          break;
-        default:
-          _errorMessage = e.message;
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _signInWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = "Google sign-in canceled.";
-        });
-        return;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      setState(() {
-        _errorMessage = "Google sign-in failed: $e";
-      });
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _resetPassword() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      setState(() => _errorMessage = "Please enter your email to reset password.");
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      setState(() {
-        _errorMessage = "Password reset link sent to $email";
-      });
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 
   InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
     final isDark = widget.isDarkMode;
-
     return InputDecoration(
       labelText: label,
       filled: true,
       fillColor: isDark ? const Color(0xFF2C2F33) : Colors.white,
-      labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: SizeConfig.font(2)),
-      hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: SizeConfig.font(1.8)),
+      labelStyle: TextStyle(
+        color: isDark ? Colors.white70 : Colors.black87,
+        fontSize: SizeConfig.font(2),
+      ),
+      hintStyle: TextStyle(
+        color: isDark ? Colors.white54 : Colors.black45,
+        fontSize: SizeConfig.font(1.8),
+      ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
@@ -146,8 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
-
     final theme = Theme.of(context);
+    final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -166,23 +81,19 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(SizeConfig.wp(6)),
-        child: Center(
-          child: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(6)),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/icons/png/focusflow_icon.png',
-                  width: SizeConfig.wp(25),
-                  height: SizeConfig.wp(25),
-                ),
-                SizedBox(height: SizeConfig.hp(4)),
+                SizedBox(height: SizeConfig.hp(21)),
+
+                // App name
                 Text(
                   "FocusFlow",
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: SizeConfig.font(4.5),
+                    fontSize: SizeConfig.font(5.5),
                     fontWeight: FontWeight.bold,
                     color: widget.isDarkMode ? Colors.white : Colors.black87,
                   ),
@@ -228,7 +139,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _resetPassword,
+                    onPressed: () {
+                      final email = _emailController.text.trim();
+                      authProvider.resetPassword(email);
+                    },
                     child: Text(
                       "Forgot Password?",
                       style: TextStyle(
@@ -240,25 +154,32 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: SizeConfig.hp(3)),
 
-                if (_errorMessage != null)
+                // Error message
+                if (authProvider.errorMessage != null)
                   Text(
-                    _errorMessage!,
+                    authProvider.errorMessage!,
                     style: TextStyle(
                       color: Colors.redAccent,
                       fontSize: SizeConfig.font(1.8),
                     ),
                   ),
-
                 SizedBox(height: SizeConfig.hp(3)),
 
-                _isLoading
+                // Loading or buttons
+                authProvider.isLoading
                     ? const CircularProgressIndicator()
                     : Column(
                         children: [
+                          // Sign In button
                           ElevatedButton(
-                            onPressed: _signIn,
+                            onPressed: () {
+                              final email = _emailController.text.trim();
+                              final password = _passwordController.text.trim();
+                              authProvider.signIn(email, password);
+                            },
                             style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                              minimumSize:
+                                  Size(double.infinity, SizeConfig.hp(6)),
                             ),
                             child: Text(
                               "Sign In",
@@ -269,9 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           SizedBox(height: SizeConfig.hp(2)),
+
+                          // Divider
                           Row(
                             children: [
-                              Expanded(child: Divider()),
+                              const Expanded(child: Divider()),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
                                 child: Text(
@@ -279,12 +202,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(fontSize: SizeConfig.font(1.8)),
                                 ),
                               ),
-                              Expanded(child: Divider()),
+                              const Expanded(child: Divider()),
                             ],
                           ),
                           SizedBox(height: SizeConfig.hp(3)),
+
+                          // Google sign in
                           OutlinedButton(
-                            onPressed: _signInWithGoogle,
+                            onPressed: authProvider.signInWithGoogle,
                             style: OutlinedButton.styleFrom(
                               minimumSize: Size(double.infinity, SizeConfig.hp(6)),
                             ),
@@ -301,7 +226,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: SizeConfig.font(2),
-                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
+                                    color: widget.isDarkMode
+                                        ? const Color(0xFFBFFB4F)
+                                        : Colors.black,
                                   ),
                                 ),
                               ],
@@ -319,6 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
+                                  context.read<AuthProvider>().clearError();
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -334,7 +262,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: SizeConfig.font(2),
-                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
+                                    color: widget.isDarkMode
+                                        ? const Color(0xFFBFFB4F)
+                                        : Colors.black,
                                   ),
                                 ),
                               ),
@@ -345,7 +275,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-        ),
+
+          // Floating Icon
+          Positioned(
+            top: SizeConfig.hp(0),
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Image.asset(
+                'assets/icons/png/focusflow_icon_transparent.png',
+                width: SizeConfig.wp(50),
+                height: SizeConfig.wp(50),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

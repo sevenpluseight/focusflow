@@ -278,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           // Floating Icon
           Positioned(
-            top: SizeConfig.hp(0),
+            top: SizeConfig.hp(-1),
             left: 0,
             right: 0,
             child: Center(

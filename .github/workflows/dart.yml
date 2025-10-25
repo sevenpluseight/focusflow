@@ -13,42 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Cache Flutter SDK
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: ${{ runner.tool_cache }}/flutter
-          key: flutter-sdk-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            flutter-sdk-
-
       # Setup Flutter (includes Dart)
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.21.0
         with:
-          flutter-version: '3.13.0' # numeric version only
+          flutter-version: '3.13.0'
 
-      # Verify Flutter and Dart versions
+      # Verify Flutter & Dart versions
       - name: Flutter & Dart version
         run: flutter --version
 
-      # Cache pub dependencies
-      - name: Cache Flutter Pub dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
-      # Install dependencies
+      # Install dependencies using Flutter
       - name: Install dependencies
         run: flutter pub get
-
-      # Optional: verify formatting
-      # - name: Verify formatting
-      #   run: flutter format --set-exit-if-changed .
 
       # Analyze project
       - name: Analyze project

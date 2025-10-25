@@ -234,6 +234,7 @@ class _FocusFlowAppState extends State<FocusFlowApp> {
       future: _firebaseInitFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show a splash/loading screen while Firebase initializes
           return const MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(

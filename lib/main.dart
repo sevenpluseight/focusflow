@@ -199,11 +199,7 @@ import 'package:focusflow/theme/app_theme.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/services/services.dart';
 import 'package:focusflow/providers/auth_provider.dart';
-import 'package:focusflow/theme/app_theme.dart';
-import 'package:focusflow/screens/auth/login_screen.dart';
-import 'package:focusflow/services/services.dart';
 
-void main() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const FocusFlowApp());
@@ -218,13 +214,6 @@ class FocusFlowApp extends StatefulWidget {
 
 class _FocusFlowAppState extends State<FocusFlowApp> {
   bool _isDarkMode = true;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
   late final Future<void> _firebaseInitFuture;
 
   @override
@@ -233,13 +222,18 @@ class _FocusFlowAppState extends State<FocusFlowApp> {
     _firebaseInitFuture = FirebaseService.initializeFirebase();
   }
 
+  void _toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _firebaseInitFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a splash/loading screen while Firebase initializes
           return const MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
@@ -254,13 +248,12 @@ class _FocusFlowAppState extends State<FocusFlowApp> {
                 child: Text(
                   "Firebase failed to initialize: ${snapshot.error}",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: Colors.red),
                 ),
               ),
             ),
           );
         } else {
-          // Firebase initialized successfully
           return MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -275,76 +268,6 @@ class _FocusFlowAppState extends State<FocusFlowApp> {
                 isDarkMode: _isDarkMode,
                 onToggleTheme: _toggleTheme,
               ),
-            ),
-          );
-        }
-      },
-    );
-  }
-  runApp(const FocusFlowApp());
-}
-
-class FocusFlowApp extends StatefulWidget {
-  const FocusFlowApp({super.key});
-
-  @override
-  State<FocusFlowApp> createState() => _FocusFlowAppState();
-}
-
-class _FocusFlowAppState extends State<FocusFlowApp> {
-  bool _isDarkMode = true;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
-  late final Future<void> _firebaseInitFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _firebaseInitFuture = FirebaseService.initializeFirebase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _firebaseInitFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a splash/loading screen while Firebase initializes
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(
-              body: Center(
-                child: Text(
-                  "Firebase failed to initialize: ${snapshot.error}",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
-            ),
-          );
-        } else {
-          // Firebase initialized successfully
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'FocusFlow',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: LoginScreen(
-              isDarkMode: _isDarkMode,
-              onToggleTheme: _toggleTheme,
             ),
           );
         }

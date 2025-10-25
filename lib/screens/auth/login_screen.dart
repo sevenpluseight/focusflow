@@ -58,27 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
-    final isDark = widget.isDarkMode;
-
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: isDark ? const Color(0xFF2C2F33) : Colors.white,
-      labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: SizeConfig.font(2)),
-      hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: SizeConfig.font(1.8)),
-      suffixIcon: suffixIcon,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: BorderSide(color: isDark ? Colors.white30 : Colors.black38),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: const BorderSide(color: Color(0xFFBFFB4F), width: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);

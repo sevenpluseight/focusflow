@@ -11,12 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repo
       - uses: actions/checkout@v4
 
-      # Setup Flutter (includes Dart SDK)
-      - uses: subosito/flutter-action@v2
+      # Cache Flutter SDK
+      - name: Cache Flutter SDK
+        uses: actions/cache@v3
         with:
-          flutter-version: '3.13.0'
+          path: ${{ runner.tool_cache }}/flutter
+          key: flutter-sdk-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            flutter-sdk-
+
+      # Setup Flutter (includes Dart SDK)
+      - name: Flutter action
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: '3.13.0'   # matches Dart SDK requirement ^3.8.1
+
+      # Verify Flutter version
+      - name: Verify Flutter and Dart versions
+        run: flutter --version
 
       # Cache pub dependencies
       - name: Cache Flutter Pub dependencies
@@ -31,6 +46,10 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: flutter pub get
+
+      # Optional: verify formatting
+      # - name: Verify formatting
+      #   run: flutter format --set-exit-if-changed .
 
       # Analyze code
       - name: Analyze project

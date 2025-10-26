@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../firebase_options.dart';
-import '../auth/login_screen.dart';
+import '../auth/auth.dart';
 import '../main_navigation_controller.dart';
+
 class SplashScreen extends StatefulWidget {
   final bool isDarkMode;
   final VoidCallback? onToggleTheme;
@@ -58,39 +60,60 @@ class _SplashScreenState extends State<SplashScreen>
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      // Firebase is initialized,  check auth state
+
       User? user = FirebaseAuth.instance.currentUser;
 
       setState(() => _statusText = "🤖 Connecting to Gemini...");
-      await _testGeminiAPI(); // Keep Gemini check
+      await _testGeminiAPI();
 
       Widget nextScreen;
 
       if (user == null) {
         // User is LOGGED OUT
         setState(() => _statusText = "🔒 Redirecting to Login...");
-        nextScreen = LoginScreen( // Go to Login
+        nextScreen = LoginScreen(
           isDarkMode: widget.isDarkMode,
           onToggleTheme: widget.onToggleTheme,
         );
       } else {
         // User is LOGGED IN
-        setState(() => _statusText = "🔓 User authenticated. Loading app...");
+        setState(() => _statusText = "🔓 User authenticated. Checking role...");
 
-        // ---- TODO: DETERMINE USER ROLE ----
-        // This is where you need logic (likely using FirebaseAuth custom claims
-        // or Firestore) to figure out if the user is UserRole.user, .coach, or .admin.
-        // For now, we default to UserRole.user
-        UserRole userRole = UserRole.user;
-        nextScreen = MainNavigationController(currentUserRole: userRole); // Go to Main App
+        // Fetch role from Firestore
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        UserRole userRole = UserRole.user; // default
+
+        if (doc.exists) {
+          final roleString = doc.data()?['role']?.toString().toLowerCase();
+          switch (roleString) {
+            case 'user':
+              userRole = UserRole.user;
+              break;
+            case 'coach':
+              userRole = UserRole.coach;
+              break;
+            case 'admin':
+              userRole = UserRole.admin;
+              break;
+            default:
+              userRole = UserRole.user;
+          }
+        }
+
+        setState(() => _statusText = "🔑 Role determined: $userRole. Loading app...");
+        nextScreen = MainNavigationController(currentUserRole: userRole, isDarkMode: widget.isDarkMode, onToggleTheme: widget.onToggleTheme ?? () {});
       }
 
-      await Future.delayed(const Duration(milliseconds: 500)); // Short delay for status text
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => nextScreen, // Navigate to the determined screen
+            pageBuilder: (_, __, ___) => nextScreen,
             transitionsBuilder: (_, animation, __, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
@@ -106,7 +129,6 @@ class _SplashScreenState extends State<SplashScreen>
             backgroundColor: Colors.redAccent,
           ),
         );
-        // Maybe navigate to an error screen or retry? Or just stay here.
       }
     }
   }
@@ -119,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
       throw Exception("Missing GEMINI_API_KEY in .env");
     }
 
-    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey); // Using flash model for speed
+    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
     const prompt = "Say hello from FocusFlow startup check!";
 
     try {
@@ -127,11 +149,8 @@ class _SplashScreenState extends State<SplashScreen>
       setState(() => _statusText = "✅ Gemini connected!");
       debugPrint("✅ Gemini connected: ${response.text}");
     } catch (e) {
-      // Don't throw here if Gemini failing shouldn't stop the app
-      // Log the error instead or show a non-fatal warning
       setState(() => _statusText = "⚠️ Gemini connection failed (continuing...)");
       debugPrint("⚠️ Gemini connection failed: $e");
-      // throw Exception("Gemini connection failed: $e"); // Only throw if it's critical
     }
   }
 
@@ -155,7 +174,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: SvgPicture.asset(
-                        'assets/icons/svg/focusflow_icon.svg', // Ensure path is correct
+                        'assets/icons/svg/focusflow_icon.svg',
                         width: size.width * 0.35,
                         height: size.width * 0.35,
                       ),

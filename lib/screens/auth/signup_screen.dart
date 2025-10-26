@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:focusflow/providers/auth_provider.dart';
-import 'package:focusflow/screens/auth/login_screen.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
 import 'package:focusflow/widgets/widgets.dart';
 
 class SignUpScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
-  final bool isDarkMode;
+  final bool isDarkMode; // kept for backward compatibility but no longer relied upon
 
   const SignUpScreen({
     super.key,
@@ -66,8 +66,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _checkPasswordsMatch() {
     setState(() {
-      _passwordsMatch =
-          Validators.passwordsMatch(_passwordController.text, _confirmPasswordController.text);
+      _passwordsMatch = Validators.passwordsMatch(
+        _passwordController.text,
+        _confirmPasswordController.text,
+      );
     });
   }
 
@@ -78,10 +80,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (!_isFormValid) return;
 
-    // Clear any previous errors before starting
     authProvider.clearError();
 
-    // Call sign up
     await authProvider.signUp(username: username, email: email, password: password);
 
     if (authProvider.errorMessage == null && mounted) {
@@ -101,17 +101,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _showInfoModal(String title, String message,
-      {bool redirectToLogin = false}) {
+  void _showInfoModal(String title, String message, {bool redirectToLogin = false}) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2F33),
+        backgroundColor: isDarkMode ? const Color(0xFF2C2F33) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(title,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
-        content: Text(message, style: const TextStyle(color: Colors.white70)),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -121,22 +128,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => LoginScreen(
-                      isDarkMode: widget.isDarkMode,
+                      isDarkMode: isDarkMode,
                       onToggleTheme: widget.onToggleTheme,
                     ),
                   ),
                 );
               }
             },
-            child: const Text("OK", style: TextStyle(color: Color(0xFFBFFB4F))),
+            child: const Text(
+              "OK",
+              style: TextStyle(color: Color(0xFFBFFB4F)),
+            ),
           ),
         ],
       ),
     );
   }
 
-  InputDecoration _inputDecoration(String label,
-      {Widget? suffixIcon, bool isError = false}) {
+  InputDecoration _inputDecoration(String label, {Widget? suffixIcon, bool isError = false}) {
     final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
@@ -147,22 +156,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-            color: isError
-                ? Colors.redAccent
-                : theme.inputDecorationTheme.enabledBorder!.borderSide.color),
+          color: isError
+              ? Colors.redAccent
+              : theme.inputDecorationTheme.enabledBorder!.borderSide.color,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-            color: isError
-                ? Colors.redAccent
-                : theme.inputDecorationTheme.focusedBorder!.borderSide.color),
+          color: isError
+              ? Colors.redAccent
+              : theme.inputDecorationTheme.focusedBorder!.borderSide.color,
+        ),
       ),
     );
   }
 
-  Widget _buildRule(String text, bool met) {
-    final textColor = widget.isDarkMode
+  Widget _buildRule(String text, bool met, bool isDarkMode) {
+    final textColor = isDarkMode
         ? (met ? Colors.lightGreen : Colors.white54)
         : (met ? Colors.green[800] : Colors.black54);
 
@@ -172,7 +183,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           met ? Icons.check_circle : Icons.cancel,
           color: met
               ? Colors.lightGreen
-              : (widget.isDarkMode ? Colors.white30 : Colors.black26),
+              : (isDarkMode ? Colors.white30 : Colors.black26),
           size: SizeConfig.font(2.15),
         ),
         SizedBox(width: SizeConfig.wp(2)),
@@ -210,6 +221,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     final bottomPaddingForScroll = 160.0;
 
     return GestureDetector(
@@ -224,7 +236,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               icon: Icon(
                 Pixel.chevronleft,
                 size: SizeConfig.wp(6.6),
-                color: widget.isDarkMode ? Colors.white : Colors.black87,
+                color: isDarkMode ? Colors.white : Colors.black87,
               ),
               onPressed: () => Navigator.pop(context),
             ),
@@ -233,7 +245,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 padding: EdgeInsets.only(right: SizeConfig.wp(1.2)),
                 child: IconButton(
                   icon: Icon(
-                    widget.isDarkMode ? Pixel.sunalt : Pixel.moon,
+                    isDarkMode ? Pixel.sunalt : Pixel.moon,
                     size: SizeConfig.wp(6.8),
                   ),
                   onPressed: widget.onToggleTheme,
@@ -246,10 +258,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                    SizeConfig.wp(4),
-                    SizeConfig.hp(3),
-                    SizeConfig.wp(4),
-                    bottomPaddingForScroll),
+                  SizeConfig.wp(4),
+                  SizeConfig.hp(3),
+                  SizeConfig.wp(4),
+                  bottomPaddingForScroll,
+                ),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -260,7 +273,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: TextStyle(
                             fontSize: SizeConfig.font(4),
                             fontWeight: FontWeight.bold,
-                            color: widget.isDarkMode ? Colors.white : Colors.black87,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
@@ -271,8 +284,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _usernameController,
                         decoration: _inputDecoration("Username"),
                         style: TextStyle(
-                            fontSize: SizeConfig.font(2),
-                            color: widget.isDarkMode ? Colors.white : Colors.black87),
+                          fontSize: SizeConfig.font(2),
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
                         onChanged: (_) => setState(() {}),
                       ),
                       SizedBox(height: SizeConfig.hp(2)),
@@ -280,11 +294,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       // Email
                       TextField(
                         controller: _emailController,
-                        decoration: _inputDecoration("Email",
-                            isError: _emailController.text.isNotEmpty && !_isEmailValid),
+                        decoration: _inputDecoration(
+                          "Email",
+                          isError: _emailController.text.isNotEmpty && !_isEmailValid,
+                        ),
                         style: TextStyle(
-                            fontSize: SizeConfig.font(2),
-                            color: widget.isDarkMode ? Colors.white : Colors.black87),
+                          fontSize: SizeConfig.font(2),
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           setState(() {
@@ -297,23 +314,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           children: [
                             Icon(
                               _isEmailValid ? Pixel.check : Pixel.alert,
-                              color: _isEmailValid ? Colors.lightGreen : Colors.redAccent,
+                              color: _isEmailValid
+                                  ? Colors.lightGreen
+                                  : Colors.redAccent,
                               size: SizeConfig.font(2.7),
                             ),
                             SizedBox(width: SizeConfig.wp(2)),
                             Expanded(
                               child: Text(
-                                _isEmailValid ? "Valid email" : "Invalid email format",
+                                _isEmailValid
+                                    ? "Valid email"
+                                    : "Invalid email format",
                                 style: TextStyle(
-                                  color:
-                                      _isEmailValid ? Colors.lightGreen : Colors.redAccent,
+                                  color: _isEmailValid
+                                      ? Colors.lightGreen
+                                      : Colors.redAccent,
                                   fontSize: SizeConfig.font(1.95),
                                 ),
                               ),
                             ),
                           ],
                         ),
-
                       SizedBox(height: SizeConfig.hp(2)),
 
                       // Password
@@ -324,8 +345,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             controller: _passwordController,
                             obscureText: !_passwordVisible,
                             style: TextStyle(
-                                fontSize: SizeConfig.font(2),
-                                color: widget.isDarkMode ? Colors.white : Colors.black87),
+                              fontSize: SizeConfig.font(2),
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
                             onChanged: (val) {
                               _checkPasswordStrength(val);
                               _checkPasswordsMatch();
@@ -335,7 +357,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _passwordVisible ? Pixel.eye : Pixel.eyeclosed,
-                                  color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : Colors.black54,
                                   size: SizeConfig.wp(5),
                                 ),
                                 onPressed: () =>
@@ -343,9 +367,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                             ),
                           ),
-
                           SizedBox(height: SizeConfig.hp(1)),
-
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: LinearProgressIndicator(
@@ -353,7 +375,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ? 0
                                   : _passwordStrength,
                               backgroundColor:
-                                  widget.isDarkMode ? Colors.white10 : Colors.grey[300],
+                                  isDarkMode ? Colors.white10 : Colors.grey[300],
                               color: _passwordStrength < 0.3
                                   ? Colors.redAccent
                                   : _passwordStrength < 0.6
@@ -364,35 +386,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               minHeight: SizeConfig.hp(1),
                             ),
                           ),
-
                           if (_startedTyping) ...[
                             SizedBox(height: SizeConfig.hp(1)),
                             Text(
                               _passwordStrengthLabel,
                               style: TextStyle(
-                                  fontSize: SizeConfig.font(1.95),
-                                  color: widget.isDarkMode
-                                      ? Colors.white70
-                                      : Colors.black87),
+                                fontSize: SizeConfig.font(1.95),
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black87,
+                              ),
                             ),
                             SizedBox(height: SizeConfig.hp(1)),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                _buildRule("At least 8 characters", _hasLength),
+                                _buildRule("At least 8 characters", _hasLength, isDarkMode),
                                 SizedBox(height: SizeConfig.hp(0.8)),
-                                _buildRule("1 uppercase letter", _hasUppercase),
+                                _buildRule("1 uppercase letter", _hasUppercase, isDarkMode),
                                 SizedBox(height: SizeConfig.hp(0.8)),
-                                _buildRule("1 special character", _hasSpecial),
+                                _buildRule("1 special character", _hasSpecial, isDarkMode),
                                 SizedBox(height: SizeConfig.hp(0.8)),
                                 _buildRule(
-                                    "Avoid easy patterns like '123' or 'abc'", _noSequential),
+                                  "Avoid easy patterns like '123' or 'abc'",
+                                  _noSequential,
+                                  isDarkMode,
+                                ),
                               ],
                             ),
                           ],
                         ],
                       ),
-
                       SizedBox(height: SizeConfig.hp(2)),
 
                       // Confirm Password
@@ -400,8 +424,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _confirmPasswordController,
                         obscureText: !_confirmPasswordVisible,
                         style: TextStyle(
-                            fontSize: SizeConfig.font(2),
-                            color: widget.isDarkMode ? Colors.white : Colors.black87),
+                          fontSize: SizeConfig.font(2),
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
                         onChanged: (_) {
                           _checkPasswordsMatch();
                           setState(() {});
@@ -413,11 +438,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _confirmPasswordVisible ? Pixel.eye : Pixel.eyeclosed,
-                              color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
                               size: SizeConfig.wp(5),
                             ),
                             onPressed: () => setState(
-                                () => _confirmPasswordVisible = !_confirmPasswordVisible),
+                              () => _confirmPasswordVisible =
+                                  !_confirmPasswordVisible,
+                            ),
                           ),
                         ),
                       ),
@@ -442,15 +470,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: SafeArea(
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.wp(4), vertical: SizeConfig.hp(8)),
+                      horizontal: SizeConfig.wp(4),
+                      vertical: SizeConfig.hp(8),
+                    ),
                     child: authProvider.isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : ElevatedButton(
-                            onPressed: _isFormValid
-                                ? () => _signUp(authProvider)
-                                : null,
+                            onPressed:
+                                _isFormValid ? () => _signUp(authProvider) : null,
                             style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                              minimumSize:
+                                  Size(double.infinity, SizeConfig.hp(6)),
+                              backgroundColor: _isFormValid
+                                  ? const Color(0xFFBFFB4F)
+                                  : const Color(0xFFBFFB4F).withOpacity(0.4),
+                              foregroundColor: _isFormValid
+                                  ? Colors.black
+                                  : Colors.black45,
+                              elevation: _isFormValid ? 3 : 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side:
+                                    const BorderSide(color: Colors.transparent),
+                              ),
                             ),
                             child: Text(
                               "Create Account",

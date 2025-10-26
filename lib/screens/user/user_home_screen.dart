@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:pixelarticons/pixelarticons.dart';
+import 'package:provider/provider.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 
 class UserHomeScreen extends StatelessWidget {
-  const UserHomeScreen({Key? key}) : super(key: key);
+  final bool isDarkMode;
+  final VoidCallback onToggleTheme;
+
+  const UserHomeScreen({Key? key, required this.isDarkMode, required this.onToggleTheme}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // NOTE: This Scaffold is only for the AppBar.
-    // The BottomNavigationBar is handled by MainNavigationController.
+    final authProvider = context.watch<AuthProvider>();
+    final username = authProvider.username ?? "User";
+
     return Scaffold(
       backgroundColor: const Color(0xFF222428), 
       appBar: AppBar(
@@ -25,6 +32,25 @@ class UserHomeScreen extends StatelessWidget {
               /* TODO: Navigate to Notifications */
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              authProvider.clearError();
+              await authProvider.signOut(); // wait until logout completes
+
+              // Navigate directly to LoginScreen
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LoginScreen(
+                    isDarkMode: isDarkMode,
+                    onToggleTheme: onToggleTheme,
+                  ),
+                ),
+                (route) => false,
+              );
+            },
+          ),
           const SizedBox(width: 10),
         ],
       ),
@@ -35,9 +61,9 @@ class UserHomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               // Greeting
-              const Text(
-                'Good Morning, [Username]!', // TODO: Fetch username
-                style: TextStyle(
+              Text(
+                'Good Morning, $username!',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

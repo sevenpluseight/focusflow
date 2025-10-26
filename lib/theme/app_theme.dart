@@ -34,8 +34,10 @@ class AppTheme {
         backgroundColor: primaryColor,
         foregroundColor: Colors.black,
         minimumSize: const Size.fromHeight(52),
+        elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
+          side: BorderSide.none,
         ),
       ),
     ),
@@ -69,8 +71,10 @@ class AppTheme {
         backgroundColor: primaryColor,
         foregroundColor: Colors.black,
         minimumSize: const Size.fromHeight(52),
+        elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
+          side: BorderSide.none,
         ),
       ),
     ),

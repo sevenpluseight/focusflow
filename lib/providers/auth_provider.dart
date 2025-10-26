@@ -5,9 +5,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  User? _user;
   bool _isLoading = false;
   String? _errorMessage;
 
+  String? _username;
+  String? _role;
+  String? _infoMessage;
+
+  String? get username => _username;
+  String? get role => _role;
+  String? get infoMessage => _infoMessage;
+
+  User? get user => _user;
+  bool get isLoggedIn => _user != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -21,6 +32,25 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void _setUser(User? user) {
+    _user = user;
+    if (user != null) {
+      fetchUserData();
+    }
+    // notifyListeners();
+  }
+
+  void _setMessage(String? message) {
+    _infoMessage = message;
+    notifyListeners();
+  }
+
+    void clearError() {
+    _setError(null);
+     _setMessage(null);
+  }
+
+  // Sign in
   Future<void> signIn(String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
       _setError("Please fill in both email and password.");
@@ -29,10 +59,15 @@ class AuthProvider with ChangeNotifier {
 
     _setLoading(true);
     _setError(null);
+    _setMessage(null);
 
     try {
       final user = await _authService.signIn(email, password);
-      if (user == null) _setError("Invalid email or password.");
+      if (user == null) {
+        _setError("Invalid email or password.");
+      } else {
+        _setUser(user); // Track logged-in user
+      }
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -40,13 +75,18 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Sign in with Google
   Future<void> signInWithGoogle() async {
     _setLoading(true);
     _setError(null);
 
     try {
       final user = await _authService.signInWithGoogle();
-      if (user == null) _setError("Google sign-in canceled or failed.");
+      if (user == null) {
+        _setError("Google sign-in canceled or failed.");
+      } else {
+        _setUser(user);
+      }
     } catch (e) {
       _setError("Google sign-in failed: $e");
     } finally {
@@ -54,12 +94,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Sign-up with role
+  // Sign up (Login)
   Future<void> signUp({
     required String username,
     required String email,
     required String password,
-    String role = "user", // Default role
+    String role = "user",
   }) async {
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       _setError("Please fill in all fields.");
@@ -81,7 +121,8 @@ class AuthProvider with ChangeNotifier {
         return;
       }
 
-      // Save user in Firestore with role
+      _setUser(user);
+
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'uid': user.uid,
         'username': username,
@@ -106,6 +147,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Reset password
   Future<void> resetPassword(String email) async {
     if (email.isEmpty) {
       _setError("Please enter your email to reset password.");
@@ -125,5 +167,39 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  void clearError() => _setError(null);
+  // Fetch user data
+  Future<void> fetchUserData() async {
+    if (_user == null) return;
+
+    try {
+      final docRef = FirebaseFirestore.instance.collection('users').doc(_user!.uid);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        await docRef.set({
+          'uid': _user!.uid,
+          'username': _user!.displayName ?? 'User',
+          'email': _user!.email,
+          'role': 'user',
+          'signInMethod': 'google',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      final data = (await docRef.get()).data();
+      _username = data?['username'];
+      _role = data?['role'];
+      notifyListeners();
+    } catch (e) {
+      _setError("Failed to fetch user data: $e");
+    }
+  }
+
+  // Sign out (Logout)
+  Future<void> signOut() async {
+    await _authService.signOut();
+    _setUser(null);
+    _username = null;
+    _role = null;
+  }
 }

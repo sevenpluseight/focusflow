@@ -26,6 +26,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String? _localErrorMessage;
 
+  late double iconSize;
+  late double iconTopOffset;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +36,14 @@ class _LoginScreenState extends State<LoginScreen> {
       context.read<AuthProvider>().clearError();
     });
   }
+
+@override
+void didChangeDependencies() {
+    super.didChangeDependencies();
+    SizeConfig.init(context);
+    iconSize = SizeConfig.wp(50);
+    iconTopOffset = SizeConfig.hp(-1);
+}
 
   @override
   void dispose() {
@@ -51,18 +62,18 @@ class _LoginScreenState extends State<LoginScreen> {
       filled: true,
       fillColor: colors.surface,
       labelStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withOpacity(0.8),
+        color: colors.onSurface.withValues(alpha: 0.8),
         fontSize: SizeConfig.font(2),
       ),
       hintStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withOpacity(0.6),
+        color: colors.onSurface.withValues(alpha: 0.6),
         fontSize: SizeConfig.font(1.8),
       ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
         borderSide: BorderSide(
-          color: colors.outlineVariant ?? colors.onSurface.withOpacity(0.3),
+          color: colors.outlineVariant,
         ),
       ),
       focusedBorder: OutlineInputBorder(
@@ -117,16 +128,23 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(6)),
             child: Column(
               children: [
-                SizedBox(height: SizeConfig.hp(21)),
+                SizedBox(height: SizeConfig.hp(2)),
+                Image.asset(
+                  'assets/icons/png/focusflow_icon_transparent.png',
+                  width: SizeConfig.wp(35),
+                  height: SizeConfig.wp(35),
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: SizeConfig.hp(1)),
                 Text(
                   "FocusFlow",
                   style: text.titleLarge?.copyWith(
                     fontSize: SizeConfig.font(5.5),
                     fontWeight: FontWeight.bold,
-                    color: colors.onBackground,
+                    color: colors.onSurface,
                   ),
                 ),
-                SizedBox(height: SizeConfig.hp(5)),
+                SizedBox(height: SizeConfig.hp(3)),
 
                 // Email
                 TextField(
@@ -149,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
-                        color: colors.onSurface.withOpacity(0.7),
+                        color: colors.onSurface.withValues(alpha: 0.7),
                         size: SizeConfig.wp(5),
                       ),
                       onPressed: () =>
@@ -173,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       "Forgot Password?",
                       style: text.bodyMedium?.copyWith(
-                        color: colors.onSurface.withOpacity(0.8),
+                        color: colors.onSurface.withValues(alpha: 0.8),
                         fontSize: SizeConfig.font(1.8),
                       ),
                     ),
@@ -215,15 +233,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (!mounted) return;
 
                     if (authProvider.isLoggedIn) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UserLoadingScreen(
-                            isDarkMode: isDarkMode,
-                            onToggleTheme: widget.onToggleTheme ?? () {},
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UserLoadingScreen(
+                              isDarkMode: isDarkMode,
+                              onToggleTheme: widget.onToggleTheme ?? () {},
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     } else {
                       final err = authProvider.errorMessage?.toLowerCase() ?? "";
                       if (err.contains("invalid-credential") ||
@@ -271,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         "Or continue with",
                         style: text.bodyMedium?.copyWith(
                           fontSize: SizeConfig.font(1.8),
-                          color: colors.onSurface.withOpacity(0.8),
+                          color: colors.onSurface.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
@@ -287,15 +307,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (!mounted) return;
                     if (authProvider.isLoggedIn) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UserLoadingScreen(
-                            isDarkMode: isDarkMode,
-                            onToggleTheme: widget.onToggleTheme ?? () {},
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UserLoadingScreen(
+                              isDarkMode: isDarkMode,
+                              onToggleTheme: widget.onToggleTheme ?? () {},
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     } else if (authProvider.errorMessage != null) {
                       _showTemporaryError(authProvider.errorMessage!);
                     }
@@ -330,10 +352,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don’t have an account?",
+                      "Don't have an account?",
                       style: text.bodyMedium?.copyWith(
                         fontSize: SizeConfig.font(1.8),
-                        color: colors.onSurface.withOpacity(0.8),
+                        color: colors.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                     TextButton(
@@ -361,21 +383,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ],
-            ),
-          ),
-
-          // Floating Icon
-          Positioned(
-            top: SizeConfig.hp(-1),
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Image.asset(
-                'assets/icons/png/focusflow_icon_transparent.png',
-                width: SizeConfig.wp(50),
-                height: SizeConfig.wp(50),
-                fit: BoxFit.contain,
-              ),
             ),
           ),
         ],

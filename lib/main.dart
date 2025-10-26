@@ -196,9 +196,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/theme/app_theme.dart';
-import 'package:focusflow/screens/auth/login_screen.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 import 'package:focusflow/services/services.dart';
-import 'package:focusflow/providers/auth_provider.dart';
+import 'package:focusflow/providers/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

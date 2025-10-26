@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:focusflow/screens/auth/signup_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
+import 'package:focusflow/screens/user/user.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
@@ -22,169 +23,107 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
   bool _obscurePassword = true;
+  String? _localErrorMessage;
 
-  Future<void> _signIn() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = "Please fill in both email and password.");
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().clearError();
     });
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'user-not-found':
-          _errorMessage = "No user found with that email.";
-          break;
-        case 'wrong-password':
-          _errorMessage = "Incorrect password.";
-          break;
-        case 'invalid-email':
-          _errorMessage = "Invalid email address.";
-          break;
-        default:
-          _errorMessage = e.message;
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 
-  Future<void> _signInWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = "Google sign-in canceled.";
-        });
-        return;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      setState(() {
-        _errorMessage = "Google sign-in failed: $e";
-      });
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _resetPassword() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      setState(() => _errorMessage = "Please enter your email to reset password.");
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      setState(() {
-        _errorMessage = "Password reset link sent to $email";
-      });
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
-    } finally {
-      setState(() => _isLoading = false);
-    }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
-    final isDark = widget.isDarkMode;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final text = theme.textTheme;
 
     return InputDecoration(
       labelText: label,
       filled: true,
-      fillColor: isDark ? const Color(0xFF2C2F33) : Colors.white,
-      labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: SizeConfig.font(2)),
-      hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: SizeConfig.font(1.8)),
+      fillColor: colors.surface,
+      labelStyle: text.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.8),
+        fontSize: SizeConfig.font(2),
+      ),
+      hintStyle: text.bodyMedium?.copyWith(
+        color: colors.onSurface.withOpacity(0.6),
+        fontSize: SizeConfig.font(1.8),
+      ),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: BorderSide(color: isDark ? Colors.white30 : Colors.black38),
+        borderSide: BorderSide(
+          color: colors.outlineVariant ?? colors.onSurface.withOpacity(0.3),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: const BorderSide(color: Color(0xFFBFFB4F), width: 2),
+        borderSide: BorderSide(color: colors.primary, width: 2),
       ),
     );
+  }
+
+  void _showTemporaryError(String message) {
+    setState(() => _localErrorMessage = message);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _localErrorMessage = null);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
-
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final text = theme.textTheme;
+    final authProvider = context.watch<AuthProvider>();
+
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+    final IconData themeIcon = isDarkMode ? Pixel.sunalt : Pixel.moon;
+    final Color themeIconColor = isDarkMode ? Colors.white : Colors.black87;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: theme.appBarTheme.elevation,
+        iconTheme: theme.appBarTheme.iconTheme,
         actions: [
           Padding(
             padding: EdgeInsets.only(right: SizeConfig.wp(1.2)),
             child: IconButton(
               icon: Icon(
-                widget.isDarkMode ? Pixel.sunalt : Pixel.moon,
+                themeIcon,
                 size: SizeConfig.wp(6.8),
+                color: themeIconColor,
               ),
               onPressed: widget.onToggleTheme,
             ),
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(SizeConfig.wp(6)),
-        child: Center(
-          child: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(6)),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/icons/png/focusflow_icon.png',
-                  width: SizeConfig.wp(25),
-                  height: SizeConfig.wp(25),
-                ),
-                SizedBox(height: SizeConfig.hp(4)),
+                SizedBox(height: SizeConfig.hp(21)),
                 Text(
                   "FocusFlow",
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: SizeConfig.font(4.5),
+                  style: text.titleLarge?.copyWith(
+                    fontSize: SizeConfig.font(5.5),
                     fontWeight: FontWeight.bold,
-                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                    color: colors.onBackground,
                   ),
                 ),
                 SizedBox(height: SizeConfig.hp(5)),
@@ -194,8 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _emailController,
                   decoration: _inputDecoration("Email"),
                   keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                  style: text.bodyLarge?.copyWith(
+                    color: colors.onSurface,
                     fontSize: SizeConfig.font(2),
                   ),
                 ),
@@ -210,16 +149,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
-                        color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                        color: colors.onSurface.withOpacity(0.7),
                         size: SizeConfig.wp(5),
                       ),
-                      onPressed: () => setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      }),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  style: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                  style: text.bodyLarge?.copyWith(
+                    color: colors.onSurface,
                     fontSize: SizeConfig.font(2),
                   ),
                 ),
@@ -228,11 +166,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _resetPassword,
+                    onPressed: () {
+                      final email = _emailController.text.trim();
+                      context.read<AuthProvider>().resetPassword(email);
+                    },
                     child: Text(
                       "Forgot Password?",
-                      style: TextStyle(
-                        color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                      style: text.bodyMedium?.copyWith(
+                        color: colors.onSurface.withOpacity(0.8),
                         fontSize: SizeConfig.font(1.8),
                       ),
                     ),
@@ -240,112 +181,204 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: SizeConfig.hp(3)),
 
-                if (_errorMessage != null)
+                // Error message
+                if (_localErrorMessage != null)
                   Text(
-                    _errorMessage!,
-                    style: TextStyle(
+                    _localErrorMessage!,
+                    style: text.bodyMedium?.copyWith(
                       color: Colors.redAccent,
+                      fontSize: SizeConfig.font(1.8),
+                    ),
+                  ),
+
+                // Info message
+                if (authProvider.infoMessage != null)
+                  Text(
+                    authProvider.infoMessage!,
+                    style: text.bodyMedium?.copyWith(
+                      color: Colors.greenAccent,
                       fontSize: SizeConfig.font(1.8),
                     ),
                   ),
 
                 SizedBox(height: SizeConfig.hp(3)),
 
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : Column(
-                        children: [
-                          ElevatedButton(
-                            onPressed: _signIn,
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                            ),
-                            child: Text(
-                              "Sign In",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: SizeConfig.font(2),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: SizeConfig.hp(2)),
-                          Row(
-                            children: [
-                              Expanded(child: Divider()),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
-                                child: Text(
-                                  "Or continue with",
-                                  style: TextStyle(fontSize: SizeConfig.font(1.8)),
-                                ),
-                              ),
-                              Expanded(child: Divider()),
-                            ],
-                          ),
-                          SizedBox(height: SizeConfig.hp(3)),
-                          OutlinedButton(
-                            onPressed: _signInWithGoogle,
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/icons/png/google.png',
-                                  height: SizeConfig.hp(3),
-                                ),
-                                SizedBox(width: SizeConfig.wp(2)),
-                                Text(
-                                  "Sign in with Google",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: SizeConfig.font(2),
-                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: SizeConfig.hp(2)),
+                // Sign In button
+                ElevatedButton(
+                  onPressed: () async {
+                    final email = _emailController.text.trim();
+                    final password = _passwordController.text.trim();
+                    setState(() => _localErrorMessage = null);
 
-                          // Sign Up link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Don’t have an account?",
-                                style: TextStyle(fontSize: SizeConfig.font(1.8)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SignUpScreen(
-                                        isDarkMode: widget.isDarkMode,
-                                        onToggleTheme: widget.onToggleTheme,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: SizeConfig.font(2),
-                                    color: widget.isDarkMode ? Color(0xFFBFFB4F) : Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
+                    await authProvider.signIn(email, password);
+
+                    if (!mounted) return;
+
+                    if (authProvider.isLoggedIn) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UserLoadingScreen(
+                            isDarkMode: isDarkMode,
+                            onToggleTheme: widget.onToggleTheme ?? () {},
                           ),
-                        ],
+                        ),
+                      );
+                    } else {
+                      final err = authProvider.errorMessage?.toLowerCase() ?? "";
+                      if (err.contains("invalid-credential") ||
+                          err.contains("user-not-found") ||
+                          err.contains("wrong-password") ||
+                          err.contains("invalid email") ||
+                          err.contains("password is invalid")) {
+                        _showTemporaryError("Incorrect email or password.");
+                      } else if (authProvider.errorMessage != null &&
+                          authProvider.errorMessage!.isNotEmpty) {
+                        _showTemporaryError(authProvider.errorMessage!);
+                      } else {
+                        _showTemporaryError("Incorrect email or password.");
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFBFFB4F),
+                    elevation: 2,
+                    foregroundColor: Colors.black,
+                    minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Sign In",
+                    style: text.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: SizeConfig.font(2),
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                SizedBox(height: SizeConfig.hp(2)),
+
+                // Divider
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
+                      child: Text(
+                        "Or continue with",
+                        style: text.bodyMedium?.copyWith(
+                          fontSize: SizeConfig.font(1.8),
+                          color: colors.onSurface.withOpacity(0.8),
+                        ),
                       ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.hp(3)),
+
+                // Google sign in
+                OutlinedButton(
+                  onPressed: () async {
+                    await authProvider.signInWithGoogle();
+
+                    if (!mounted) return;
+                    if (authProvider.isLoggedIn) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UserLoadingScreen(
+                            isDarkMode: isDarkMode,
+                            onToggleTheme: widget.onToggleTheme ?? () {},
+                          ),
+                        ),
+                      );
+                    } else if (authProvider.errorMessage != null) {
+                      _showTemporaryError(authProvider.errorMessage!);
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                    side: BorderSide(color: colors.primary),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/icons/png/google.png',
+                        height: SizeConfig.hp(3),
+                      ),
+                      SizedBox(width: SizeConfig.wp(2)),
+                      Text(
+                        "Sign in with Google",
+                        style: text.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: SizeConfig.font(2),
+                          color: isDarkMode ? colors.primary : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: SizeConfig.hp(2)),
+
+                // Sign Up link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don’t have an account?",
+                      style: text.bodyMedium?.copyWith(
+                        fontSize: SizeConfig.font(1.8),
+                        color: colors.onSurface.withOpacity(0.8),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.read<AuthProvider>().clearError();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignUpScreen(
+                              isDarkMode: isDarkMode,
+                              onToggleTheme: widget.onToggleTheme ?? () {},
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Sign Up",
+                        style: text.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: SizeConfig.font(2),
+                          color: isDarkMode ? colors.primary : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-        ),
+
+          // Floating Icon
+          Positioned(
+            top: SizeConfig.hp(-1),
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Image.asset(
+                'assets/icons/png/focusflow_icon_transparent.png',
+                width: SizeConfig.wp(50),
+                height: SizeConfig.wp(50),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

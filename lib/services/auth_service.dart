@@ -50,6 +50,16 @@ class AuthService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  // Sign out
+  Future<void> signOut() async {
+    await _auth.signOut();
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    if (await googleSignIn.isSignedIn()) {
+      await googleSignIn.signOut();
+    }
+  }
+
   // Auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

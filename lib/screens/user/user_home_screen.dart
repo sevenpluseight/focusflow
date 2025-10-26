@@ -1,60 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
-import 'package:focusflow/screens/auth/auth.dart';
-
 class UserHomeScreen extends StatelessWidget {
-  final bool isDarkMode;
-  final VoidCallback onToggleTheme;
+  const UserHomeScreen({super.key});
 
-  const UserHomeScreen({Key? key, required this.isDarkMode, required this.onToggleTheme}) : super(key: key);
-
-  @override
+@override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final username = authProvider.username ?? "User";
+    final username = authProvider.username ?? "User"; // Get username
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF222428), 
-      appBar: AppBar(
-        title: const Text(
-          'User Dashboard',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF2C2F33),
-        elevation: 1,
-        automaticallyImplyLeading: false, // No back button
-        actions: [
-          IconButton(
-            icon: const Icon(Pixel.notification, color: Colors.white, size: 28),
-            onPressed: () {
-              /* TODO: Navigate to Notifications */
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              authProvider.clearError();
-              await authProvider.signOut(); // wait until logout completes
-
-              // Navigate directly to LoginScreen
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LoginScreen(
-                    isDarkMode: isDarkMode,
-                    onToggleTheme: onToggleTheme,
-                  ),
-                ),
-                (route) => false,
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
-      body: Center(
+    return Container( // Use a Container if you need specific background/padding
+      color: const Color(0xFF222428), 
+      child: Center( 
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -62,7 +19,8 @@ class UserHomeScreen extends StatelessWidget {
             children: <Widget>[
               // Greeting
               Text(
-                'Good Morning, $username!',
+                'Good Morning, $username!', 
+                textAlign: TextAlign.center, 
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -70,16 +28,51 @@ class UserHomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Productivity Tips box
-              Container(/* ... Tip Box code ... */),
+              // Productivity Tips box Placeholder
+              Container(
+                 width: double.infinity,
+                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                 decoration: BoxDecoration(
+                   color: Colors.white.withAlpha((255 * 0.8).toInt()),
+                   borderRadius: BorderRadius.circular(8),
+                 ),
+                 child: const Text(
+                   'Productivity Tip: Placeholder!', // TODO: Load dynamic tips
+                   style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic, fontSize: 14),
+                   textAlign: TextAlign.center,
+                 ),
+              ),
               const SizedBox(height: 40),
               // Circular Progress Chart placeholder
-              Stack(/* ... Chart code ... */),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: CircularProgressIndicator(
+                      value: 0.75, // TODO: Replace with actual progress
+                      strokeWidth: 12,
+                      backgroundColor: Colors.white.withAlpha((255 * 0.8).toInt()),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFBFFB4F)),
+                      strokeCap: StrokeCap.round,
+                    ),
+                  ),
+                   const Text(
+                    '3 / 4 Hrs', // TODO: Show actual progress dynamically
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
-              // Progress text
               const Text(
-                'Today\'s Progress: 75%',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
+                'Today\'s Progress: 75%', // TODO: Make dynamic
+                 textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
               ),
             ],
           ),

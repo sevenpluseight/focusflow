@@ -8,7 +8,9 @@ import 'placeholder_pages.dart';
 import 'coach/coach_home_screen.dart';
 import 'admin/admin_dashboard_screen.dart';
 import 'user/user_home_screen.dart';
-import '../screens/auth/auth.dart';
+import '../screens/auth/login_screen.dart';
+import '../widgets/animated_nav_bar_item.dart';
+import '../theme/app_theme.dart';
 
 // Define user roles
 enum UserRole { user, coach, admin }
@@ -19,11 +21,11 @@ class MainNavigationController extends StatefulWidget {
   final VoidCallback onToggleTheme;
 
   const MainNavigationController({
-    Key? key,
+    super.key,
     required this.currentUserRole,
     required this.isDarkMode,
     required this.onToggleTheme,
-  }) : super(key: key);
+  });
 
   @override
   State<MainNavigationController> createState() =>
@@ -38,45 +40,22 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
   late List<IconData> _iconList;
   late List<String> _labels;
 
-  late AuthProvider _authProvider;
-
   @override
   void initState() {
     super.initState();
-    _authProvider = context.read<AuthProvider>();
-    _authProvider.addListener(_authListener);
-
     _setupNavigationForRole(widget.currentUserRole);
   }
 
-  void _authListener() {
-    // If user logs out, navigate to login immediately
-    if (!_authProvider.isLoggedIn && mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LoginScreen(
-            isDarkMode: widget.isDarkMode,
-            onToggleTheme: widget.onToggleTheme,
-          ),
-        ),
-        (route) => false,
-      );
-    }
-  }
-
+  // Setup navigation based on user role
   void _setupNavigationForRole(UserRole role) {
     switch (role) {
       case UserRole.user:
-        _pageOptions = [
-          UserHomeScreen(
-            isDarkMode: widget.isDarkMode,
-            onToggleTheme: widget.onToggleTheme,
-          ),
-          const PlaceholderPage(title: 'User Reports'),
-          const PlaceholderPage(title: 'User Timer'),
-          const PlaceholderPage(title: 'Coaches'),
-          const PlaceholderPage(title: 'Profile'),
+        _pageOptions = const [
+          UserHomeScreen(),
+          PlaceholderPage(title: 'User Reports'),
+          PlaceholderPage(title: 'User Timer'),
+          PlaceholderPage(title: 'Coaches'),
+          PlaceholderPage(title: 'Profile'),
         ];
         _iconList = const [
           Pixel.home,
@@ -87,6 +66,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         ];
         _labels = const ['Home', 'Reports', 'Timer', 'Coaches', 'Profile'];
         break;
+
       case UserRole.coach:
         _pageOptions = const [
           CoachHomeScreen(),
@@ -104,6 +84,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         ];
         _labels = const ['Home', 'Users', 'Challenge', 'Reports', 'Profile'];
         break;
+
       case UserRole.admin:
         _pageOptions = const [
           AdminDashboardScreen(),
@@ -124,58 +105,137 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     }
   }
 
+  // Tab handling
   void _handleItemTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (!mounted) return;
+    setState(() => _selectedIndex = index);
   }
 
   void _onTapDown(int index) {
-    setState(() {
-      _pressedIndex = index;
-    });
+    if (!mounted) return;
+    setState(() => _pressedIndex = index);
   }
 
   void _onTapUpOrCancel(int index) {
     if (mounted && _pressedIndex == index) {
-      setState(() {
-        _pressedIndex = null;
-      });
+      setState(() => _pressedIndex = null);
+    }
+  }
+
+  // Logout confirmation dialog (✅ fixed: only one click needed)
+  Future<void> _showLogoutConfirmationDialog() async {
+    final authProvider = context.read<AuthProvider>();
+
+    final bool? confirmLogout = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF2C2F33) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            'Confirm Logout',
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          ),
+          content: Text(
+            'Are you sure you want to log out?',
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Cancel',
+                style:
+                    TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+            ),
+            TextButton(
+              child: const Text('Logout',
+                  style: TextStyle(color: Colors.redAccent)),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmLogout == true && mounted) {
+      try {
+        await authProvider.signOut();
+        // Navigate directly — no second click
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+            MaterialPageRoute(
+              settings: const RouteSettings(name: '/login'),
+              builder: (_) => LoginScreen(
+                isDarkMode: widget.isDarkMode,
+                onToggleTheme: widget.onToggleTheme,
+              ),
+            ),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Logout failed: $e"),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
     }
   }
 
   @override
-  void dispose() {
-    _authProvider.removeListener(_authListener);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isDarkMode = widget.isDarkMode;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF222428) : Colors.grey[100],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(_labels[_selectedIndex]),
-        backgroundColor: isDarkMode ? const Color(0xFF2C2F33) : Colors.green,
-        elevation: 1,
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor ??
+            (isDark ? const Color(0xFF2C2F33) : Colors.white),
+        elevation: 0,
+        title: Text(
+          _labels[_selectedIndex],
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         automaticallyImplyLeading: false,
         actions: [
-          if (widget.currentUserRole == UserRole.user)
+          if (widget.currentUserRole == UserRole.user ||
+              widget.currentUserRole == UserRole.admin)
             IconButton(
-              icon: const Icon(Pixel.notification, color: Colors.white, size: 28),
+              tooltip: 'Notifications',
+              icon: Icon(
+                widget.currentUserRole == UserRole.admin
+                    ? Pixel.edit
+                    : Pixel.notification,
+                size: 28,
+                color: Colors.white,
+              ),
               onPressed: () {
-                /* TODO: Navigate to Notifications */
+                debugPrint(
+                    '${widget.currentUserRole.name} Notification Icon Tapped');
               },
             ),
           IconButton(
+            tooltip: 'Logout',
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              _authProvider.clearError();
-              await _authProvider.signOut();
-              // Navigation handled by _authListener
-            },
+            onPressed: _showLogoutConfirmationDialog,
           ),
           const SizedBox(width: 10),
         ],
@@ -188,53 +248,27 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         itemCount: _iconList.length,
         tabBuilder: (int index, bool isActive) {
           final bool isPressed = _pressedIndex == index;
-          final Color color =
-              isActive ? const Color(0xFFBFFB4F) : const Color(0xFFD0D0D0);
-          final double scaleFactor = isPressed ? 0.8 : (isActive ? 1.25 : 0.9);
-          final double iconSize = isPressed ? 22 : (isActive ? 28 : 22);
-
-          return GestureDetector(
-            onTapDown: (_) => _onTapDown(index),
-            onTapUp: (_) {
+          return AnimatedNavBarItem(
+            index: index,
+            iconData: _iconList[index],
+            label: _labels[index],
+            isActive: isActive,
+            isPressed: isPressed,
+            activeColor: AppTheme.primaryColor,
+            inactiveColor:
+                isDark ? const Color(0xFFD0D0D0) : Colors.grey.shade600,
+            onTapDown: () => _onTapDown(index),
+            onTapUp: () {
               _handleItemTap(index);
               _onTapUpOrCancel(index);
             },
             onTapCancel: () => _onTapUpOrCancel(index),
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              width: MediaQuery.of(context).size.width / _iconList.length,
-              color: Colors.transparent,
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedScale(
-                    scale: scaleFactor,
-                    duration: const Duration(milliseconds: 150),
-                    curve: Curves.easeInOut,
-                    child: Icon(_iconList[index], size: iconSize, color: color),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _labels[index],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight:
-                          isActive ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           );
         },
         activeIndex: _selectedIndex,
-        onTap: (index) {}, // handled by GestureDetector
-        backgroundColor: isDarkMode ? const Color(0xFF2C2F33) : Colors.green,
+        onTap: (_) {},
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor ??
+            (isDark ? const Color(0xFF2C2F33) : Colors.white),
         gapLocation: GapLocation.none,
         notchSmoothness: NotchSmoothness.smoothEdge,
         height: 65,

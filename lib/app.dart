@@ -4,6 +4,7 @@ import 'package:focusflow/services/services.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/theme/app_theme.dart';
 
+import 'package:focusflow/screens/main_navigation_controller.dart';
 class App extends StatefulWidget {
   const App({super.key});
 
@@ -62,14 +63,17 @@ class _AppState extends State<App> {
           }
 
           if (snapshot.hasData) {
-            return const Scaffold(
-              body: Center(child: Text("Welcome! Will update later.")),
+            UserRole determinedRole = UserRole.user;
+            return MainNavigationController(
+              currentUserRole: determinedRole,
+              isDarkMode: _isDarkMode,
+              onToggleTheme: _toggleTheme, // Pass the callback
             );
           } else {
             return LoginScreen(
-              onToggleTheme: _toggleTheme,
+              onToggleTheme: _toggleTheme, // Pass callback to LoginScreen
               isDarkMode: _isDarkMode,
-              );
+            );
           }
         },
       ),

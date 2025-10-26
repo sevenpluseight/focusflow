@@ -2,19 +2,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
-import 'package:focusflow/screens/user/user.dart';
+// import 'package:focusflow/screens/user/user.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/widgets/widgets.dart';
+import '../main_navigation_controller.dart';
 
 class UserLoadingScreen extends StatefulWidget {
   final bool isDarkMode;
   final VoidCallback onToggleTheme;
 
   const UserLoadingScreen({
-    Key? key,
+    super.key,
     required this.isDarkMode,
     required this.onToggleTheme,
-  }) : super(key: key);
+  });
 
   @override
   State<UserLoadingScreen> createState() => _UserLoadingScreenState();
@@ -43,13 +44,15 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       // Retry if first failed - Second attempt
       if (!_hasRetried) {
         _hasRetried = true;
-        CustomSnackBar.show(
-          context,
-          message: "Retrying to fetch user data...",
-          type: SnackBarType.info,
-          position: SnackBarPosition.top,
-          duration: const Duration(seconds: 2),
-        );
+        if (mounted) {
+          CustomSnackBar.show(
+            context,
+            message: "Retrying to fetch user data...",
+            type: SnackBarType.info,
+            position: SnackBarPosition.top,
+            duration: const Duration(seconds: 2),
+          );
+        }
 
         final retrySuccess = await _fetchWithTimeout(authProvider);
         if (retrySuccess && mounted) {
@@ -116,6 +119,8 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
   }
 
   void _navigateToHome(String? username) {
+    if (!mounted) return;
+
     CustomSnackBar.show(
       context,
       message: "Welcome back${username != null ? ', $username!' : '!'}",
@@ -124,18 +129,18 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       duration: const Duration(seconds: 2),
     );
 
-    Future.delayed(const Duration(seconds: 1), () {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => UserHomeScreen(
-            isDarkMode: widget.isDarkMode,
-            onToggleTheme: widget.onToggleTheme,
-          ),
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MainNavigationController(
+          // TODO: Determine the actual user role here later
+          currentUserRole: UserRole.user,
+          isDarkMode: widget.isDarkMode,
+          onToggleTheme: widget.onToggleTheme,
         ),
-      );
-    });
+      ),
+    );
   }
 
   @override
@@ -143,7 +148,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor:
-          widget.isDarkMode ? theme.colorScheme.background : Colors.white,
+          widget.isDarkMode ? theme.colorScheme.surface : Colors.white,
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

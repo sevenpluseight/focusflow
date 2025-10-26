@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
       User? user = FirebaseAuth.instance.currentUser;
 
       setState(() => _statusText = "🤖 Connecting to Gemini...");
-      await _testGeminiAPI();
+      await _testGeminiAPI(); // Keep Gemini check
 
       Widget nextScreen;
 
@@ -129,6 +129,7 @@ class _SplashScreenState extends State<SplashScreen>
             backgroundColor: Colors.redAccent,
           ),
         );
+        // Maybe navigate to an error screen or retry? Or just stay here.
       }
     }
   }

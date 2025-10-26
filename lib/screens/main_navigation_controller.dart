@@ -69,10 +69,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     switch (role) {
       case UserRole.user:
         _pageOptions = [
-          UserHomeScreen(
-            isDarkMode: widget.isDarkMode,
-            onToggleTheme: widget.onToggleTheme,
-          ),
+          const UserHomeScreen(),
           const PlaceholderPage(title: 'User Reports'),
           const PlaceholderPage(title: 'User Timer'),
           const PlaceholderPage(title: 'Coaches'),
@@ -89,7 +86,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         break;
       case UserRole.coach:
         _pageOptions = const [
-          CoachHomeScreen(),
+          const CoachHomeScreen(),
           PlaceholderPage(title: 'Coach Users'),
           PlaceholderPage(title: 'Challenge'),
           PlaceholderPage(title: 'Reports'),
@@ -106,7 +103,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         break;
       case UserRole.admin:
         _pageOptions = const [
-          AdminDashboardScreen(),
+          const AdminDashboardScreen(),
           PlaceholderPage(title: 'Users'),
           PlaceholderPage(title: 'Events'),
           PlaceholderPage(title: 'Notifications'),

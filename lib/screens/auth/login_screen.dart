@@ -62,11 +62,11 @@ void didChangeDependencies() {
       filled: true,
       fillColor: colors.surface,
       labelStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withValues(alpha: 0.8),
+        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
         fontSize: SizeConfig.font(2),
       ),
       hintStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withValues(alpha: 0.6),
+        color: colors.onSurface.withAlpha((255 * 0.6).toInt()),
         fontSize: SizeConfig.font(1.8),
       ),
       suffixIcon: suffixIcon,
@@ -167,7 +167,7 @@ void didChangeDependencies() {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
-                        color: colors.onSurface.withValues(alpha: 0.7),
+                        color: colors.onSurface.withAlpha((255 * 0.7).toInt()),
                         size: SizeConfig.wp(5),
                       ),
                       onPressed: () =>
@@ -191,7 +191,7 @@ void didChangeDependencies() {
                     child: Text(
                       "Forgot Password?",
                       style: text.bodyMedium?.copyWith(
-                        color: colors.onSurface.withValues(alpha: 0.8),
+                        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
                         fontSize: SizeConfig.font(1.8),
                       ),
                     ),
@@ -291,7 +291,7 @@ void didChangeDependencies() {
                         "Or continue with",
                         style: text.bodyMedium?.copyWith(
                           fontSize: SizeConfig.font(1.8),
-                          color: colors.onSurface.withValues(alpha: 0.8),
+                          color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
                         ),
                       ),
                     ),
@@ -355,7 +355,7 @@ void didChangeDependencies() {
                       "Don't have an account?",
                       style: text.bodyMedium?.copyWith(
                         fontSize: SizeConfig.font(1.8),
-                        color: colors.onSurface.withValues(alpha: 0.8),
+                        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
                       ),
                     ),
                     TextButton(

@@ -14,7 +14,6 @@ class CustomSnackBar {
   }) {
     final theme = Theme.of(context);
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
 
     IconData icon;
     Color backgroundColor;

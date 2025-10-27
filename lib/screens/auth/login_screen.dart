@@ -181,23 +181,47 @@ void didChangeDependencies() {
                 ),
 
                 // Forgot password
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(
+                //     onPressed: () {
+                //       final email = _emailController.text.trim();
+                //       context.read<AuthProvider>().resetPassword(email);
+                //     },
+                //     child: Text(
+                //       "Forgot Password?",
+                //       style: text.bodyMedium?.copyWith(
+                //         color: colors.onSurface.withValues(alpha: 0.8),
+                //         fontSize: SizeConfig.font(1.8),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // SizedBox(height: SizeConfig.hp(3)),
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      final email = _emailController.text.trim();
-                      context.read<AuthProvider>().resetPassword(email);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ForgotPasswordScreen(
+                            isDarkMode: widget.isDarkMode,
+                            onToggleTheme: widget.onToggleTheme ?? () {},
+                          ),
+                        ),
+                      );
                     },
                     child: Text(
                       "Forgot Password?",
                       style: text.bodyMedium?.copyWith(
-                        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
-                        fontSize: SizeConfig.font(1.8),
+                        color: colors.onSurface.withValues(alpha: 0.8),
+                        fontSize: SizeConfig.font(2),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: SizeConfig.hp(3)),
 
                 // Error message
                 if (_localErrorMessage != null)

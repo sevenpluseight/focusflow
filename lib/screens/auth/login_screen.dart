@@ -4,7 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/auth/auth.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
-import 'package:focusflow/screens/user/user.dart';
+import 'package:focusflow/screens/user_loading_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

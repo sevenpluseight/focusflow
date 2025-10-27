@@ -7,14 +7,7 @@ import 'package:focusflow/utils/utils.dart';
 import 'package:focusflow/widgets/widgets.dart';
 
 class SignUpScreen extends StatefulWidget {
-  final VoidCallback? onToggleTheme;
-  final bool isDarkMode; // kept for backward compatibility but no longer relied upon
-
-  const SignUpScreen({
-    super.key,
-    this.onToggleTheme,
-    required this.isDarkMode,
-  });
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -127,10 +120,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => LoginScreen(
-                      isDarkMode: isDarkMode,
-                      onToggleTheme: widget.onToggleTheme,
-                    ),
+                    builder: (_) => const LoginScreen(),
                   ),
                 );
               }
@@ -248,7 +238,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     isDarkMode ? Pixel.sunalt : Pixel.moon,
                     size: SizeConfig.wp(6.8),
                   ),
-                  onPressed: widget.onToggleTheme,
+                  onPressed: () => context.read<ThemeProvider>().toggleTheme(),
                 ),
               ),
             ],

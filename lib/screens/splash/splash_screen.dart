@@ -11,14 +11,7 @@ import '../auth/auth.dart';
 import '../main_navigation_controller.dart';
 
 class SplashScreen extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback? onToggleTheme;
-
-  const SplashScreen({
-    super.key,
-    required this.isDarkMode,
-    this.onToggleTheme,
-  });
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -71,10 +64,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (user == null) {
         // User is LOGGED OUT
         setState(() => _statusText = "🔒 Redirecting to Login...");
-        nextScreen = LoginScreen(
-          isDarkMode: widget.isDarkMode,
-          onToggleTheme: widget.onToggleTheme,
-        );
+        nextScreen = const LoginScreen();
       } else {
         // User is LOGGED IN
         setState(() => _statusText = "🔓 User authenticated. Checking role...");
@@ -105,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
         }
 
         setState(() => _statusText = "🔑 Role determined: $userRole. Loading app...");
-        nextScreen = MainNavigationController(currentUserRole: userRole, isDarkMode: widget.isDarkMode, onToggleTheme: widget.onToggleTheme ?? () {});
+        nextScreen = MainNavigationController(currentUserRole: userRole);
       }
 
       await Future.delayed(const Duration(milliseconds: 500));

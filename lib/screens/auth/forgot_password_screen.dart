@@ -6,14 +6,7 @@ import 'package:focusflow/utils/utils.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback onToggleTheme;
-
-  const ForgotPasswordScreen({
-    Key? key,
-    required this.isDarkMode,
-    required this.onToggleTheme,
-  }) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -46,21 +39,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _showDialog(String title, String message, {bool isError = false}) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: widget.isDarkMode ? const Color(0xFF2C2F33) : Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF2C2F33) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           title,
           style: TextStyle(
-            color: widget.isDarkMode ? Colors.white : Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           message,
-          style: TextStyle(color: widget.isDarkMode ? Colors.white70 : Colors.black87),
+          style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
@@ -70,10 +65,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => LoginScreen(
-                      isDarkMode: widget.isDarkMode,
-                      onToggleTheme: widget.onToggleTheme,
-                    ),
+                    builder: (_) => const LoginScreen(),
                   ),
                 );
               }

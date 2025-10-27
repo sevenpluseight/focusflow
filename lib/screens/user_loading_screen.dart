@@ -2,20 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
-// import 'package:focusflow/screens/user/user.dart';
 import 'package:focusflow/screens/auth/login_screen.dart';
 import 'package:focusflow/widgets/widgets.dart';
-import '../main_navigation_controller.dart';
+import 'main_navigation_controller.dart';
 
 class UserLoadingScreen extends StatefulWidget {
-  final bool isDarkMode;
-  final VoidCallback onToggleTheme;
-
-  const UserLoadingScreen({
-    super.key,
-    required this.isDarkMode,
-    required this.onToggleTheme,
-  });
+  const UserLoadingScreen({super.key});
 
   @override
   State<UserLoadingScreen> createState() => _UserLoadingScreenState();
@@ -37,7 +29,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       // First fetching attempt
       final success = await _fetchWithTimeout(authProvider);
       if (success && mounted) {
-        _navigateToHome(authProvider.username);
+        _navigateToHome(authProvider);
         return;
       }
 
@@ -56,7 +48,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
 
         final retrySuccess = await _fetchWithTimeout(authProvider);
         if (retrySuccess && mounted) {
-          _navigateToHome(authProvider.username);
+          _navigateToHome(authProvider);
           return;
         }
       }
@@ -77,10 +69,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (_) => LoginScreen(
-              isDarkMode: widget.isDarkMode,
-              onToggleTheme: widget.onToggleTheme,
-            ),
+            builder: (_) => const LoginScreen(),
           ),
           (route) => false,
         );
@@ -96,10 +85,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => LoginScreen(
-            isDarkMode: widget.isDarkMode,
-            onToggleTheme: widget.onToggleTheme,
-          ),
+          builder: (_) => const LoginScreen(),
         ),
       );
     }
@@ -118,12 +104,18 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     }
   }
 
-  void _navigateToHome(String? username) {
+  void _navigateToHome(AuthProvider authProvider) {
     if (!mounted) return;
+
+    final roleString = authProvider.role ?? 'user';
+    final userRole = UserRole.values.firstWhere(
+      (e) => e.toString().split('.').last == roleString,
+      orElse: () => UserRole.user,
+    );
 
     CustomSnackBar.show(
       context,
-      message: "Welcome back${username != null ? ', $username!' : '!'}",
+      message: "Welcome back${authProvider.username != null ? ', ${authProvider.username}!' : '!'}",
       type: SnackBarType.success,
       position: SnackBarPosition.top,
       duration: const Duration(seconds: 2),
@@ -134,10 +126,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => MainNavigationController(
-          // TODO: Determine the actual user role here later
-          currentUserRole: UserRole.user,
-          isDarkMode: widget.isDarkMode,
-          onToggleTheme: widget.onToggleTheme,
+          currentUserRole: userRole,
         ),
       ),
     );
@@ -146,9 +135,10 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
     return Scaffold(
       backgroundColor:
-          widget.isDarkMode ? theme.colorScheme.surface : Colors.white,
+          isDarkMode ? theme.colorScheme.surface : Colors.white,
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

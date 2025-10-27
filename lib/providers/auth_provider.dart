@@ -5,23 +5,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   User? _user;
   bool _isLoading = false;
   String? _errorMessage;
-
+  String? _infoMessage;
   String? _username;
   String? _role;
-  String? _infoMessage;
 
-  String? get username => _username;
-  String? get role => _role;
-  String? get infoMessage => _infoMessage;
-
+  // Getters
   User? get user => _user;
   bool get isLoggedIn => _user != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? get infoMessage => _infoMessage;
+  String? get username => _username;
+  String? get role => _role;
+  AuthService get authService => _authService;
 
+  // Private setters
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -32,22 +35,20 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _setUser(User? user) {
-    _user = user;
-    if (user != null) {
-      fetchUserData();
-    }
-    // notifyListeners();
-  }
-
   void _setMessage(String? message) {
     _infoMessage = message;
     notifyListeners();
   }
 
-    void clearError() {
+  void _setUser(User? user) {
+    _user = user;
+    if (user != null) fetchUserData();
+    notifyListeners();
+  }
+
+  void clearError() {
     _setError(null);
-     _setMessage(null);
+    _setMessage(null);
   }
 
   // Sign in
@@ -66,7 +67,7 @@ class AuthProvider with ChangeNotifier {
       if (user == null) {
         _setError("Invalid email or password.");
       } else {
-        _setUser(user); // Track logged-in user
+        _setUser(user);
       }
     } catch (e) {
       _setError(e.toString());
@@ -94,7 +95,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign up (Login)
+  // Sign up
   Future<void> signUp({
     required String username,
     required String email,
@@ -131,7 +132,6 @@ class AuthProvider with ChangeNotifier {
         'signInMethod': 'email',
         'createdAt': FieldValue.serverTimestamp(),
       });
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         _setError(
@@ -149,19 +149,40 @@ class AuthProvider with ChangeNotifier {
 
   // Reset password
   Future<void> resetPassword(String email) async {
-    if (email.isEmpty) {
-      _setError("Please enter your email to reset password.");
+    final normalizedEmail = email.trim().toLowerCase();
+
+    if (normalizedEmail.isEmpty) {
+      _setError("Please enter a valid email.");
       return;
     }
 
     _setLoading(true);
     _setError(null);
+    _setMessage(null);
 
     try {
-      await _authService.resetPassword(email);
-      _setError("Password reset email sent to $email.");
+      // Firebase will send a reset email if the account exists
+      await _auth.sendPasswordResetEmail(email: normalizedEmail);
+
+      // Show generic message regardless of success or failure
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox."
+      );
+    } on FirebaseAuthException catch (e) {
+      // Only catch invalid email formats
+      if (e.code == 'invalid-email') {
+        _setError("Invalid email format.");
+      } else {
+        // All other cases show the generic message
+        _setMessage(
+          "If this email exists, a reset link was sent. Check your inbox."
+        );
+      }
     } catch (e) {
-      _setError("Failed to send reset link: $e");
+      // Generic message for any other error
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox."
+      );
     } finally {
       _setLoading(false);
     }
@@ -195,7 +216,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign out (Logout)
+  // Sign out
   Future<void> signOut() async {
     await _authService.signOut();
     _setUser(null);

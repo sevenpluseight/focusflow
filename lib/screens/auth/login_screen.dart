@@ -7,14 +7,7 @@ import 'package:focusflow/utils/utils.dart';
 import 'package:focusflow/screens/user/user.dart';
 
 class LoginScreen extends StatefulWidget {
-  final VoidCallback? onToggleTheme;
-  final bool isDarkMode;
-
-  const LoginScreen({
-    super.key,
-    this.onToggleTheme,
-    required this.isDarkMode,
-  });
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -117,7 +110,7 @@ void didChangeDependencies() {
                 size: SizeConfig.wp(6.8),
                 color: themeIconColor,
               ),
-              onPressed: widget.onToggleTheme,
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
             ),
           ),
         ],
@@ -130,7 +123,9 @@ void didChangeDependencies() {
               children: [
                 SizedBox(height: SizeConfig.hp(2)),
                 Image.asset(
-                  'assets/icons/png/focusflow_icon_transparent.png',
+                  isDarkMode
+                      ? 'assets/icons/png/focusflow_icon_transparent.png'
+                      : 'assets/icons/png/focusflow_icon_borderline.png',
                   width: SizeConfig.wp(35),
                   height: SizeConfig.wp(35),
                   fit: BoxFit.contain,
@@ -206,10 +201,7 @@ void didChangeDependencies() {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ForgotPasswordScreen(
-                            isDarkMode: widget.isDarkMode,
-                            onToggleTheme: widget.onToggleTheme ?? () {},
-                          ),
+                          builder: (_) => const ForgotPasswordScreen(),
                         ),
                       );
                     },
@@ -261,10 +253,7 @@ void didChangeDependencies() {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => UserLoadingScreen(
-                              isDarkMode: isDarkMode,
-                              onToggleTheme: widget.onToggleTheme ?? () {},
-                            ),
+                            builder: (_) => const UserLoadingScreen(),
                           ),
                         );
                       }
@@ -276,7 +265,8 @@ void didChangeDependencies() {
                           err.contains("invalid email") ||
                           err.contains("password is invalid")) {
                         _showTemporaryError("Incorrect email or password.");
-                      } else if (authProvider.errorMessage != null &&
+                      }
+                       else if (authProvider.errorMessage != null &&
                           authProvider.errorMessage!.isNotEmpty) {
                         _showTemporaryError(authProvider.errorMessage!);
                       } else {
@@ -335,10 +325,7 @@ void didChangeDependencies() {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => UserLoadingScreen(
-                              isDarkMode: isDarkMode,
-                              onToggleTheme: widget.onToggleTheme ?? () {},
-                            ),
+                            builder: (_) => const UserLoadingScreen(),
                           ),
                         );
                       }
@@ -388,10 +375,7 @@ void didChangeDependencies() {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SignUpScreen(
-                              isDarkMode: isDarkMode,
-                              onToggleTheme: widget.onToggleTheme ?? () {},
-                            ),
+                            builder: (context) => const SignUpScreen(),
                           ),
                         );
                       },

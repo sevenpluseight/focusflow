@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focusflow/models/models.dart';
 import 'package:focusflow/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,20 +9,18 @@ class AuthProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   User? _user;
+  UserModel? _userModel;
   bool _isLoading = false;
   String? _errorMessage;
   String? _infoMessage;
-  String? _username;
-  String? _role;
 
   // Getters
   User? get user => _user;
+  UserModel? get userModel => _userModel;
   bool get isLoggedIn => _user != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get infoMessage => _infoMessage;
-  String? get username => _username;
-  String? get role => _role;
   AuthService get authService => _authService;
 
   // Private setters
@@ -42,7 +41,11 @@ class AuthProvider with ChangeNotifier {
 
   void _setUser(User? user) {
     _user = user;
-    if (user != null) fetchUserData();
+    if (user != null) {
+      fetchUserData();
+    } else {
+      _userModel = null;
+    }
     notifyListeners();
   }
 
@@ -122,16 +125,18 @@ class AuthProvider with ChangeNotifier {
         return;
       }
 
-      _setUser(user);
+      final newUser = UserModel(
+        uid: user.uid,
+        username: username,
+        email: email,
+        role: role,
+        signInMethod: 'email',
+        createdAt: Timestamp.now(),
+      );
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'uid': user.uid,
-        'username': username,
-        'email': email,
-        'role': role,
-        'signInMethod': 'email',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(newUser.toMap());
+
+      _setUser(user);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         _setError(
@@ -161,25 +166,19 @@ class AuthProvider with ChangeNotifier {
     _setMessage(null);
 
     try {
-      // Firebase will send a reset email if the account exists
       await _auth.sendPasswordResetEmail(email: normalizedEmail);
-
-      // Show generic message regardless of success or failure
       _setMessage(
         "If this email exists, a reset link was sent. Check your inbox."
       );
     } on FirebaseAuthException catch (e) {
-      // Only catch invalid email formats
       if (e.code == 'invalid-email') {
         _setError("Invalid email format.");
       } else {
-        // All other cases show the generic message
         _setMessage(
           "If this email exists, a reset link was sent. Check your inbox."
         );
       }
     } catch (e) {
-      // Generic message for any other error
       _setMessage(
         "If this email exists, a reset link was sent. Check your inbox."
       );
@@ -197,19 +196,20 @@ class AuthProvider with ChangeNotifier {
       final doc = await docRef.get();
 
       if (!doc.exists) {
-        await docRef.set({
-          'uid': _user!.uid,
-          'username': _user!.displayName ?? 'User',
-          'email': _user!.email,
-          'role': 'user',
-          'signInMethod': 'google',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        final newUser = UserModel(
+          uid: _user!.uid,
+          username: _user!.displayName ?? 'User',
+          email: _user!.email!,
+          role: 'user',
+          signInMethod: 'google',
+          createdAt: Timestamp.now(),
+        );
+        await docRef.set(newUser.toMap());
+        _userModel = newUser;
+      } else {
+        _userModel = UserModel.fromFirestore(doc);
       }
 
-      final data = (await docRef.get()).data();
-      _username = data?['username'];
-      _role = data?['role'];
       notifyListeners();
     } catch (e) {
       _setError("Failed to fetch user data: $e");
@@ -220,7 +220,5 @@ class AuthProvider with ChangeNotifier {
   Future<void> signOut() async {
     await _authService.signOut();
     _setUser(null);
-    _username = null;
-    _role = null;
   }
 }

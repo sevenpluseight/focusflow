@@ -4,7 +4,8 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/auth/auth.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
-import 'package:focusflow/screens/user_loading_screen.dart';
+import 'package:focusflow/screens/auth/user_loading_screen.dart';
+import 'package:focusflow/screens/auth/forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,13 +31,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-@override
-void didChangeDependencies() {
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
     SizeConfig.init(context);
     iconSize = SizeConfig.wp(50);
     iconTopOffset = SizeConfig.hp(-1);
-}
+  }
 
   @override
   void dispose() {
@@ -92,305 +93,269 @@ void didChangeDependencies() {
     final authProvider = context.watch<AuthProvider>();
 
     final bool isDarkMode = theme.brightness == Brightness.dark;
-    final IconData themeIcon = isDarkMode ? Pixel.sunalt : Pixel.moon;
-    final Color themeIconColor = isDarkMode ? Colors.white : Colors.black87;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        elevation: theme.appBarTheme.elevation,
-        iconTheme: theme.appBarTheme.iconTheme,
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: SizeConfig.wp(1.2)),
-            child: IconButton(
-              icon: Icon(
-                themeIcon,
-                size: SizeConfig.wp(6.8),
-                color: themeIconColor,
-              ),
-              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
-            ),
-          ),
-        ],
-      ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(6)),
-            child: Column(
-              children: [
-                SizedBox(height: SizeConfig.hp(2)),
-                Image.asset(
-                  isDarkMode
-                      ? 'assets/icons/png/focusflow_icon_transparent.png'
-                      : 'assets/icons/png/focusflow_icon_borderline.png',
-                  width: SizeConfig.wp(35),
-                  height: SizeConfig.wp(35),
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(height: SizeConfig.hp(1)),
-                Text(
-                  "FocusFlow",
-                  style: text.titleLarge?.copyWith(
-                    fontSize: SizeConfig.font(5.5),
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(6)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: SizeConfig.hp(2)),
+                  Image.asset(
+                    isDarkMode
+                        ? 'assets/icons/png/focusflow_icon_transparent.png'
+                        : 'assets/icons/png/focusflow_icon_borderline.png',
+                    width: SizeConfig.wp(35),
+                    height: SizeConfig.wp(35),
+                    fit: BoxFit.contain,
                   ),
-                ),
-                SizedBox(height: SizeConfig.hp(3)),
-
-                // Email
-                TextField(
-                  controller: _emailController,
-                  decoration: _inputDecoration("Email"),
-                  keyboardType: TextInputType.emailAddress,
-                  style: text.bodyLarge?.copyWith(
-                    color: colors.onSurface,
-                    fontSize: SizeConfig.font(2),
-                  ),
-                ),
-                SizedBox(height: SizeConfig.hp(2)),
-
-                // Password
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: _inputDecoration(
-                    "Password",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
-                        color: colors.onSurface.withAlpha((255 * 0.7).toInt()),
-                        size: SizeConfig.wp(5),
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                  style: text.bodyLarge?.copyWith(
-                    color: colors.onSurface,
-                    fontSize: SizeConfig.font(2),
-                  ),
-                ),
-
-                // Forgot password
-                // Align(
-                //   alignment: Alignment.centerRight,
-                //   child: TextButton(
-                //     onPressed: () {
-                //       final email = _emailController.text.trim();
-                //       context.read<AuthProvider>().resetPassword(email);
-                //     },
-                //     child: Text(
-                //       "Forgot Password?",
-                //       style: text.bodyMedium?.copyWith(
-                //         color: colors.onSurface.withValues(alpha: 0.8),
-                //         fontSize: SizeConfig.font(1.8),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // SizedBox(height: SizeConfig.hp(3)),
-
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ForgotPasswordScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Forgot Password?",
-                      style: text.bodyMedium?.copyWith(
-                        color: colors.onSurface.withValues(alpha: 0.8),
-                        fontSize: SizeConfig.font(2),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Error message
-                if (_localErrorMessage != null)
+                  SizedBox(height: SizeConfig.hp(1)),
                   Text(
-                    _localErrorMessage!,
-                    style: text.bodyMedium?.copyWith(
-                      color: Colors.redAccent,
-                      fontSize: SizeConfig.font(1.8),
-                    ),
-                  ),
-
-                // Info message
-                if (authProvider.infoMessage != null)
-                  Text(
-                    authProvider.infoMessage!,
-                    style: text.bodyMedium?.copyWith(
-                      color: Colors.greenAccent,
-                      fontSize: SizeConfig.font(1.8),
-                    ),
-                  ),
-
-                SizedBox(height: SizeConfig.hp(3)),
-
-                // Sign In button
-                ElevatedButton(
-                  onPressed: () async {
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text.trim();
-                    setState(() => _localErrorMessage = null);
-
-                    await authProvider.signIn(email, password);
-
-                    if (!mounted) return;
-
-                    if (authProvider.isLoggedIn) {
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const UserLoadingScreen(),
-                          ),
-                        );
-                      }
-                    } else {
-                      final err = authProvider.errorMessage?.toLowerCase() ?? "";
-                      if (err.contains("invalid-credential") ||
-                          err.contains("user-not-found") ||
-                          err.contains("wrong-password") ||
-                          err.contains("invalid email") ||
-                          err.contains("password is invalid")) {
-                        _showTemporaryError("Incorrect email or password.");
-                      }
-                       else if (authProvider.errorMessage != null &&
-                          authProvider.errorMessage!.isNotEmpty) {
-                        _showTemporaryError(authProvider.errorMessage!);
-                      } else {
-                        _showTemporaryError("Incorrect email or password.");
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBFFB4F),
-                    elevation: 2,
-                    foregroundColor: Colors.black,
-                    minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Sign In",
-                    style: text.bodyLarge?.copyWith(
+                    "FocusFlow",
+                    style: text.titleLarge?.copyWith(
+                      fontSize: SizeConfig.font(5.5),
                       fontWeight: FontWeight.bold,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.hp(3)),
+
+                  // Email input
+                  TextField(
+                    controller: _emailController,
+                    decoration: _inputDecoration("Email"),
+                    keyboardType: TextInputType.emailAddress,
+                    style: text.bodyLarge?.copyWith(
+                      color: colors.onSurface,
                       fontSize: SizeConfig.font(2),
-                      color: Colors.black,
                     ),
                   ),
-                ),
-                SizedBox(height: SizeConfig.hp(2)),
+                  SizedBox(height: SizeConfig.hp(2)),
 
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
-                      child: Text(
-                        "Or continue with",
-                        style: text.bodyMedium?.copyWith(
-                          fontSize: SizeConfig.font(1.8),
-                          color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
+                  // Password input
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: _inputDecoration(
+                      "Password",
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
+                          color: colors.onSurface.withAlpha((255 * 0.7).toInt()),
+                          size: SizeConfig.wp(5),
                         ),
+                        onPressed: () =>
+                            setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-                SizedBox(height: SizeConfig.hp(3)),
-
-                // Google sign in
-                OutlinedButton(
-                  onPressed: () async {
-                    await authProvider.signInWithGoogle();
-
-                    if (!mounted) return;
-                    if (authProvider.isLoggedIn) {
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const UserLoadingScreen(),
-                          ),
-                        );
-                      }
-                    } else if (authProvider.errorMessage != null) {
-                      _showTemporaryError(authProvider.errorMessage!);
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                    side: BorderSide(color: colors.primary),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/icons/png/google.png',
-                        height: SizeConfig.hp(3),
-                      ),
-                      SizedBox(width: SizeConfig.wp(2)),
-                      Text(
-                        "Sign in with Google",
-                        style: text.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: SizeConfig.font(2),
-                          color: isDarkMode ? colors.primary : Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: SizeConfig.hp(2)),
-
-                // Sign Up link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account?",
-                      style: text.bodyMedium?.copyWith(
-                        fontSize: SizeConfig.font(1.8),
-                        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
-                      ),
+                    style: text.bodyLarge?.copyWith(
+                      color: colors.onSurface,
+                      fontSize: SizeConfig.font(2),
                     ),
-                    TextButton(
+                  ),
+
+                  // Forgot password button
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
                       onPressed: () {
-                        context.read<AuthProvider>().clearError();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const SignUpScreen(),
+                            builder: (_) => const ForgotPasswordScreen(),
                           ),
                         );
                       },
                       child: Text(
-                        "Sign Up",
-                        style: text.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        "Forgot Password?",
+                        style: text.bodyMedium?.copyWith(
+                          color: colors.onSurface.withValues(alpha: 0.8),
                           fontSize: SizeConfig.font(2),
-                          color: isDarkMode ? colors.primary : Colors.black,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+
+                  // Error message
+                  if (_localErrorMessage != null)
+                    Text(
+                      _localErrorMessage!,
+                      style: text.bodyMedium?.copyWith(
+                        color: Colors.redAccent,
+                        fontSize: SizeConfig.font(1.8),
+                      ),
+                    ),
+
+                  // Info message
+                  if (authProvider.infoMessage != null)
+                    Text(
+                      authProvider.infoMessage!,
+                      style: text.bodyMedium?.copyWith(
+                        color: Colors.greenAccent,
+                        fontSize: SizeConfig.font(1.8),
+                      ),
+                    ),
+
+                  SizedBox(height: SizeConfig.hp(3)),
+
+                  // Sign In button
+                  ElevatedButton(
+                    onPressed: () async {
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text.trim();
+                      setState(() => _localErrorMessage = null);
+
+                      await authProvider.signIn(email, password);
+
+                      if (!mounted) return;
+
+                      if (authProvider.isLoggedIn) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const UserLoadingScreen(),
+                          ),
+                        );
+                      } else {
+                        final err =
+                            authProvider.errorMessage?.toLowerCase() ?? "";
+                        if (err.contains("invalid-credential") ||
+                            err.contains("user-not-found") ||
+                            err.contains("wrong-password") ||
+                            err.contains("invalid email") ||
+                            err.contains("password is invalid")) {
+                          _showTemporaryError("Incorrect email or password.");
+                        } else if (authProvider.errorMessage != null &&
+                            authProvider.errorMessage!.isNotEmpty) {
+                          _showTemporaryError(authProvider.errorMessage!);
+                        } else {
+                          _showTemporaryError("Incorrect email or password.");
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFBFFB4F),
+                      elevation: 2,
+                      foregroundColor: Colors.black,
+                      minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Sign In",
+                      style: text.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: SizeConfig.font(2),
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.hp(2)),
+
+                  // Divider
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: SizeConfig.wp(2)),
+                        child: Text(
+                          "Or continue with",
+                          style: text.bodyMedium?.copyWith(
+                            fontSize: SizeConfig.font(1.8),
+                            color:
+                                colors.onSurface.withAlpha((255 * 0.8).toInt()),
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  SizedBox(height: SizeConfig.hp(3)),
+
+                  // Google Sign-In button
+                  OutlinedButton(
+                    onPressed: () async {
+                      await authProvider.signInWithGoogle();
+                      if (!mounted) return;
+                      if (authProvider.isLoggedIn) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const UserLoadingScreen(),
+                          ),
+                        );
+                      } else if (authProvider.errorMessage != null) {
+                        _showTemporaryError(authProvider.errorMessage!);
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: Size(double.infinity, SizeConfig.hp(6)),
+                      side: BorderSide(color: colors.primary),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/icons/png/google.png',
+                          height: SizeConfig.hp(3),
+                        ),
+                        SizedBox(width: SizeConfig.wp(2)),
+                        Text(
+                          "Sign in with Google",
+                          style: text.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: SizeConfig.font(2),
+                            color:
+                                isDarkMode ? colors.primary : Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.hp(2)),
+
+                  // Sign Up link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account?",
+                        style: text.bodyMedium?.copyWith(
+                          fontSize: SizeConfig.font(1.8),
+                          color:
+                              colors.onSurface.withAlpha((255 * 0.8).toInt()),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.read<AuthProvider>().clearError();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Sign Up",
+                          style: text.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: SizeConfig.font(2),
+                            color:
+                                isDarkMode ? colors.primary : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

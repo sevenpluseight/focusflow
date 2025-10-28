@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:focusflow/models/models.dart';
 
 class GoogleSignInService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,14 +37,15 @@ class GoogleSignInService {
       final docSnapshot = await userDoc.get();
 
       if (!docSnapshot.exists) {
-        await userDoc.set({
-          'uid': user.uid,
-          'username': user.displayName ?? 'No Name',
-          'email': user.email,
-          'photoURL': user.photoURL,
-          'signInMethod': 'google',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        final newUser = UserModel(
+          uid: user.uid,
+          username: user.displayName ?? 'No Name',
+          email: user.email ?? '',
+          role: 'user',
+          signInMethod: 'google',
+          createdAt: FieldValue.serverTimestamp() as Timestamp,
+        );
+        await userDoc.set(newUser.toMap());
       } else {
         await userDoc.update({'lastLogin': FieldValue.serverTimestamp()});
       }

@@ -7,14 +7,7 @@ import 'package:focusflow/utils/utils.dart';
 import 'package:focusflow/widgets/widgets.dart';
 
 class SignUpScreen extends StatefulWidget {
-  final VoidCallback? onToggleTheme;
-  final bool isDarkMode; // kept for backward compatibility but no longer relied upon
-
-  const SignUpScreen({
-    super.key,
-    this.onToggleTheme,
-    required this.isDarkMode,
-  });
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -127,10 +120,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => LoginScreen(
-                      isDarkMode: isDarkMode,
-                      onToggleTheme: widget.onToggleTheme,
-                    ),
+                    builder: (_) => const LoginScreen(),
                   ),
                 );
               }
@@ -222,13 +212,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     SizeConfig.init(context);
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    final bottomPaddingForScroll = 160.0;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) => Scaffold(
-          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             backgroundColor: theme.appBarTheme.backgroundColor,
             elevation: theme.appBarTheme.elevation,
@@ -248,264 +236,246 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     isDarkMode ? Pixel.sunalt : Pixel.moon,
                     size: SizeConfig.wp(6.8),
                   ),
-                  onPressed: widget.onToggleTheme,
+                  onPressed: () => context.read<ThemeProvider>().toggleTheme(),
                 ),
               ),
             ],
           ),
           backgroundColor: theme.scaffoldBackgroundColor,
-          body: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  SizeConfig.wp(4),
-                  SizeConfig.hp(3),
-                  SizeConfig.wp(4),
-                  bottomPaddingForScroll,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: Text(
-                          "Create Your Account",
-                          style: TextStyle(
-                            fontSize: SizeConfig.font(4),
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                          ),
-                        ),
+          body: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(4)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Text(
+                      "Create Your Account",
+                      style: TextStyle(
+                        fontSize: SizeConfig.font(4),
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black87,
                       ),
-                      SizedBox(height: SizeConfig.hp(4)),
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.hp(4)),
 
-                      // Username
-                      TextField(
-                        controller: _usernameController,
-                        decoration: _inputDecoration("Username"),
-                        style: TextStyle(
-                          fontSize: SizeConfig.font(2),
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                        onChanged: (_) => setState(() {}),
-                      ),
-                      SizedBox(height: SizeConfig.hp(2)),
+                  // Username
+                  TextField(
+                    controller: _usernameController,
+                    decoration: _inputDecoration("Username"),
+                    style: TextStyle(
+                      fontSize: SizeConfig.font(2),
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  SizedBox(height: SizeConfig.hp(2)),
 
-                      // Email
-                      TextField(
-                        controller: _emailController,
-                        decoration: _inputDecoration(
-                          "Email",
-                          isError: _emailController.text.isNotEmpty && !_isEmailValid,
+                  // Email
+                  TextField(
+                    controller: _emailController,
+                    decoration: _inputDecoration(
+                      "Email",
+                      isError: _emailController.text.isNotEmpty && !_isEmailValid,
+                    ),
+                    style: TextStyle(
+                      fontSize: SizeConfig.font(2),
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (value) {
+                      setState(() {
+                        _isEmailValid = Validators.isEmailValid(value.trim());
+                      });
+                    },
+                  ),
+                  if (_emailController.text.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          _isEmailValid ? Pixel.check : Pixel.alert,
+                          color: _isEmailValid
+                              ? Colors.lightGreen
+                              : Colors.redAccent,
+                          size: SizeConfig.font(2.7),
                         ),
-                        style: TextStyle(
-                          fontSize: SizeConfig.font(2),
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          setState(() {
-                            _isEmailValid = Validators.isEmailValid(value.trim());
-                          });
-                        },
-                      ),
-                      if (_emailController.text.isNotEmpty)
-                        Row(
-                          children: [
-                            Icon(
-                              _isEmailValid ? Pixel.check : Pixel.alert,
+                        SizedBox(width: SizeConfig.wp(2)),
+                        Expanded(
+                          child: Text(
+                            _isEmailValid
+                                ? "Valid email"
+                                : "Invalid email format",
+                            style: TextStyle(
                               color: _isEmailValid
                                   ? Colors.lightGreen
                                   : Colors.redAccent,
-                              size: SizeConfig.font(2.7),
+                              fontSize: SizeConfig.font(1.95),
                             ),
-                            SizedBox(width: SizeConfig.wp(2)),
-                            Expanded(
-                              child: Text(
-                                _isEmailValid
-                                    ? "Valid email"
-                                    : "Invalid email format",
-                                style: TextStyle(
-                                  color: _isEmailValid
-                                      ? Colors.lightGreen
-                                      : Colors.redAccent,
-                                  fontSize: SizeConfig.font(1.95),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      SizedBox(height: SizeConfig.hp(2)),
+                      ],
+                    ),
+                  SizedBox(height: SizeConfig.hp(2)),
 
-                      // Password
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: !_passwordVisible,
-                            style: TextStyle(
-                              fontSize: SizeConfig.font(2),
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                            ),
-                            onChanged: (val) {
-                              _checkPasswordStrength(val);
-                              _checkPasswordsMatch();
-                            },
-                            decoration: _inputDecoration(
-                              "Password",
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _passwordVisible ? Pixel.eye : Pixel.eyeclosed,
-                                  color: isDarkMode
-                                      ? Colors.white70
-                                      : Colors.black54,
-                                  size: SizeConfig.wp(5),
-                                ),
-                                onPressed: () =>
-                                    setState(() => _passwordVisible = !_passwordVisible),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: SizeConfig.hp(1)),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: _passwordController.text.isEmpty
-                                  ? 0
-                                  : _passwordStrength,
-                              backgroundColor:
-                                  isDarkMode ? Colors.white10 : Colors.grey[300],
-                              color: _passwordStrength < 0.3
-                                  ? Colors.redAccent
-                                  : _passwordStrength < 0.6
-                                      ? Colors.orangeAccent
-                                      : _passwordStrength < 0.8
-                                          ? Colors.lightGreen
-                                          : Colors.greenAccent,
-                              minHeight: SizeConfig.hp(1),
-                            ),
-                          ),
-                          if (_startedTyping) ...[
-                            SizedBox(height: SizeConfig.hp(1)),
-                            Text(
-                              _passwordStrengthLabel,
-                              style: TextStyle(
-                                fontSize: SizeConfig.font(1.95),
-                                color: isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black87,
-                              ),
-                            ),
-                            SizedBox(height: SizeConfig.hp(1)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _buildRule("At least 8 characters", _hasLength, isDarkMode),
-                                SizedBox(height: SizeConfig.hp(0.8)),
-                                _buildRule("1 uppercase letter", _hasUppercase, isDarkMode),
-                                SizedBox(height: SizeConfig.hp(0.8)),
-                                _buildRule("1 special character", _hasSpecial, isDarkMode),
-                                SizedBox(height: SizeConfig.hp(0.8)),
-                                _buildRule(
-                                  "Avoid easy patterns like '123' or 'abc'",
-                                  _noSequential,
-                                  isDarkMode,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                      SizedBox(height: SizeConfig.hp(2)),
-
-                      // Confirm Password
+                  // Password
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       TextField(
-                        controller: _confirmPasswordController,
-                        obscureText: !_confirmPasswordVisible,
+                        controller: _passwordController,
+                        obscureText: !_passwordVisible,
                         style: TextStyle(
                           fontSize: SizeConfig.font(2),
                           color: isDarkMode ? Colors.white : Colors.black87,
                         ),
-                        onChanged: (_) {
+                        onChanged: (val) {
+                          _checkPasswordStrength(val);
                           _checkPasswordsMatch();
-                          setState(() {});
                         },
                         decoration: _inputDecoration(
-                          "Confirm Password",
-                          isError: _confirmPasswordController.text.isNotEmpty &&
-                              !_passwordsMatch,
+                          "Password",
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _confirmPasswordVisible ? Pixel.eye : Pixel.eyeclosed,
-                              color:
-                                  isDarkMode ? Colors.white70 : Colors.black54,
+                              _passwordVisible ? Pixel.eye : Pixel.eyeclosed,
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : Colors.black54,
                               size: SizeConfig.wp(5),
                             ),
-                            onPressed: () => setState(
-                              () => _confirmPasswordVisible =
-                                  !_confirmPasswordVisible,
-                            ),
+                            onPressed: () =>
+                                setState(() => _passwordVisible = !_passwordVisible),
                           ),
                         ),
                       ),
-
-                      if (authProvider.errorMessage != null)
-                        Padding(
-                          padding: EdgeInsets.only(top: SizeConfig.hp(1)),
-                          child: Text(
-                            authProvider.errorMessage!,
-                            style: const TextStyle(color: Colors.redAccent),
+                      SizedBox(height: SizeConfig.hp(1)),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: _passwordController.text.isEmpty
+                              ? 0
+                              : _passwordStrength,
+                          backgroundColor:
+                              isDarkMode ? Colors.white10 : Colors.grey[300],
+                          color: _passwordStrength < 0.3
+                              ? Colors.redAccent
+                              : _passwordStrength < 0.6
+                                  ? Colors.orangeAccent
+                                  : _passwordStrength < 0.8
+                                      ? Colors.lightGreen
+                                      : Colors.greenAccent,
+                          minHeight: SizeConfig.hp(1),
+                        ),
+                      ),
+                      if (_startedTyping) ...[
+                        SizedBox(height: SizeConfig.hp(1)),
+                        Text(
+                          _passwordStrengthLabel,
+                          style: TextStyle(
+                            fontSize: SizeConfig.font(1.95),
+                            color: isDarkMode
+                                ? Colors.white70
+                                : Colors.black87,
                           ),
                         ),
-                      SizedBox(height: SizeConfig.hp(4)),
+                        SizedBox(height: SizeConfig.hp(1)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildRule("At least 8 characters", _hasLength, isDarkMode),
+                            SizedBox(height: SizeConfig.hp(0.8)),
+                            _buildRule("1 uppercase letter", _hasUppercase, isDarkMode),
+                            SizedBox(height: SizeConfig.hp(0.8)),
+                            _buildRule("1 special character", _hasSpecial, isDarkMode),
+                            SizedBox(height: SizeConfig.hp(0.8)),
+                            _buildRule(
+                              "Avoid easy patterns like '123' or 'abc'",
+                              _noSequential,
+                              isDarkMode,
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
-                ),
-              ),
+                  SizedBox(height: SizeConfig.hp(2)),
 
-              // Create Account button
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.wp(4),
-                      vertical: SizeConfig.hp(8),
+                  // Confirm Password
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_confirmPasswordVisible,
+                    style: TextStyle(
+                      fontSize: SizeConfig.font(2),
+                      color: isDarkMode ? Colors.white : Colors.black87,
                     ),
-                    child: authProvider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            onPressed:
-                                _isFormValid ? () => _signUp(authProvider) : null,
-                            style: ElevatedButton.styleFrom(
-                              minimumSize:
-                                  Size(double.infinity, SizeConfig.hp(6)),
-                              backgroundColor: _isFormValid
-                                  ? const Color(0xFFBFFB4F)
-                                  : const Color(0xFFBFFB4F).withOpacity(0.4),
-                              foregroundColor: _isFormValid
-                                  ? Colors.black
-                                  : Colors.black45,
-                              elevation: _isFormValid ? 3 : 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side:
-                                    const BorderSide(color: Colors.transparent),
-                              ),
-                            ),
-                            child: Text(
-                              "Create Account",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: SizeConfig.font(2.6),
-                              ),
+                    onChanged: (_) {
+                      _checkPasswordsMatch();
+                      setState(() {});
+                    },
+                    decoration: _inputDecoration(
+                      "Confirm Password",
+                      isError: _confirmPasswordController.text.isNotEmpty &&
+                          !_passwordsMatch,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _confirmPasswordVisible ? Pixel.eye : Pixel.eyeclosed,
+                          color:
+                              isDarkMode ? Colors.white70 : Colors.black54,
+                          size: SizeConfig.wp(5),
+                        ),
+                        onPressed: () => setState(
+                          () => _confirmPasswordVisible =
+                              !_confirmPasswordVisible,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  if (authProvider.errorMessage != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: SizeConfig.hp(1)),
+                      child: Text(
+                        authProvider.errorMessage!,
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                    ),
+                  SizedBox(height: SizeConfig.hp(4)),
+
+                  // Create Account button
+                  authProvider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed:
+                              _isFormValid ? () => _signUp(authProvider) : null,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize:
+                                Size(double.infinity, SizeConfig.hp(6)),
+                            backgroundColor: _isFormValid
+                                ? const Color(0xFFBFFB4F)
+                                : const Color(0xFFBFFB4F).withOpacity(0.4),
+                            foregroundColor: _isFormValid
+                                ? Colors.black
+                                : Colors.black45,
+                            elevation: _isFormValid ? 3 : 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side:
+                                  const BorderSide(color: Colors.transparent),
                             ),
                           ),
-                  ),
-                ),
+                          child: Text(
+                            "Create Account",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: SizeConfig.font(2.6),
+                            ),
+                          ),
+                        ),
+                  SizedBox(height: SizeConfig.hp(28)),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

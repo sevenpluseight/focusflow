@@ -1,45 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:pixelarticons/pixelarticons.dart';
 
 class CoachHomeScreen extends StatelessWidget {
   const CoachHomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF222428), // Dark charcoal background
-      appBar: AppBar(
-        title: const Text(
-          'Coach Dashboard',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF222428),
-        elevation: 0,
-        automaticallyImplyLeading: false, // No back button
-        actions: [
-          // Optional: Add notification icon if needed for coaches
-          IconButton(
-            icon: const Icon(Pixel.notification, color: Colors.white, size: 28),
-            onPressed: () {
-              /* TODO: Navigate to Coach Notifications if applicable */
-            },
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
-        // Allow scrolling
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- Pending Requests Section (Figure 19) ---
             const Text(
               'Pending User Requests',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -47,28 +26,27 @@ class CoachHomeScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TODO: Fetch and display pending requests here
                   Text(
                     'User 1 wants to connect...',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'User 2 wants to connect...',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       'View More >',
-                      style: TextStyle(color: Color(0xFFBFFB4F)),
+                      style: TextStyle(color: theme.colorScheme.primary),
                     ),
                   ),
                 ],
@@ -76,13 +54,11 @@ class CoachHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // --- Quick Stats Section (Figure 19) ---
             const Text(
               'Quick Stats',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -90,17 +66,16 @@ class CoachHomeScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TODO: Fetch and display actual stats
                   Text(
                     '• Total Users Coached: 5',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 16,
                       height: 1.5,
                     ),
@@ -108,7 +83,7 @@ class CoachHomeScreen extends StatelessWidget {
                   Text(
                     '• Avg Focus Today: 3.2 Hrs',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 16,
                       height: 1.5,
                     ),
@@ -116,7 +91,7 @@ class CoachHomeScreen extends StatelessWidget {
                   Text(
                     '• Ongoing Challenges: 2',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 16,
                       height: 1.5,
                     ),
@@ -126,13 +101,11 @@ class CoachHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // --- AI Highlights Section (Figure 19) ---
             const Text(
               'AI Highlights',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -140,13 +113,12 @@ class CoachHomeScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TODO: Fetch and display AI alerts
                   Text(
                     '• Alert: User 3 shows potential burnout risk.',
                     style: TextStyle(

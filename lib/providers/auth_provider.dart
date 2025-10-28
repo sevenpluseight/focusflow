@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:focusflow/models/models.dart';
 import 'package:focusflow/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   User? _user;
+  UserModel? _userModel;
   bool _isLoading = false;
   String? _errorMessage;
-
-  String? _username;
-  String? _role;
   String? _infoMessage;
 
-  String? get username => _username;
-  String? get role => _role;
-  String? get infoMessage => _infoMessage;
-
+  // Getters
   User? get user => _user;
+  UserModel? get userModel => _userModel;
   bool get isLoggedIn => _user != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? get infoMessage => _infoMessage;
+  AuthService get authService => _authService;
 
+  // Private setters
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -32,22 +34,24 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _setUser(User? user) {
-    _user = user;
-    if (user != null) {
-      fetchUserData();
-    }
-    // notifyListeners();
-  }
-
   void _setMessage(String? message) {
     _infoMessage = message;
     notifyListeners();
   }
 
-    void clearError() {
+  void _setUser(User? user) {
+    _user = user;
+    if (user != null) {
+      fetchUserData();
+    } else {
+      _userModel = null;
+    }
+    notifyListeners();
+  }
+
+  void clearError() {
     _setError(null);
-     _setMessage(null);
+    _setMessage(null);
   }
 
   // Sign in
@@ -66,7 +70,7 @@ class AuthProvider with ChangeNotifier {
       if (user == null) {
         _setError("Invalid email or password.");
       } else {
-        _setUser(user); // Track logged-in user
+        _setUser(user);
       }
     } catch (e) {
       _setError(e.toString());
@@ -94,7 +98,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Sign up (Login)
+  // Sign up
   Future<void> signUp({
     required String username,
     required String email,
@@ -121,17 +125,18 @@ class AuthProvider with ChangeNotifier {
         return;
       }
 
+      final newUser = UserModel(
+        uid: user.uid,
+        username: username,
+        email: email,
+        role: role,
+        signInMethod: 'email',
+        createdAt: Timestamp.now(),
+      );
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(newUser.toMap());
+
       _setUser(user);
-
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'uid': user.uid,
-        'username': username,
-        'email': email,
-        'role': role,
-        'signInMethod': 'email',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         _setError(
@@ -149,19 +154,34 @@ class AuthProvider with ChangeNotifier {
 
   // Reset password
   Future<void> resetPassword(String email) async {
-    if (email.isEmpty) {
-      _setError("Please enter your email to reset password.");
+    final normalizedEmail = email.trim().toLowerCase();
+
+    if (normalizedEmail.isEmpty) {
+      _setError("Please enter a valid email.");
       return;
     }
 
     _setLoading(true);
     _setError(null);
+    _setMessage(null);
 
     try {
-      await _authService.resetPassword(email);
-      _setError("Password reset email sent to $email.");
+      await _auth.sendPasswordResetEmail(email: normalizedEmail);
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox."
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') {
+        _setError("Invalid email format.");
+      } else {
+        _setMessage(
+          "If this email exists, a reset link was sent. Check your inbox."
+        );
+      }
     } catch (e) {
-      _setError("Failed to send reset link: $e");
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox."
+      );
     } finally {
       _setLoading(false);
     }
@@ -176,30 +196,29 @@ class AuthProvider with ChangeNotifier {
       final doc = await docRef.get();
 
       if (!doc.exists) {
-        await docRef.set({
-          'uid': _user!.uid,
-          'username': _user!.displayName ?? 'User',
-          'email': _user!.email,
-          'role': 'user',
-          'signInMethod': 'google',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        final newUser = UserModel(
+          uid: _user!.uid,
+          username: _user!.displayName ?? 'User',
+          email: _user!.email!,
+          role: 'user',
+          signInMethod: 'google',
+          createdAt: Timestamp.now(),
+        );
+        await docRef.set(newUser.toMap());
+        _userModel = newUser;
+      } else {
+        _userModel = UserModel.fromFirestore(doc);
       }
 
-      final data = (await docRef.get()).data();
-      _username = data?['username'];
-      _role = data?['role'];
       notifyListeners();
     } catch (e) {
       _setError("Failed to fetch user data: $e");
     }
   }
 
-  // Sign out (Logout)
+  // Sign out
   Future<void> signOut() async {
     await _authService.signOut();
     _setUser(null);
-    _username = null;
-    _role = null;
   }
 }

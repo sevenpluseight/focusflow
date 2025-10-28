@@ -1,49 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
+
 class UserHomeScreen extends StatelessWidget {
   const UserHomeScreen({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final username = authProvider.username ?? "User"; // Get username
+    final username = authProvider.userModel?.username ?? "User";
 
-    return Container( // Use a Container if you need specific background/padding
-      color: const Color(0xFF222428), 
-      child: Center( 
+    final theme = Theme.of(context);
+
+    final backgroundColor = theme.scaffoldBackgroundColor;
+
+    final cardBackgroundColor = theme.colorScheme.surface;
+    final progressBackgroundColor = theme.colorScheme.surfaceVariant;
+
+    return Container(
+      color: backgroundColor,
+      child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+            children: [
               // Greeting
               Text(
-                'Good Morning, $username!', 
-                textAlign: TextAlign.center, 
-                style: const TextStyle(
-                  fontSize: 22,
+                'Good Morning, $username!',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                 ),
               ),
               const SizedBox(height: 16),
-              // Productivity Tips box Placeholder
+
+              // Productivity Tips Box
               Container(
-                 width: double.infinity,
-                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                 decoration: BoxDecoration(
-                   color: Colors.white.withAlpha((255 * 0.8).toInt()),
-                   borderRadius: BorderRadius.circular(8),
-                 ),
-                 child: const Text(
-                   'Productivity Tip: Placeholder!', // TODO: Load dynamic tips
-                   style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic, fontSize: 14),
-                   textAlign: TextAlign.center,
-                 ),
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: cardBackgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Productivity Tip: Placeholder!',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ),
               const SizedBox(height: 40),
-              // Circular Progress Chart placeholder
+
+              // Circular Progress Indicator
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -51,28 +64,33 @@ class UserHomeScreen extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: CircularProgressIndicator(
-                      value: 0.75, // TODO: Replace with actual progress
+                      value: 0.75,
                       strokeWidth: 12,
-                      backgroundColor: Colors.white.withAlpha((255 * 0.8).toInt()),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFBFFB4F)),
+                      backgroundColor: progressBackgroundColor,
+                      valueColor:
+                          const AlwaysStoppedAnimation(Color(0xFFBFFB4F)),
                       strokeCap: StrokeCap.round,
                     ),
                   ),
-                   const Text(
-                    '3 / 4 Hrs', // TODO: Show actual progress dynamically
-                    style: TextStyle(
-                      fontSize: 28,
+                  Text(
+                    '3 / 4 Hrs',
+                    style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: theme.colorScheme.onBackground,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Today\'s Progress: 75%', // TODO: Make dynamic
-                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.white70, height: 1.4),
+
+              // Today's progress text
+              Text(
+                'Today\'s Progress: 75%',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                  height: 1.4,
+                ),
               ),
             ],
           ),

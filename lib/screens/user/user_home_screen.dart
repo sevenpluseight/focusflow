@@ -8,7 +8,7 @@ class UserHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final username = authProvider.username ?? "User";
+    final username = authProvider.userModel?.username ?? "User";
 
     final theme = Theme.of(context);
 

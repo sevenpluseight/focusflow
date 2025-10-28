@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../firebase_options.dart';
 import '../auth/auth.dart';
-import '../main_navigation_controller.dart';
+import '../core/main_navigation_controller.dart';
+import '../../services/services.dart';
+import '../../models/models.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -69,16 +70,13 @@ class _SplashScreenState extends State<SplashScreen>
         // User is LOGGED IN
         setState(() => _statusText = "🔓 User authenticated. Checking role...");
 
-        // Fetch role from Firestore
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
+        final UserService userService = UserService();
+        final UserModel? userModel = await userService.getUser(user.uid);
 
         UserRole userRole = UserRole.user; // default
 
-        if (doc.exists) {
-          final roleString = doc.data()?['role']?.toString().toLowerCase();
+        if (userModel != null) {
+          final roleString = userModel.role.toLowerCase();
           switch (roleString) {
             case 'user':
               userRole = UserRole.user;

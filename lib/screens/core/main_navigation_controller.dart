@@ -175,11 +175,11 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     final isDark = theme.brightness == Brightness.dark;
 
     // Lighter color for top & bottom bars
-    final Color barColor = isDark ? const Color(0xFF3A3D42) : Colors.grey[200]!;
+    final Color barColor = isDark ? const Color(0xFF3A3D42) : Color(0xFFE8F5E9);
     // Darker color for screen background
     final Color backgroundColor = isDark ? const Color(0xFF2C2F33) : Colors.grey[100]!;
 
-    final Color activeColor = AppTheme.primaryColor;
+    final Color activeColor =  isDark ? AppTheme.primaryColor : const Color(0xFF007A5E);
     final Color inactiveColor = isDark ? Colors.white70 : Colors.grey.shade700;
 
     return Scaffold(

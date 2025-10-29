@@ -10,6 +10,7 @@ class AppTheme {
   static final ThemeData darkTheme = FormTheme.formFieldTheme(isDarkMode: true).copyWith(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: darkBackground,
+    cardColor: const Color(0xFF2C2F33),
     colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: primaryColor,
@@ -47,13 +48,14 @@ class AppTheme {
   static final ThemeData lightTheme = FormTheme.formFieldTheme(isDarkMode: false).copyWith(
     brightness: Brightness.light,
     scaffoldBackgroundColor: lightBackground,
+    cardColor: Colors.grey[100],
     colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: primaryColor,
       surface: Color(0xFFF4F4F4),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: lightBackground,
+      backgroundColor: Color(0xFFF4F4F4),
       elevation: 0,
       iconTheme: IconThemeData(color: Colors.black),
       titleTextStyle: TextStyle(
@@ -61,6 +63,17 @@ class AppTheme {
         fontWeight: FontWeight.bold,
         fontSize: 20,
       ),
+      shape: Border(
+        bottom: BorderSide(
+          color: Colors.grey,
+          width: 0.5,
+        ),
+      ),
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color(0xFFF4F4F4),
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.grey,
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.black87),

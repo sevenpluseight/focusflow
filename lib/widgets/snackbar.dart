@@ -21,11 +21,11 @@ class CustomSnackBar {
     switch (type) {
       case SnackBarType.success:
         icon = Pixel.checkdouble;
-        backgroundColor = Colors.greenAccent.shade700;
+        backgroundColor = const Color(0xFFBFFB4F);
         break;
       case SnackBarType.error:
         icon = Pixel.alert;
-        backgroundColor = Colors.redAccent.shade700;
+        backgroundColor = const Color(0xFFD32F2F);
         break;
       case SnackBarType.info:
         icon = Pixel.infobox;

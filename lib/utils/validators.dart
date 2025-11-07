@@ -1,5 +1,4 @@
-// lib/utils/validators.dart
-class Validators {
+class AuthValidators {
   /// Validate email format and allowed domains
   static bool isEmailValid(String email) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');

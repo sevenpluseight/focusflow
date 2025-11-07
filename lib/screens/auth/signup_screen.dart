@@ -47,19 +47,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!_startedTyping && password.isNotEmpty) _startedTyping = true;
 
     setState(() {
-      _hasLength = Validators.hasLength(password);
-      _hasUppercase = Validators.hasUppercase(password);
-      _hasSpecial = Validators.hasSpecial(password);
-      _noSequential = Validators.noSequential(password);
+      _hasLength = AuthValidators.hasLength(password);
+      _hasUppercase = AuthValidators.hasUppercase(password);
+      _hasSpecial = AuthValidators.hasSpecial(password);
+      _noSequential = AuthValidators.noSequential(password);
 
-      _passwordStrength = Validators.passwordStrength(password);
-      _passwordStrengthLabel = Validators.passwordStrengthLabel(password);
+      _passwordStrength = AuthValidators.passwordStrength(password);
+      _passwordStrengthLabel = AuthValidators.passwordStrengthLabel(password);
     });
   }
 
   void _checkPasswordsMatch() {
     setState(() {
-      _passwordsMatch = Validators.passwordsMatch(
+      _passwordsMatch = AuthValidators.passwordsMatch(
         _passwordController.text,
         _confirmPasswordController.text,
       );
@@ -287,7 +287,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     keyboardType: TextInputType.emailAddress,
                     onChanged: (value) {
                       setState(() {
-                        _isEmailValid = Validators.isEmailValid(value.trim());
+                        _isEmailValid = AuthValidators.isEmailValid(value.trim());
                       });
                     },
                   ),

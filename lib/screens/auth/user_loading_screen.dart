@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
-import 'package:focusflow/screens/auth/login_screen.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:focusflow/models/models.dart';
 import '../core/main_navigation_controller.dart';

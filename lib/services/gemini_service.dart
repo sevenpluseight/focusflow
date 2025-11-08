@@ -31,11 +31,10 @@ class GeminiService {
     }
   }
 
-  /// Quick connection check — use this in your splash screen.
   static Future<String> testConnection() async {
     try {
       await initialize();
-      const prompt = "Say hello from FocusFlow startup check!";
+      const prompt = "Say Gemini is connected!";
       final result = await generateText(prompt);
       return "✅ Gemini connected: $result";
     } catch (e) {

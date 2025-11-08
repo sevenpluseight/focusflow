@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../firebase_options.dart';
 import '../auth/auth.dart';
@@ -101,8 +101,8 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => nextScreen,
-            transitionsBuilder: (_, animation, __, child) =>
+            pageBuilder: (_, _, _) => nextScreen,
+            transitionsBuilder: (_, animation, _, child) =>
                 FadeTransition(opacity: animation, child: child),
             transitionDuration: const Duration(milliseconds: 800),
           ),
@@ -117,26 +117,19 @@ class _SplashScreenState extends State<SplashScreen>
             backgroundColor: Colors.redAccent,
           ),
         );
-        // Maybe navigate to an error screen or retry? Or just stay here.
       }
     }
   }
 
   Future<void> _testGeminiAPI() async {
-    final apiKey = dotenv.env['GEMINI_API_KEY'];
-
-    if (apiKey == null || apiKey.isEmpty) {
-      setState(() => _statusText = "❌ Missing GEMINI_API_KEY in .env file");
-      throw Exception("Missing GEMINI_API_KEY in .env");
-    }
-
-    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
-    const prompt = "Say hello from FocusFlow startup check!";
-
     try {
-      final response = await model.generateContent([Content.text(prompt)]);
-      setState(() => _statusText = "✅ Gemini connected!");
-      debugPrint("✅ Gemini connected: ${response.text}");
+      final result = await GeminiService.testConnection();
+      if (result.startsWith("✅")) {
+        setState(() => _statusText = "✅ Gemini connected!");
+      } else {
+        setState(() => _statusText = "⚠️ Gemini connection failed (continuing...)");
+      }
+      debugPrint(result);
     } catch (e) {
       setState(() => _statusText = "⚠️ Gemini connection failed (continuing...)");
       debugPrint("⚠️ Gemini connection failed: $e");

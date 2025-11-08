@@ -220,7 +220,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isEmailValid
                             ? const Color(0xFFBFFB4F)
-                            : const Color(0xFFBFFB4F).withOpacity(0.5),
+                            : const Color(0xFFBFFB4F).withValues(),
                         padding: EdgeInsets.symmetric(vertical: SizeConfig.hp(2)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

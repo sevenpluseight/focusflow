@@ -1,6 +1,6 @@
 // EXPORT THIS FILE
-export 'firebase_service.dart';
-export 'gemini_service.dart';
-export 'google_sign_in_service.dart';
-export 'auth_service.dart';
-export 'user_service.dart';
+export 'firebase_service.dart'; // Firebase-related operations
+export 'gemini_service.dart'; // Gemini service operations
+export 'google_sign_in_service.dart'; // Not used currently - check providers/auth_provider.dart
+export 'auth_service.dart'; // Authentication operations
+export 'user_service.dart'; // User data operations

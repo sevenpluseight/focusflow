@@ -389,7 +389,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       minimumSize: Size(double.infinity, SizeConfig.hp(6)),
                       backgroundColor: _isFormValid
                           ? const Color(0xFFBFFB4F)
-                          : const Color(0xFFBFFB4F).withOpacity(0.4),
+                          : const Color(0xFFBFFB4F).withValues(),
                       foregroundColor: _isFormValid ? Colors.black : Colors.black45,
                       elevation: _isFormValid ? 3 : 0,
                       shape: RoundedRectangleBorder(

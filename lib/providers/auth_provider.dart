@@ -103,10 +103,20 @@ class AuthProvider with ChangeNotifier {
     required String username,
     required String email,
     required String password,
+    required double dailyTargetHours,
+    required int workInterval,
+    required int breakInterval,
+    required String focusType,
     String role = "user",
   }) async {
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      _setError("Please fill in all fields.");
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        dailyTargetHours <= 0 ||
+        workInterval <= 0 ||
+        breakInterval <= 0 ||
+        focusType.isEmpty) {
+      _setError("Please complete all required fields before creating your account.");
       return;
     }
 
@@ -132,21 +142,28 @@ class AuthProvider with ChangeNotifier {
         role: role,
         signInMethod: 'email',
         createdAt: Timestamp.now(),
+        dailyTargetHours: dailyTargetHours,
+        workInterval: workInterval,
+        breakInterval: breakInterval,
+        focusType: focusType,
       );
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(newUser.toMap());
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set(newUser.toMap(), SetOptions(merge: true));
 
-      _setUser(user);
+      _setUser(user); // Automatically fetch data after creation
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         _setError(
-          "This email is already linked to an existing account.\nPlease use your original sign-in method."
+          "This email is already linked to an existing account.\nPlease use your original sign-in method.",
         );
       } else {
-        _setError(e.message);
+        _setError(e.message ?? "An unexpected Firebase error occurred.");
       }
     } catch (e) {
-      _setError(e.toString());
+      _setError("An unexpected error occurred: $e");
     } finally {
       _setLoading(false);
     }
@@ -167,21 +184,15 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _auth.sendPasswordResetEmail(email: normalizedEmail);
-      _setMessage(
-        "If this email exists, a reset link was sent. Check your inbox."
-      );
+      _setMessage("If this email exists, a reset link was sent. Check your inbox.");
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-email') {
         _setError("Invalid email format.");
       } else {
-        _setMessage(
-          "If this email exists, a reset link was sent. Check your inbox."
-        );
+        _setMessage("If this email exists, a reset link was sent. Check your inbox.");
       }
-    } catch (e) {
-      _setMessage(
-        "If this email exists, a reset link was sent. Check your inbox."
-      );
+    } catch (_) {
+      _setMessage("If this email exists, a reset link was sent. Check your inbox.");
     } finally {
       _setLoading(false);
     }
@@ -196,18 +207,32 @@ class AuthProvider with ChangeNotifier {
       final doc = await docRef.get();
 
       if (!doc.exists) {
+        // Create default Firestore doc if missing (e.g. Google sign-in user)
         final newUser = UserModel(
           uid: _user!.uid,
           username: _user!.displayName ?? 'User',
-          email: _user!.email!,
+          email: _user!.email ?? '',
           role: 'user',
           signInMethod: 'google',
           createdAt: Timestamp.now(),
+          dailyTargetHours: 2,
+          workInterval: 25,
+          breakInterval: 5,
+          focusType: 'Classic-Pomodoro',
         );
-        await docRef.set(newUser.toMap());
+
+        await docRef.set(newUser.toMap(), SetOptions(merge: true));
         _userModel = newUser;
       } else {
         _userModel = UserModel.fromFirestore(doc);
+
+        // Clamp invalid values (in case of old data)
+        _userModel = _userModel!.copyWith(
+          dailyTargetHours: (_userModel!.dailyTargetHours ?? 4).clamp(1, 8).toDouble(),
+          workInterval: (_userModel!.workInterval ?? 50).clamp(25, 120),
+          breakInterval: (_userModel!.breakInterval ?? 10).clamp(5, 60),
+          focusType: _userModel!.focusType ?? 'Classic-Pomodoro',
+        );
       }
 
       notifyListeners();

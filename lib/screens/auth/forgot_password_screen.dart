@@ -178,7 +178,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       onChanged: (value) {
                         if (!_startedTyping && value.isNotEmpty) _startedTyping = true;
-                        setState(() => _isEmailValid = Validators.isEmailValid(value.trim()));
+                        setState(() => _isEmailValid = AuthValidators.isEmailValid(value.trim()));
                       },
                       decoration: _inputDecoration('Email'),
                     ),

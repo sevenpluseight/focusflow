@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 // import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -10,6 +10,7 @@ import '../auth/auth.dart';
 import '../core/main_navigation_controller.dart';
 import '../../services/services.dart';
 import '../../models/models.dart';
+import '../../providers/providers.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -55,24 +56,16 @@ class _SplashScreenState extends State<SplashScreen>
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      User? user = FirebaseAuth.instance.currentUser;
-
       setState(() => _statusText = "🤖 Connecting to Gemini...");
-      await _testGeminiAPI(); // Keep Gemini check
+      await _testGeminiAPI();
 
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       Widget nextScreen;
 
-      if (user == null) {
-        // User is LOGGED OUT
-        setState(() => _statusText = "🔒 Redirecting to Login...");
-        nextScreen = const LoginScreen();
-      } else {
+      if (authProvider.isLoggedIn) {
         // User is LOGGED IN
-        setState(() => _statusText = "🔓 User authenticated. Checking role...");
-
-        final UserService userService = UserService();
-        final UserModel? userModel = await userService.getUser(user.uid);
-
+        setState(() => _statusText = "🔓 User authenticated. Loading app...");
+        final userModel = authProvider.userModel;
         UserRole userRole = UserRole.user; // default
 
         if (userModel != null) {
@@ -91,9 +84,11 @@ class _SplashScreenState extends State<SplashScreen>
               userRole = UserRole.user;
           }
         }
-
-        setState(() => _statusText = "🔑 Role determined: $userRole. Loading app...");
         nextScreen = MainNavigationController(currentUserRole: userRole);
+      } else {
+        // User is LOGGED OUT
+        setState(() => _statusText = "🔒 Redirecting to Login...");
+        nextScreen = const LoginScreen();
       }
 
       await Future.delayed(const Duration(milliseconds: 500));

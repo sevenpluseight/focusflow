@@ -14,6 +14,12 @@ class AuthProvider with ChangeNotifier {
   String? _errorMessage;
   String? _infoMessage;
 
+  AuthProvider() {
+    _auth.authStateChanges().listen((user) {
+      _setUser(user);
+    });
+  }
+
   // Getters
   User? get user => _user;
   UserModel? get userModel => _userModel;
@@ -218,7 +224,7 @@ class AuthProvider with ChangeNotifier {
           dailyTargetHours: 2,
           workInterval: 25,
           breakInterval: 5,
-          focusType: 'Classic-Pomodoro',
+          focusType: 'Breeze',
         );
 
         await docRef.set(newUser.toMap(), SetOptions(merge: true));
@@ -231,7 +237,7 @@ class AuthProvider with ChangeNotifier {
           dailyTargetHours: (_userModel!.dailyTargetHours ?? 4).clamp(1, 8).toDouble(),
           workInterval: (_userModel!.workInterval ?? 50).clamp(25, 120),
           breakInterval: (_userModel!.breakInterval ?? 10).clamp(5, 60),
-          focusType: _userModel!.focusType ?? 'Classic-Pomodoro',
+          focusType: _userModel!.focusType ?? 'Breeze',
         );
       }
 

@@ -98,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final authProvider = context.read<AuthProvider>();
 
     // Check if the email is already taken
-    if (authProvider.userModel != null && authProvider.userModel!.email == email) {
+    if (authProvider.doesEmailMatch(email)) {
       CustomSnackBar.show(
         context,
         message: "Account already exists. Please login.",

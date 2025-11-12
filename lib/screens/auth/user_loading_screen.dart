@@ -24,13 +24,13 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
   }
 
   Future<void> _attemptFetchUserData() async {
-    final authProvider = context.read<AuthProvider>();
+    final userProvider = context.read<UserProvider>();
 
     try {
       // First fetching attempt
-      final success = await _fetchWithTimeout(authProvider);
+      final success = await _fetchWithTimeout(userProvider);
       if (success && mounted) {
-        _navigateToHome(authProvider);
+        _navigateToHome(userProvider);
         return;
       }
 
@@ -47,13 +47,13 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
           );
         }
 
-        final retrySuccess = await _fetchWithTimeout(authProvider);
+        final retrySuccess = await _fetchWithTimeout(userProvider);
         if (retrySuccess && mounted) {
-          _navigateToHome(authProvider);
+          _navigateToHome(userProvider);
           return;
         }
       }
-      
+
       // If both attempts fail, show error and navigate to login
       if (mounted) {
         CustomSnackBar.show(
@@ -69,9 +69,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (_) => const LoginScreen(),
-          ),
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
         );
       }
@@ -85,19 +83,15 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }
 
-  Future<bool> _fetchWithTimeout(AuthProvider authProvider) async {
+  Future<bool> _fetchWithTimeout(UserProvider userProvider) async {
     try {
-      await authProvider.fetchUserData().timeout(
-            const Duration(seconds: 4),
-          );
-      return authProvider.userModel != null;
+      await userProvider.fetchUser().timeout(const Duration(seconds: 4));
+      return userProvider.user != null;
     } on TimeoutException {
       return false;
     } catch (_) {
@@ -105,10 +99,10 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     }
   }
 
-  void _navigateToHome(AuthProvider authProvider) {
+  void _navigateToHome(UserProvider userProvider) {
     if (!mounted) return;
 
-    final roleString = authProvider.userModel?.role ?? 'user';
+    final roleString = userProvider.user?.role ?? 'user';
     final userRole = UserRole.values.firstWhere(
       (e) => e.toString().split('.').last == roleString,
       orElse: () => UserRole.user,
@@ -116,7 +110,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
 
     CustomSnackBar.show(
       context,
-      message: "Welcome back${authProvider.userModel?.username != null ? ', ${authProvider.userModel?.username}!' : '!'}",
+      message: "Welcome back${userProvider.user?.username != null ? ', ${userProvider.user?.username}!' : '!'}",
       type: SnackBarType.success,
       position: SnackBarPosition.top,
       duration: const Duration(seconds: 2),
@@ -126,9 +120,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => MainNavigationController(
-          currentUserRole: userRole,
-        ),
+        builder: (_) => MainNavigationController(currentUserRole: userRole),
       ),
     );
   }
@@ -137,9 +129,9 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor:
-          isDarkMode ? theme.colorScheme.surface : Colors.white,
+      backgroundColor: isDarkMode ? theme.colorScheme.surface : Colors.white,
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,8 +1,9 @@
-/* TODO - Comment out or remove debug printing */
-
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'other/productivity_tips.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -12,91 +13,168 @@ class UserHomeScreen extends StatefulWidget {
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
+  final TextEditingController _targetController = TextEditingController();
+  late String _dailyTip;
+  Timer? _tipTimer;
+
   @override
   void initState() {
     super.initState();
 
+    _dailyTip = _computeTipForToday();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = context.read<AuthProvider>();
-      final progressProvider = context.read<ProgressProvider>();
+      final userProvider = context.read<UserProvider>();
+      final dailyTarget = userProvider.user?.dailyTargetHours ?? 2.0;
+      _targetController.text = dailyTarget.toStringAsFixed(0);
 
-      final uid = authProvider.userModel?.uid;
-      final dailyTarget = authProvider.userModel?.dailyTargetHours ?? 2.0;
+      // Schedule tip update at 4AM
+      _scheduleTipUpdate();
+    });
+  }
 
-      // Debug printing start
-      print("[UserHomeScreen] Init: UID=$uid, dailyTarget=$dailyTarget");
-      // Debug printing end
+  @override
+  void dispose() {
+    _targetController.dispose();
+    _tipTimer?.cancel();
+    super.dispose();
+  }
 
-      if (uid != null) {
-        progressProvider.listenTodayProgress(uid, dailyTarget);
-      }
+  // Picks a tip based on the date (after 4AM)
+  String _computeTipForToday() {
+    final now = DateTime.now();
+    DateTime tipDate = now;
+    if (now.hour < 4) {
+      // Before 4AM, consider it "previous day"
+      tipDate = now.subtract(const Duration(days: 1));
+    }
+    final daySeed = tipDate.year * 10000 + tipDate.month * 100 + tipDate.day;
+    final random = Random(daySeed);
+    return productivityTips[random.nextInt(productivityTips.length)];
+  }
+
+  // Schedule tip update at next 4AM
+  void _scheduleTipUpdate() {
+    final now = DateTime.now();
+    DateTime next4AM = DateTime(now.year, now.month, now.day, 4);
+    if (now.isAfter(next4AM)) {
+      next4AM = next4AM.add(const Duration(days: 1));
+    }
+
+    final durationUntilNext4AM = next4AM.difference(now);
+
+    _tipTimer = Timer(durationUntilNext4AM, () {
+      setState(() {
+        _dailyTip = _computeTipForToday();
+      });
+
+      // Schedule subsequent days every 24 hours
+      _tipTimer = Timer.periodic(const Duration(days: 1), (_) {
+        setState(() {
+          _dailyTip = _computeTipForToday();
+        });
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final username = authProvider.userModel?.username ?? "User";
-    final dailyTarget = authProvider.userModel?.dailyTargetHours ?? 2.0;
+    final userProvider = context.watch<UserProvider>();
+    final progressProvider = context.watch<ProgressProvider>();
+
+    final username = userProvider.user?.username ?? "User";
+    final dailyTarget = userProvider.user?.dailyTargetHours ?? 2.0;
 
     final theme = Theme.of(context);
-    final backgroundColor = theme.scaffoldBackgroundColor;
-    final cardBackgroundColor = theme.colorScheme.surface;
+    final tipBoxColor = theme.brightness == Brightness.light
+        ? const Color(0xFFE8F5E9)
+        : theme.colorScheme.surface;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
-            // Circular progress indicator
             Center(
-              child: Consumer<ProgressProvider>(
-                builder: (context, progress, _) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 260,
-                            height: 260,
-                            child: CircularProgressIndicator(
-                              value: progress.todayProgress.clamp(0.0, 1.0),
-                              strokeWidth: 16,
-                              backgroundColor: Theme.of(context).brightness == Brightness.light
-                                  ? Colors.grey.shade300
-                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
-                              valueColor: const AlwaysStoppedAnimation(
-                                  Color(0xFFBFFB4F)),
-                              strokeCap: StrokeCap.round,
-                            ),
-                          ),
-                          Text(
-                            progress.getFormattedProgress(dailyTarget),
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
+                      SizedBox(
+                        width: 260,
+                        height: 260,
+                        child: CircularProgressIndicator(
+                          value: progressProvider.todayProgress.clamp(0.0, 1.0),
+                          strokeWidth: 16,
+                          backgroundColor: theme.brightness == Brightness.light
+                              ? Colors.grey.shade300
+                              : theme.colorScheme.surfaceContainerHighest,
+                          valueColor: const AlwaysStoppedAnimation(Color(0xFFBFFB4F)),
+                          strokeCap: StrokeCap.round,
+                        ),
                       ),
-                      const SizedBox(height: 20),
                       Text(
-                        'Today\'s Progress: ${(progress.todayProgress * 100).toStringAsFixed(0)}%',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.textTheme.bodyMedium?.color
-                              ?.withValues(),
-                          height: 1.4,
+                        progressProvider.getFormattedProgress(dailyTarget),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
-                  );
-                },
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Today\'s Progress: ${(progressProvider.todayProgress * 100).toStringAsFixed(0)}%',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withValues(),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: _targetController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Daily Target Hours',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      textAlign: TextAlign.center,
+                      onSubmitted: (value) async {
+                        final newValue = double.tryParse(value);
+                        if (newValue == null || newValue < 1 || newValue > 8) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Enter a number between 1 and 8"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          _targetController.text = dailyTarget.toStringAsFixed(0);
+                          return;
+                        }
+
+                        final uid = userProvider.user?.uid;
+                        if (uid != null) {
+                          await userProvider.updateSettings(dailyTargetHours: newValue);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Daily target updated ✅"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            // Greeting and tip
             Padding(
               padding: const EdgeInsets.fromLTRB(17, 24, 20, 0),
               child: Column(
@@ -112,19 +190,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: cardBackgroundColor,
+                      color: tipBoxColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Productivity Tip: Placeholder!',
+                      _dailyTip,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withValues(),
-                        fontStyle: FontStyle.italic,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(),
                       ),
                     ),
                   ),

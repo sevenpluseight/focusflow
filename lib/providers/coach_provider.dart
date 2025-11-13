@@ -28,6 +28,9 @@ class CoachProvider with ChangeNotifier {
   List<DistractionLogModel> get userLogs => _userLogs;
   bool get logsLoading => _logsLoading;
 
+  Map<String, int> _todayFocusMinutes = {};
+  Map<String, int> get todayFocusMinutes => _todayFocusMinutes;
+
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
     if (coachId.isEmpty) return;
@@ -45,6 +48,9 @@ class CoachProvider with ChangeNotifier {
       _connectedUsers = querySnapshot.docs
           .map((doc) => UserModel.fromFirestore(doc))
           .toList();
+      
+      // After fetching users, fetch their progress in parallel
+      await _fetchUsersProgress(_connectedUsers);
 
     } catch (e) {
       print('Error fetching connected users: $e');
@@ -54,6 +60,46 @@ class CoachProvider with ChangeNotifier {
     }
   }
 
+  Future<void> _fetchUsersProgress(List<UserModel> users) async {
+    final todayId = _getTodayId();
+    _todayFocusMinutes.clear();
+
+    List<Future<void>> futures = [];
+
+    for (final user in users) {
+      futures.add(
+        _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('dailyProgress')
+            .doc(todayId)
+            .get()
+            .then((doc) {
+          if (doc.exists) {
+            // Store minutes in the map: 'userId' -> 120
+            _todayFocusMinutes[user.uid] = (doc.data()?['minutesFocused'] as num? ?? 0).toInt();
+          } else {
+            _todayFocusMinutes[user.uid] = 0;
+          }
+        }).catchError((e) {
+          print('Error fetching progress for ${user.uid}: $e');
+          _todayFocusMinutes[user.uid] = 0; // Default to 0 on error
+        })
+      );
+    }
+    // Wait for all progress fetches to complete
+    await Future.wait(futures);
+  }
+
+  String _getTodayId() {
+    final now = DateTime.now();
+    // Logic from ProgressProvider: day resets at 4AM
+    final adjusted = now.hour < 4 ? now.subtract(const Duration(days: 1)) : now;
+    return "${adjusted.year.toString().padLeft(4, '0')}-"
+        "${adjusted.month.toString().padLeft(2, '0')}-"
+        "${adjusted.day.toString().padLeft(2, '0')}";
+  }
+  
   // This function will save the new challenge
   Future<void> submitChallengeForApproval({
     required String name,

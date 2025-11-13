@@ -97,8 +97,6 @@ class _CoachUserListScreenState extends State<CoachUserListScreen> {
   }
 }
 
-
-// --- NEW WIDGET ---
 // This widget is now separate and will not conflict
 // with the keyboard resizing.
 
@@ -114,8 +112,9 @@ class _UserListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final coachProvider = context.watch<CoachProvider>();
 
-    if (isLoading) {
+    if (coachProvider.isLoading) {
       return const Expanded(
         child: Center(child: CircularProgressIndicator()),
       );
@@ -139,14 +138,15 @@ class _UserListView extends StatelessWidget {
         itemCount: filteredUsers.length,
         itemBuilder: (context, index) {
           final user = filteredUsers[index];
-          return _buildUserReportCard(context, theme, user);
+          final minutes = coachProvider.todayFocusMinutes[user.uid] ?? 0;
+          return _buildUserReportCard(context, theme, user, minutes);
         },
       ),
     );
   }
 
   // This widget builds the card using a real UserModel
-  Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user) {
+  Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user, int minutes) {
     // --- Status Logic ---
     String status = "Active";
     Color statusColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
@@ -154,6 +154,16 @@ class _UserListView extends StatelessWidget {
     if ((user.currentStreak ?? 0) == 0) {
       status = "At Risk";
       statusColor = Colors.orangeAccent;
+    }
+
+    String focusText;
+    if (minutes == 0) {
+      focusText = '0h';
+    } else if (minutes < 60) {
+      focusText = '${minutes}m';
+    } else {
+      // e.g., 90 minutes = 1.5h
+      focusText = '${(minutes / 60).toStringAsFixed(1)}h';
     }
 
     return Padding(
@@ -180,7 +190,7 @@ class _UserListView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Focus: (todo)h',
+                    'Focus: $focusText',
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
                   Text(

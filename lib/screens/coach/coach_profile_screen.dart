@@ -22,7 +22,7 @@ class CoachProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- Logic for "Log Out" (from your other profile screen) ---
+  // --- Logic for "Log Out" ---
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
     final theme = Theme.of(context);

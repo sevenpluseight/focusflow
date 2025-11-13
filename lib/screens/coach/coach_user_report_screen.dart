@@ -90,7 +90,16 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
               theme: theme,
               icon: Pixel.user,
               label: 'User Overview',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoachUserOverviewScreen(
+                      userId: _user!.uid,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             _buildReportButton(

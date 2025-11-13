@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/models/models.dart';
+import 'package:focusflow/models/coach_request_model.dart';
 
 class UserProvider with ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
@@ -121,6 +122,48 @@ class UserProvider with ChangeNotifier {
     if (updates.isNotEmpty) {
       await _firestore.collection('users').doc(uid).update(updates);
       await fetchUser();
+    }
+  }
+
+  Future<void> submitCoachApplication({
+    required String fullName,
+    required String expertise,
+    required String bio,
+    String? portfolioLink,
+  }) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (_user == null || uid == null) {
+      throw Exception('User not logged in.');
+    }
+    
+    _setLoading(true);
+    try {
+      final newRequestRef = _firestore.collection('coachRequests').doc(uid);
+
+      // Check if a request already exists
+      final doc = await newRequestRef.get();
+      if (doc.exists) {
+        throw Exception('You already have a pending application.');
+      }
+      
+      final newRequest = CoachRequestModel(
+        id: newRequestRef.id,
+        userId: uid,
+        username: _user!.username,
+        fullName: fullName,
+        expertise: expertise,
+        bio: bio,
+        portfolioLink: portfolioLink,
+        createdAt: Timestamp.now(),
+      );
+
+      await newRequestRef.set(newRequest.toMap());
+
+    } catch (e) {
+      // Re-throw the error to show in the UI
+      throw Exception(e.toString());
+    } finally {
+      _setLoading(false);
     }
   }
 }

@@ -109,7 +109,7 @@ class CoachProfileScreen extends StatelessWidget {
               onPressed: () => _switchToUserMode(context),
               style: ElevatedButton.styleFrom(
                 // Using a distinct color to make it stand out
-                backgroundColor: Colors.green, 
+                backgroundColor: Colors.lightGreenAccent, 
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

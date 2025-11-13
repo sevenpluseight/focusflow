@@ -4,6 +4,7 @@ import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/screens/core/main_navigation_controller.dart';
+import 'package:focusflow/screens/user/coach_application_screen.dart';
 import '../auth/auth.dart';
 
 class UserProfileScreen extends StatelessWidget {
@@ -227,7 +228,7 @@ class UserProfileScreen extends StatelessWidget {
                         label: const Text("Switch to Coach Mode"),
                         onPressed: () => _switchToCoachMode(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green, 
+                          backgroundColor: Colors.lightGreenAccent, 
                         ),
                       )
                     else
@@ -237,12 +238,12 @@ class UserProfileScreen extends StatelessWidget {
                       icon: const Icon(Pixel.plus),
                       label: const Text("Request to be Coach"),
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Request to be coach clicked!"),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CoachApplicationScreen(),
+                            ),
+                          );
                       },
                     ),
                     const SizedBox(height: 32),

@@ -166,4 +166,39 @@ class CoachProvider with ChangeNotifier {
       throw Exception('Failed to submit report.');
     }
   }
+
+  Future<void> sendMessage({
+    required String userId,
+    required String text,
+    required MessageType type,
+  }) async {
+    final coachId = _auth.currentUser?.uid;
+    if (coachId == null) throw Exception('Not logged in');
+    if (text.isEmpty) throw Exception('Message cannot be empty');
+
+    try {
+      // We store messages in a subcollection on the USER's document.
+      // This makes it easy for the user to fetch their own messages.
+      final messageRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('messages')
+          .doc();
+      
+      final newMessage = MessageModel(
+        id: messageRef.id,
+        coachId: coachId,
+        userId: userId,
+        text: text,
+        type: type,
+        createdAt: Timestamp.now(),
+      );
+
+      await messageRef.set(newMessage.toMap());
+
+    } catch (e) {
+      print('Error sending message: $e');
+      throw Exception('Failed to send message.');
+    }
+  }
 }

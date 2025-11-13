@@ -4,6 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/screens/coach/coach.dart';
+import 'package:focusflow/screens/coach/widgets/widgets.dart';
 
 class CoachUserReportScreen extends StatefulWidget {
   final String userId;
@@ -33,6 +34,26 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
     } catch (e) {
       _user = null;
     }
+  }
+
+  void _showCheerModal(BuildContext context, UserModel user) {
+    showDialog(
+      context: context,
+      builder: (_) => CoachSendCheerModal(
+        userId: user.uid,
+        username: user.username,
+      ),
+    );
+  }
+
+  void _showGuideModal(BuildContext context, UserModel user) {
+    showDialog(
+      context: context,
+      builder: (_) => CoachSendGuideModal(
+        userId: user.uid,
+        username: user.username,
+      ),
+    );
   }
 
   @override
@@ -112,7 +133,7 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
                     icon: const Icon(Pixel.moodhappy),
                     label: const Text('Cheer'),
                     onPressed: () {
-                      // TODO: Show "Send Cheer" modal (Figure 27)
+                       _showCheerModal(context, _user!);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
@@ -130,7 +151,7 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
                     icon: const Icon(Pixel.teach),
                     label: const Text('Guide'),
                     onPressed: () {
-                      // TODO: Show "Recommend Guide" modal (Figure 28)
+                      _showGuideModal(context, _user!);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.cardColor,
@@ -139,6 +160,7 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      side: BorderSide(color: theme.colorScheme.primary, width: 2),
                     ),
                   ),
                 ),

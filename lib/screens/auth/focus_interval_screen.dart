@@ -46,42 +46,57 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
     },
   ];
 
-  void _submit(AuthProvider authProvider) async {
-    final selected = _focusIntervals[_selectedIntervalIndex];
-    final workInterval = selected['work'];
-    final breakInterval = selected['break'];
-
+  Future<void> _submit(AuthProvider authProvider, UserProvider userProvider) async {
     authProvider.clearError();
 
-    await authProvider.signUp(
+    // Sign up with AuthProvider
+    final user = await authProvider.signUp(
       username: widget.username,
       email: widget.email,
       password: widget.password,
-      dailyTargetHours: _dailyTargetHours,
-      workInterval: workInterval,
-      breakInterval: breakInterval,
-      focusType: selected['title'],
     );
 
-    if (authProvider.errorMessage == null && mounted) {
+    if (authProvider.errorMessage != null || user == null) {
       CustomSnackBar.show(
         context,
-        message: 'Account created successfully! 🎉',
-        type: SnackBarType.success,
+        message: authProvider.errorMessage ?? "Sign-up failed.",
+        type: SnackBarType.error,
       );
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-    } else if (authProvider.errorMessage != null) {
+      return;
+    }
+
+    // Create Firestore user document with UserProvider
+    final selected = _focusIntervals[_selectedIntervalIndex];
+    try {
+      await userProvider.createUser(
+        uid: user.uid,
+        username: widget.username,
+        email: widget.email,
+        dailyTargetHours: _dailyTargetHours,
+        workInterval: selected['work'],
+        breakInterval: selected['break'],
+        focusType: selected['title'],
+      );
+
+      if (mounted) {
+        CustomSnackBar.show(
+          context,
+          message: 'Account created successfully! 🎉',
+          type: SnackBarType.success,
+        );
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } catch (e) {
       CustomSnackBar.show(
         context,
-        message: authProvider.errorMessage!,
+        message: "Failed to save user data: $e",
         type: SnackBarType.error,
       );
     }
   }
 
   Widget _buildSlider(bool isDarkMode) {
-    final limeColor = Color(0xFFBFFB4F);
-
+    final limeColor = const Color(0xFFBFFB4F);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -139,26 +154,26 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
     SizeConfig.init(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final limeColor = Color(0xFFBFFB4F);
+    final limeColor = const Color(0xFFBFFB4F);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) => Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          body: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  height: kToolbarHeight,
-                  color: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
-                  alignment: Alignment.center,
-                  child: const SizedBox.shrink(),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
+      child: Consumer2<AuthProvider, UserProvider>(
+        builder: (context, authProvider, userProvider, _) {
+          return Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    height: kToolbarHeight,
+                    color: isDark ? theme.appBarTheme.backgroundColor : Colors.white,
+                    alignment: Alignment.center,
+                    child: const SizedBox.shrink(),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
                       padding: EdgeInsets.symmetric(horizontal: SizeConfig.wp(4)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,7 +191,6 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
                           ),
                           SizedBox(height: SizeConfig.hp(3)),
 
-                          // Question 1 (shortened)
                           Text(
                             "1. What's your daily focus hours?",
                             style: TextStyle(
@@ -189,7 +203,6 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
                           _buildSlider(isDark),
                           SizedBox(height: SizeConfig.hp(4)),
 
-                          // Question 2
                           Text(
                             "2. What's your preferred focus interval?",
                             style: TextStyle(
@@ -199,6 +212,7 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
                             ),
                           ),
                           SizedBox(height: SizeConfig.hp(1.5)),
+
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -270,14 +284,13 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
                               );
                             },
                           ),
-
                           const SizedBox(height: 16),
 
                           // Done button
-                          authProvider.isLoading
+                          (authProvider.isLoading || userProvider.isLoading)
                               ? const Center(child: CircularProgressIndicator())
                               : ElevatedButton(
-                                  onPressed: () => _submit(authProvider),
+                                  onPressed: () => _submit(authProvider, userProvider),
                                   style: ElevatedButton.styleFrom(
                                     minimumSize: Size(double.infinity, SizeConfig.hp(6)),
                                     backgroundColor: limeColor,
@@ -300,11 +313,11 @@ class _CustomizeFocusFlowScreenState extends State<CustomizeFocusFlowScreen> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

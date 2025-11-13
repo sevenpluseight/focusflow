@@ -11,6 +11,9 @@ class UserModel {
   final int? workInterval;
   final int? breakInterval;
   final String? focusType;
+  final int? currentStreak;
+  final int? longestStreak;
+  final Timestamp? lastFocusDate;
 
   UserModel({
     required this.uid,
@@ -23,6 +26,9 @@ class UserModel {
     this.workInterval,
     this.breakInterval,
     this.focusType,
+    this.currentStreak,
+    this.longestStreak,
+    this.lastFocusDate,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -39,6 +45,9 @@ class UserModel {
       workInterval: _toInt(data['workInterval']),
       breakInterval: _toInt(data['breakInterval']),
       focusType: data['focusType'],
+      currentStreak: _toInt(data['currentStreak']),
+      longestStreak: _toInt(data['longestStreak']),
+      lastFocusDate: data['lastFocusDate'],
     );
   }
 
@@ -54,6 +63,9 @@ class UserModel {
       'workInterval': workInterval,
       'breakInterval': breakInterval,
       'focusType': focusType,
+      'currentStreak': currentStreak,
+      'longestStreak': longestStreak,
+      'lastFocusDate': lastFocusDate,
     };
   }
 
@@ -69,6 +81,9 @@ class UserModel {
     int? workInterval,
     int? breakInterval,
     String? focusType,
+    int? currentStreak,
+    int? longestStreak,
+    Timestamp? lastFocusDate,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -81,6 +96,9 @@ class UserModel {
       workInterval: workInterval ?? this.workInterval,
       breakInterval: breakInterval ?? this.breakInterval,
       focusType: focusType ?? this.focusType,
+      currentStreak: currentStreak ?? this.currentStreak,
+      longestStreak: longestStreak ?? this.longestStreak,
+      lastFocusDate: lastFocusDate ?? this.lastFocusDate,
     );
   }
 

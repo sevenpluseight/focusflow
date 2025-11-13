@@ -9,6 +9,7 @@ import '../common/placeholder_pages.dart';
 import '../coach/coach_home_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../user/user_home_screen.dart';
+import '../user/user_profile_screen.dart';
 import '../auth/auth.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/widgets.dart';
@@ -38,13 +39,14 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
 
   void _setupNavigationForRole(UserRole role) {
     switch (role) {
+      // User
       case UserRole.user:
-        _pageOptions = const [
+        _pageOptions = [
           UserHomeScreen(),
           PlaceholderPage(title: 'User Reports'),
           PlaceholderPage(title: 'User Timer'),
           PlaceholderPage(title: 'Coaches'),
-          PlaceholderPage(title: 'Profile'),
+          UserProfileScreen(),
         ];
         _iconList = const [
           Pixel.home,
@@ -56,6 +58,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _labels = const ['Home', 'Reports', 'Timer', 'Coaches', 'Profile'];
         break;
 
+      // Coach
       case UserRole.coach:
         _pageOptions = const [
           CoachHomeScreen(),
@@ -74,6 +77,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _labels = const ['Home', 'Users', 'Challenge', 'Reports', 'Profile'];
         break;
 
+      // Admin
       case UserRole.admin:
         _pageOptions = const [
           AdminDashboardScreen(),

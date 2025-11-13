@@ -3,4 +3,5 @@ export 'coach_user_list_screen.dart';
 export 'coach_user_report_screen.dart';
 export 'coach_challenge_screen.dart';
 export 'coach_create_challenge_screen.dart';
+export 'coach_leaderboard_screen.dart';
 export 'coach_ongoing_challenges_screen.dart';

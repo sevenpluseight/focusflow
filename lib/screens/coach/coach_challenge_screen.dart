@@ -38,7 +38,12 @@ class CoachChallengeScreen extends StatelessWidget {
               icon: Pixel.chartmultiple,
               label: 'Check Leaderboard',
               onTap: () {
-                // TODO: Navigate to Leaderboard (Figure 23)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CoachLeaderboardScreen(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 16),

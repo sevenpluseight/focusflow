@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pixelarticons/pixelarticons.dart';
+import 'package:provider/provider.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 
 class CoachCreateChallengeScreen extends StatefulWidget {
   const CoachCreateChallengeScreen({Key? key}) : super(key: key);
@@ -14,6 +17,7 @@ class _CoachCreateChallengeScreenState extends State<CoachCreateChallengeScreen>
   final _durationController = TextEditingController();
   final _goalController = TextEditingController();
   final _descriptionController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,21 +28,42 @@ class _CoachCreateChallengeScreenState extends State<CoachCreateChallengeScreen>
     super.dispose();
   }
 
-  void _submitChallenge() {
-    if (_formKey.currentState!.validate()) {
-      // Form is valid
-      final name = _nameController.text;
-      final duration = int.parse(_durationController.text);
-      final goal = int.parse(_goalController.text);
-      final description = _descriptionController.text;
+Future<void> _submitChallenge() async {
+    if (!_formKey.currentState!.validate()) {
+      return; // Form is invalid
+    }
 
-      // TODO: Add logic to save this challenge to Firebase
-      // It should be sent to the Admin for approval [cite: 1363]
+    setState(() => _isLoading = true);
+
+    try {
+      final coachProvider = context.read<CoachProvider>();
       
-      print('Submitting Challenge: $name, $duration days, $goal hours, $description');
+      await coachProvider.submitChallengeForApproval(
+        name: _nameController.text,
+        durationDays: int.parse(_durationController.text),
+        focusGoalHours: int.parse(_goalController.text),
+        description: _descriptionController.text,
+      );
 
-      // Go back to the previous screen after submission
+      if (!mounted) return;
+      CustomSnackBar.show(
+        context,
+        message: 'Challenge submitted for approval!',
+        type: SnackBarType.success,
+      );
       Navigator.of(context).pop();
+
+    } catch (e) {
+      if (!mounted) return;
+      CustomSnackBar.show(
+        context,
+        message: e.toString(),
+        type: SnackBarType.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -101,7 +126,7 @@ class _CoachCreateChallengeScreenState extends State<CoachCreateChallengeScreen>
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _submitChallenge,
+                onPressed: _isLoading ? null : _submitChallenge,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.black,
@@ -110,13 +135,17 @@ class _CoachCreateChallengeScreenState extends State<CoachCreateChallengeScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Submit for Approval',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isLoading 
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      )
+                      : const Text(
+                        'Submit for Approval',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          ),
+                        ),
               ),
             ],
           ),

@@ -65,7 +65,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
           CoachHomeScreen(),
           CoachUserListScreen(),
           CoachChallengeScreen(),
-          PlaceholderPage(title: 'Reports'),
+          CoachReportSummaryScreen(),
           CoachProfileScreen(),
         ];
         _iconList = const [

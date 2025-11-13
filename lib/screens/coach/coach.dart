@@ -7,3 +7,4 @@ export 'coach_leaderboard_screen.dart';
 export 'coach_ongoing_challenges_screen.dart';
 export 'coach_profile_screen.dart';
 export 'coach_distraction_log_screen.dart';
+export 'coach_report_summary_screen.dart';

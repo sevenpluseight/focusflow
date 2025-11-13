@@ -1,11 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:focusflow/models/models.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/screens/coach/coach.dart';
+import 'package:pixelarticons/pixelarticons.dart';
+import 'package:provider/provider.dart';
 
-class CoachHomeScreen extends StatelessWidget {
+class CoachHomeScreen extends StatefulWidget {
   const CoachHomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CoachHomeScreen> createState() => _CoachHomeScreenState();
+}
+
+class _CoachHomeScreenState extends State<CoachHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch data when the screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchData();
+    });
+  }
+
+  Future<void> _fetchData() async {
+    // We use "read" inside initState
+    final authProvider = context.read<AuthProvider>();
+    final coachProvider = context.read<CoachProvider>();
+    final coachId = authProvider.user?.uid ?? '';
+    
+    // Fetch both users and challenges
+    await coachProvider.fetchConnectedUsers(coachId);
+    await coachProvider.fetchMyChallenges();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // We use "watch" to listen for data changes
+    final coachProvider = context.watch<CoachProvider>();
+    
+    // --- Calculate Stats ---
+    final users = coachProvider.connectedUsers;
+    final challenges = coachProvider.challenges;
+
+    final totalUsers = users.length;
+    final atRiskUsers = users.where((u) => (u.currentStreak ?? 0) == 0).toList();
+    
+    double totalStreak = 0;
+    for (var user in users) {
+      totalStreak += (user.currentStreak ?? 0);
+    }
+    final avgStreak = (totalUsers > 0) ? (totalStreak / totalUsers) : 0.0;
+    // -----------------------
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -32,13 +78,9 @@ class CoachHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // TODO: Implement Pending Requests Logic
                   Text(
-                    'User 1 wants to connect...',
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'User 2 wants to connect...',
+                    'No pending requests.',
                     style: TextStyle(color: theme.textTheme.bodyMedium?.color),
                   ),
                   const SizedBox(height: 8),
@@ -69,40 +111,42 @@ class CoachHomeScreen extends StatelessWidget {
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• Total Users Coached: 5',
-                    style: TextStyle(
-                      color: theme.textTheme.bodyMedium?.color,
-                      fontSize: 16,
-                      height: 1.5,
+              child: coachProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• Total Users Coached: $totalUsers',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        ),
+                        Text(
+                          '• Average Streak: ${avgStreak.toStringAsFixed(1)} days',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        ),
+                        Text(
+                          '• Ongoing Challenges: ${challenges.length}',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  Text(
-                    '• Avg Focus Today: 3.2 Hrs',
-                    style: TextStyle(
-                      color: theme.textTheme.bodyMedium?.color,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                  Text(
-                    '• Ongoing Challenges: 2',
-                    style: TextStyle(
-                      color: theme.textTheme.bodyMedium?.color,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(height: 30),
 
             const Text(
-              'AI Highlights',
+              'AI Highlights (At-Risk Users)',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -116,31 +160,54 @@ class CoachHomeScreen extends StatelessWidget {
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• Alert: User 3 shows potential burnout risk.',
-                    style: TextStyle(
-                      color: Colors.orangeAccent,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                  Text(
-                    '• Suggestion: Check in with User 5 about recent distraction patterns.',
-                    style: TextStyle(
-                      color: Colors.lightBlueAccent,
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
+              child: coachProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : atRiskUsers.isEmpty
+                      ? Text(
+                          'Great job! No users are currently at risk.',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        )
+                      : Column(
+                          // Build the list dynamically
+                          children: atRiskUsers.map((user) {
+                            return _buildAtRiskTile(context, user);
+                          }).toList(),
+                        ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // Helper widget to build the At-Risk user tile
+  Widget _buildAtRiskTile(BuildContext context, UserModel user) {
+    return ListTile(
+      leading: const Icon(Pixel.alert, color: Colors.orangeAccent),
+      title: Text(
+        'Alert: ${user.username} is at risk.',
+        style: const TextStyle(
+          color: Colors.orangeAccent,
+          fontSize: 16,
+          height: 1.5,
+        ),
+      ),
+      subtitle: const Text('Streak has reset to 0 days.'),
+      trailing: const Icon(Pixel.chevronright, color: Colors.grey),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CoachUserReportScreen(
+              userId: user.uid,
+            ),
+          ),
+        );
+      },
     );
   }
 }

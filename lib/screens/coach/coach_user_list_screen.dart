@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
-import 'package:focusflow/theme/app_theme.dart';
+// import 'package:focusflow/theme/app_theme.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/models/models.dart';
+import 'package:focusflow/screens/coach/coach.dart';
 
 class CoachUserListScreen extends StatefulWidget {
   const CoachUserListScreen({Key? key}) : super(key: key);
@@ -138,14 +139,14 @@ class _UserListView extends StatelessWidget {
         itemCount: filteredUsers.length,
         itemBuilder: (context, index) {
           final user = filteredUsers[index];
-          return _buildUserReportCard(theme, user);
+          return _buildUserReportCard(context, theme, user);
         },
       ),
     );
   }
 
   // This widget builds the card using a real UserModel
-  Widget _buildUserReportCard(ThemeData theme, UserModel user) {
+  Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user) {
     // --- Status Logic ---
     String status = "Active";
     Color statusColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
@@ -200,7 +201,14 @@ class _UserListView extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to Specific User's Report (Figure 26)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoachUserReportScreen(
+                      userId: user.uid,
+                    )
+                  ),
+                );  
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary, // Use theme color

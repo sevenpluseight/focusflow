@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/models/challenge_model.dart';
+import 'package:focusflow/models/report_model.dart';
+import 'package:focusflow/models/distraction_log_model.dart';
 
 class CoachProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,6 +21,12 @@ class CoachProvider with ChangeNotifier {
 
   List<ChallengeModel> get challenges => _challenges;
   bool get challengesLoading => _challengesLoading;
+
+  List<DistractionLogModel> _userLogs = [];
+  bool _logsLoading = false;
+  
+  List<DistractionLogModel> get userLogs => _userLogs;
+  bool get logsLoading => _logsLoading;
 
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
@@ -114,6 +122,48 @@ class CoachProvider with ChangeNotifier {
     } finally {
       _challengesLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> fetchDistractionLogs(String userId) async {
+    if (userId.isEmpty) return;
+    _logsLoading = true;
+    notifyListeners();
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('distractionLogs') // Assumes this subcollection
+          .orderBy('createdAt', descending: true)
+          .get();
+      _userLogs = querySnapshot.docs
+          .map((doc) => DistractionLogModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error fetching distraction logs: $e');
+    } finally {
+      _logsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> reportLog(String userId, String logId) async {
+    final coachId = _auth.currentUser?.uid;
+    if (coachId == null) throw Exception('Not logged in');
+    try {
+      final newReportRef = _firestore.collection('reports').doc();
+      final newReport = ReportModel(
+        id: newReportRef.id,
+        reportedItemId: logId,
+        reportedUserId: userId,
+        coachId: coachId,
+        createdAt: Timestamp.now(),
+        type: ReportType.distractionLog,
+      );
+      await newReportRef.set(newReport.toMap());
+    } catch (e) {
+      print('Error reporting log: $e');
+      throw Exception('Failed to submit report.');
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:focusflow/screens/coach/coach.dart';
 
 class CoachUserReportScreen extends StatefulWidget {
   final String userId;
@@ -83,7 +84,15 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
               icon: Pixel.alert,
               label: 'Distraction Analysis',
               onTap: () {
-                // TODO: Navigate to Distraction Analysis screen (Figure 29)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoachDistractionLogScreen(
+                      userId: _user!.uid,
+                      username: _user!.username,
+                    ),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -159,7 +168,11 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 28),
+            Icon(
+              icon, 
+              size: 28,
+              color: theme.colorScheme.onSurface,
+            ),
             const SizedBox(width: 16),
             Text(
               label,

@@ -5,3 +5,4 @@ export 'coach_challenge_screen.dart';
 export 'coach_create_challenge_screen.dart';
 export 'coach_leaderboard_screen.dart';
 export 'coach_ongoing_challenges_screen.dart';
+export 'coach_profile_screen.dart';

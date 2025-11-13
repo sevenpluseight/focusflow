@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/screens/coach/coach.dart';
-import 'package:focusflow/screens/coach/coach.dart';
 
 import '../common/placeholder_pages.dart';
 import '../coach/coach_home_screen.dart';
@@ -67,7 +66,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
           CoachUserListScreen(),
           CoachChallengeScreen(),
           PlaceholderPage(title: 'Reports'),
-          PlaceholderPage(title: 'Profile'),
+          CoachProfileScreen(),
         ];
         _iconList = const [
           Pixel.home,

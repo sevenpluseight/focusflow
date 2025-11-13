@@ -14,6 +14,12 @@ class CoachProvider with ChangeNotifier {
   List<UserModel> get connectedUsers => _connectedUsers;
   bool get isLoading => _isLoading;
 
+  List<ChallengeModel> _challenges = [];
+  bool _challengesLoading = false;
+
+  List<ChallengeModel> get challenges => _challenges;
+  bool get challengesLoading => _challengesLoading;
+
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
     if (coachId.isEmpty) return;
@@ -71,6 +77,43 @@ class CoachProvider with ChangeNotifier {
     } catch (e) {
       print('Error submitting challenge: $e');
       throw Exception('Failed to submit challenge.');
+    }
+  }
+
+  Future<void> fetchMyChallenges() async {
+    final coachId = _auth.currentUser?.uid;
+    if (coachId == null) return;
+
+    _challengesLoading = true;
+    notifyListeners();
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('challenges')
+          .where('coachId', isEqualTo: coachId)
+          .orderBy('createdAt', descending: true)
+          .get();
+      
+      _challenges = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        // Manually create ChallengeModel from map
+        return ChallengeModel(
+          id: data['id'] ?? '',
+          name: data['name'] ?? '',
+          durationDays: data['durationDays'] ?? 0,
+          focusGoalHours: data['focusGoalHours'] ?? 0,
+          description: data['description'] ?? '',
+          coachId: data['coachId'] ?? '',
+          createdAt: data['createdAt'] ?? Timestamp.now(),
+          status: data['status'] ?? 'pending',
+        );
+      }).toList();
+
+    } catch (e) {
+      print('Error fetching challenges: $e');
+    } finally {
+      _challengesLoading = false;
+      notifyListeners();
     }
   }
 }

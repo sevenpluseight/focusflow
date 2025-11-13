@@ -49,7 +49,12 @@ class CoachChallengeScreen extends StatelessWidget {
               icon: Pixel.clock,
               label: 'Ongoing Challenges',
               onTap: () {
-                // TODO: Navigate to Ongoing Challenges (Figure 24)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CoachOngoingChallengesScreen(),
+                  ),
+                );
               },
             ),
           ],

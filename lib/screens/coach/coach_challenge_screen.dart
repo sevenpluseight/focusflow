@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 
+import 'package:focusflow/screens/coach/coach.dart';
+
 class CoachChallengeScreen extends StatelessWidget {
   const CoachChallengeScreen({Key? key}) : super(key: key);
 
@@ -21,11 +23,15 @@ class CoachChallengeScreen extends StatelessWidget {
               icon: Pixel.plus,
               label: 'Create New Challenge',
               onTap: () {
-                // TODO: Navigate to Create Challenge Form (Figure 22)
-              },
-            ),
-            const SizedBox(height: 16),
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CoachCreateChallengeScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
             // Check Leaderboard Button
             _buildChallengeButton(
               theme: theme,

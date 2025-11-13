@@ -118,7 +118,7 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    icon: const Icon(Pixel.edit),
+                    icon: const Icon(Pixel.teach),
                     label: const Text('Guide'),
                     onPressed: () {
                       // TODO: Show "Recommend Guide" modal (Figure 28)

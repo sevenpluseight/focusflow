@@ -224,7 +224,7 @@ class UserProfileScreen extends StatelessWidget {
                       // Show "Switch Back" button if you are a coach
                       ElevatedButton.icon(
                         icon: const Icon(Pixel.repeat),
-                        label: const Text("Switch back to Coach Mode"),
+                        label: const Text("Switch to Coach Mode"),
                         onPressed: () => _switchToCoachMode(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green, 

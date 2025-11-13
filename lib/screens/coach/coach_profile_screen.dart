@@ -103,13 +103,20 @@ class CoachProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Switch to User Mode Button
-            _buildProfileButton(
-              theme: theme,
-              icon: Pixel.repeat,
-              label: 'Switch to User Mode',
-              onTap: () => _switchToUserMode(context),
+              ElevatedButton.icon(
+              icon: const Icon(Pixel.repeat),
+              label: const Text('Switch to User Mode'),
+              onPressed: () => _switchToUserMode(context),
+              style: ElevatedButton.styleFrom(
+                // Using a distinct color to make it stand out
+                backgroundColor: Colors.green, 
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-            const SizedBox(height: 24),
 
             // --- Settings ---
             const Text(

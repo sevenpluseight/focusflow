@@ -179,7 +179,11 @@ class CoachProfileScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 28),
+            Icon(
+              icon, 
+              size: 28,
+              color: theme.colorScheme.onSurface,
+              ),
             const SizedBox(width: 16),
             Text(
               label,

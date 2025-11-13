@@ -32,15 +32,31 @@ class CoachReportSummaryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // --- Quick Stats Card ---
-            _buildStatCard(
-              theme: theme,
-              title: 'Quick Stats',
-              items: [
-                _buildStatItem(theme, Pixel.users, 'Total Users', '$totalUsers'),
-                _buildStatItem(theme, Pixel.trending, 'Average Streak', '${avgStreak.toStringAsFixed(1)} days'),
-              ],
+
+            // 1. "Quick Stats" Title
+            const Text(
+              'Quick Stats',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 12),
+
+            // 2. "Quick Stats" Card (no title inside)
+            Card(
+              color: theme.cardColor,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildStatItem(theme, Pixel.users, 'Total Users', '$totalUsers'),
+                    _buildStatItem(theme, Pixel.trending, 'Average Streak', '${avgStreak.toStringAsFixed(1)} days'),
+                  ],
+                ),
+              ),
+            ),
+            // -----------------------
+
             const SizedBox(height: 24),
 
             // --- At-Risk Users Card ---
@@ -72,29 +88,7 @@ class CoachReportSummaryScreen extends StatelessWidget {
     );
   }
 
-  // Helper for the top "Quick Stats" card
-  Widget _buildStatCard({required ThemeData theme, required String title, required List<Widget> items}) {
-    return Card(
-      color: theme.cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ...items,
-          ],
-        ),
-      ),
-    );
-  }
-
+  // Helper for the stat items
   Widget _buildStatItem(ThemeData theme, IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

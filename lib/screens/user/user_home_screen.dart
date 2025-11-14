@@ -180,7 +180,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),

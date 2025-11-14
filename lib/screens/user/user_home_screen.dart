@@ -111,7 +111,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           backgroundColor: theme.brightness == Brightness.light
                               ? Colors.grey.shade300
                               : theme.colorScheme.surfaceContainerHighest,
-                          valueColor: const AlwaysStoppedAnimation(Color(0xFFBFFB4F)),
+                          valueColor: const AlwaysStoppedAnimation(
+                            Color(0xFFBFFB4F),
+                          ),
                           strokeCap: StrokeCap.round,
                         ),
                       ),
@@ -128,7 +130,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   Text(
                     'Today\'s Progress: ${(progressProvider.todayProgress * 100).toStringAsFixed(0)}%',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(
+                        alpha: 0.8,
+                      ),
                       height: 1.4,
                     ),
                   ),
@@ -154,13 +158,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               backgroundColor: Colors.red,
                             ),
                           );
-                          _targetController.text = dailyTarget.toStringAsFixed(0);
+                          _targetController.text = dailyTarget.toStringAsFixed(
+                            0,
+                          );
                           return;
                         }
 
                         final uid = userProvider.user?.uid;
                         if (uid != null) {
-                          await userProvider.updateSettings(dailyTargetHours: newValue);
+                          await userProvider.updateSettings(
+                            dailyTargetHours: newValue,
+                          );
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -173,20 +181,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Get the provider and call the function
-                      context.read<ProgressProvider>().addFocusMinutes(25);
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Added 25 test minutes!"),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                    child: const Text("TEST: Add 25 Minutes"),
-                  ),
                 ],
               ),
             ),
@@ -205,7 +199,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: tipBoxColor,
                       borderRadius: BorderRadius.circular(12),
@@ -214,7 +211,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       _dailyTip,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.9),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.9,
+                        ),
                       ),
                     ),
                   ),

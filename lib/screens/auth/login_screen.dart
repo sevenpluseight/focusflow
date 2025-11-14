@@ -4,6 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/auth/auth.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/utils/utils.dart';
+import 'package:focusflow/widgets/widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,37 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final text = theme.textTheme;
-
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: colors.surface,
-      labelStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withAlpha((255 * 0.8).toInt()),
-        fontSize: SizeConfig.font(2),
-      ),
-      hintStyle: text.bodyMedium?.copyWith(
-        color: colors.onSurface.withAlpha((255 * 0.6).toInt()),
-        fontSize: SizeConfig.font(1.8),
-      ),
-      suffixIcon: suffixIcon,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: BorderSide(
-          color: colors.outlineVariant,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(SizeConfig.wp(3)),
-        borderSide: BorderSide(color: colors.primary, width: 2),
-      ),
-    );
   }
 
   void _showTemporaryError(String message) {
@@ -123,36 +93,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: SizeConfig.hp(3)),
 
                   // Email input
-                  TextField(
+                  CustomTextField(
                     controller: _emailController,
-                    decoration: _inputDecoration("Email"),
+                    labelText: "Email",
                     keyboardType: TextInputType.emailAddress,
-                    style: text.bodyLarge?.copyWith(
-                      color: colors.onSurface,
-                      fontSize: SizeConfig.font(2),
-                    ),
                   ),
                   SizedBox(height: SizeConfig.hp(2)),
 
                   // Password input
-                  TextField(
+                  CustomTextField(
                     controller: _passwordController,
+                    labelText: "Password",
                     obscureText: _obscurePassword,
-                    decoration: _inputDecoration(
-                      "Password",
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
-                          color: colors.onSurface.withAlpha((255 * 0.7).toInt()),
-                          size: SizeConfig.wp(5),
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Pixel.eyeclosed : Pixel.eye,
+                        color: colors.onSurface.withAlpha((255 * 0.7).toInt()),
+                        size: SizeConfig.wp(5),
                       ),
-                    ),
-                    style: text.bodyLarge?.copyWith(
-                      color: colors.onSurface,
-                      fontSize: SizeConfig.font(2),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
 
@@ -200,8 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: SizeConfig.hp(3)),
 
-                  // Sign In button
-                  ElevatedButton(
+                  // Sign in button
+                  PrimaryButton(
                     onPressed: () async {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text.trim();
@@ -235,24 +195,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFBFFB4F),
-                      elevation: 2,
-                      foregroundColor: Colors.black,
-                      minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Sign In",
-                      style: text.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: SizeConfig.font(2),
-                        color: Colors.black,
-                      ),
-                    ),
+                    child: const Text("Sign In"),
                   ),
+
                   SizedBox(height: SizeConfig.hp(2)),
 
                   // Divider
@@ -277,10 +222,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: SizeConfig.hp(3)),
 
                   // Google Sign-In button
-                  OutlinedButton(
+                  SecondaryButton(
                     onPressed: () async {
                       await authProvider.signInWithGoogle();
                       if (!mounted) return;
+
                       if (authProvider.isLoggedIn) {
                         Navigator.pushReplacement(
                           context,
@@ -292,10 +238,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         _showTemporaryError(authProvider.errorMessage!);
                       }
                     },
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size(double.infinity, SizeConfig.hp(6)),
-                      side: BorderSide(color: colors.primary),
-                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -304,18 +246,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: SizeConfig.hp(3),
                         ),
                         SizedBox(width: SizeConfig.wp(2)),
-                        Text(
+                        const Text(
                           "Sign in with Google",
-                          style: text.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: SizeConfig.font(2),
-                            color:
-                                isDarkMode ? colors.primary : Colors.black,
-                          ),
                         ),
                       ],
                     ),
                   ),
+
                   SizedBox(height: SizeConfig.hp(2)),
 
                   // Sign Up link

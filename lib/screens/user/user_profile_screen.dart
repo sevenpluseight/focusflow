@@ -2,10 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/models/models.dart';
+import 'package:focusflow/screens/core/main_navigation_controller.dart';
+import 'package:focusflow/screens/user/coach_application_screen.dart';
 import '../auth/auth.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
+
+  void _switchToCoachMode(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        // We reload the main controller, forcing it back to CoachRole
+        builder: (_) => const MainNavigationController(
+          currentUserRole: UserRole.coach,
+        ),
+      ),
+    );
+  }
 
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
@@ -74,6 +89,9 @@ class UserProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
+
+    final String actualRole = user?.role ?? 'user';
+    final bool isCoachInUserMode = (actualRole == 'coach');
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -203,17 +221,29 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
+                    if (isCoachInUserMode)
+                      // Show "Switch Back" button if you are a coach
+                      ElevatedButton.icon(
+                        icon: const Icon(Pixel.repeat),
+                        label: const Text("Switch to Coach Mode"),
+                        onPressed: () => _switchToCoachMode(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.lightGreenAccent, 
+                        ),
+                      )
+                    else
+
                     // ------------------- Request to be Coach Button -------------------
                     ElevatedButton.icon(
                       icon: const Icon(Pixel.plus),
                       label: const Text("Request to be Coach"),
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Request to be coach clicked!"),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+                            Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CoachApplicationScreen(),
+                            ),
+                          );
                       },
                     ),
                     const SizedBox(height: 32),

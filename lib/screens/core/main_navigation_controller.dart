@@ -4,6 +4,7 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
+import 'package:focusflow/screens/coach/coach.dart';
 
 import '../common/placeholder_pages.dart';
 import '../coach/coach_home_screen.dart';
@@ -62,10 +63,10 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
       case UserRole.coach:
         _pageOptions = const [
           CoachHomeScreen(),
-          PlaceholderPage(title: 'Coach Users'),
-          PlaceholderPage(title: 'Challenge'),
-          PlaceholderPage(title: 'Reports'),
-          PlaceholderPage(title: 'Profile'),
+          CoachUserListScreen(),
+          CoachChallengeScreen(),
+          CoachReportSummaryScreen(),
+          CoachProfileScreen(),
         ];
         _iconList = const [
           Pixel.home,

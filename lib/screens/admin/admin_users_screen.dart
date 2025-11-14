@@ -68,43 +68,52 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          titlePadding: EdgeInsets.zero,
+          contentPadding: EdgeInsets.zero,
+
+          title: null,
+
+          content: Stack(
             children: [
-              // Title Text
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Column(children: actions),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 12.0,
+                right: 12.0,
+                child: IconButton(
+                  icon: Icon(
+                    Pixel.close,
+                    color: isDark ? Colors.white70 : Colors.black54,
                   ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => Navigator.pop(dialogContext),
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  Pixel.close,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => Navigator.pop(dialogContext),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Column(children: actions),
             ],
           ),
         );

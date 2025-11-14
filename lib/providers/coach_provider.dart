@@ -308,20 +308,25 @@ class CoachProvider with ChangeNotifier {
       
       // 2. Build a prompt for the Gemini API
       String prompt = """
-        You are a helpful productivity coach. Analyze the following data for a user named '${user.username}' and provide a list of "AI Risk Flags" or positive insights. Be concise.
+        You are a helpful productivity coach. Analyze the following data for a user named '${user.username}'.
+        Provide your analysis in clean markdown format.
+        Use markdown headings (like '## AI Risk Flags') for sections.
+        Inside lists, use bolding (like '**Term:**') for key concepts. Be concise and professional.
 
-        User's Profile:
-        - Current Streak: ${user.currentStreak ?? 0} days
-        - Longest Streak: ${user.longestStreak ?? 0} days
-        - Daily Target: ${user.dailyTargetHours ?? 2} hours
+        Here is the user's data:
+        ## User's Profile
+        - **Current Streak:** ${user.currentStreak ?? 0} days
+        - **Longest Streak:** ${user.longestStreak ?? 0} days
+        - **Daily Target:** ${user.dailyTargetHours ?? 2} hours
 
-        Recent Focus History (last 14 days):
-        ${_userProgressHistory.isEmpty ? "- No focus history." : _userProgressHistory.map((p) => "- ${p.date}: ${p.focusedMinutes} minutes focused.").join("\n")}
+        ## Recent Focus History (last 14 days)
+        ${_userProgressHistory.isEmpty ? "- No focus history." : _userProgressHistory.map((p) => "- **${p.date}:** ${p.focusedMinutes} minutes focused.").join("\n")}
 
-        Recent Distraction Logs:
-        ${_userLogs.isEmpty ? "- No distraction logs." : _userLogs.map((l) => "- ${l.category}: ${l.note ?? ''}").join("\n")}
+        ## Recent Distraction Logs
+        ${_userLogs.isEmpty ? "- No distraction logs." : _userLogs.map((l) => "- **${l.category}:** ${l.note ?? ''}").join("\n")}
 
-        Analysis:
+        ## Coach's Analysis
+        (Provide your '## AI Risk Flags' and '## Positive Insights' below)
       """;
 
       debugPrint("--- Sending Prompt to Gemini ---");

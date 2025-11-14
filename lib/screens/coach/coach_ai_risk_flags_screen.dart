@@ -62,17 +62,36 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                       ],
                     ),
                   )
-                : MarkdownBody( // <-- Changed from Text to MarkdownBody
+                : MarkdownBody( 
                   data: coachProvider.aiInsights.isEmpty
                       ? 'No insights generated.'
                       : coachProvider.aiInsights,
-                  styleSheet: MarkdownStyleSheet(
-                    // Customize text styles here if needed
-                    p: TextStyle(fontSize: 16, height: 1.5, color: theme.textTheme.bodyMedium?.color),
-                    strong: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color),
-                    listBullet: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                    // You can add more customizations for h1, h2, ul, li, etc.
-                  ),
+                  styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                      // Style for regular text
+                      p: TextStyle(
+                        fontSize: 16, 
+                        height: 1.5, 
+                        color: theme.textTheme.bodyMedium?.color
+                      ),
+                      // Style for **bold** text
+                      strong: TextStyle(
+                        fontWeight: FontWeight.bold, 
+                        color: theme.colorScheme.onSurface
+                      ),
+                      // Style for '## Heading'
+                      h2: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      h2Padding: const EdgeInsets.only(top: 16, bottom: 4),
+                      // Indent bullet points
+                      listBullet: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                        height: 1.5,
+                      ),
+                      listBulletPadding: const EdgeInsets.only(left: 4, right: 8, top: 4),
+                    ),
                 ),
           ),
         ),

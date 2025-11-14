@@ -106,7 +106,18 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
               theme: theme,
               icon: Pixel.listbox,
               label: 'Focus Trend',
-              onTap: () {},
+              onTap: () 
+              {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoachFocusTrendScreen(
+                      userId: _user!.uid,
+                      username: _user!.username,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             _buildReportButton(

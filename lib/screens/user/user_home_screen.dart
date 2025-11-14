@@ -128,7 +128,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   Text(
                     'Today\'s Progress: ${(progressProvider.todayProgress * 100).toStringAsFixed(0)}%',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withValues(),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
                       height: 1.4,
                     ),
                   ),
@@ -138,13 +138,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     child: TextField(
                       controller: _targetController,
                       keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         labelText: 'Daily Target Hours',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      textAlign: TextAlign.center,
                       onSubmitted: (value) async {
                         final newValue = double.tryParse(value);
                         if (newValue == null || newValue < 1 || newValue > 8) {
@@ -171,6 +171,21 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         }
                       },
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Get the provider and call the function
+                      context.read<ProgressProvider>().addFocusMinutes(25);
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Added 25 test minutes!"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                    child: const Text("TEST: Add 25 Minutes"),
                   ),
                 ],
               ),
@@ -199,7 +214,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       _dailyTip,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.9),
                       ),
                     ),
                   ),

@@ -5,6 +5,7 @@ import 'package:focusflow/models/models.dart';
 import 'package:focusflow/models/challenge_model.dart';
 import 'package:focusflow/models/report_model.dart';
 import 'package:focusflow/models/distraction_log_model.dart';
+import 'package:focusflow/models/daily_progress_model.dart';
 
 class CoachProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,6 +31,12 @@ class CoachProvider with ChangeNotifier {
 
   Map<String, int> _todayFocusMinutes = {};
   Map<String, int> get todayFocusMinutes => _todayFocusMinutes;
+
+  List<DailyProgressModel> _userProgressHistory = [];
+  bool _progressHistoryLoading = false;
+
+  List<DailyProgressModel> get userProgressHistory => _userProgressHistory;
+  bool get progressHistoryLoading => _progressHistoryLoading;
 
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
@@ -245,6 +252,34 @@ class CoachProvider with ChangeNotifier {
     } catch (e) {
       print('Error sending message: $e');
       throw Exception('Failed to send message.');
+    }
+  }
+
+  Future<void> fetchUserFocusHistory(String userId) async {
+    if (userId.isEmpty) return;
+
+    _progressHistoryLoading = true;
+    _userProgressHistory = []; // Clear old data
+    notifyListeners();
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('dailyProgress')
+          .orderBy('date', descending: true) // Show newest first
+          .limit(14) // Get the last 14 days
+          .get();
+      
+      _userProgressHistory = querySnapshot.docs
+          .map((doc) => DailyProgressModel.fromMap(doc.data()))
+          .toList();
+
+    } catch (e) {
+      print('Error fetching focus history: $e');
+    } finally {
+      _progressHistoryLoading = false;
+      notifyListeners();
     }
   }
 }

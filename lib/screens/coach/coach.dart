@@ -9,3 +9,4 @@ export 'coach_profile_screen.dart';
 export 'coach_distraction_log_screen.dart';
 export 'coach_report_summary_screen.dart';
 export 'coach_user_overview_screen.dart';
+export 'coach_focus_trend_screen.dart';

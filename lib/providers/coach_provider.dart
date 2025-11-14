@@ -378,12 +378,53 @@ class CoachProvider with ChangeNotifier {
           'updatedAt': Timestamp.now(),
         }
       });
-
     } catch (e) {
       _aiInsights = "Error generating AI insights: $e";
     } finally {
       _aiLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<List<String>> fetchAiGuideSuggestions(String userId) async {
+    // 1. Get user data
+    final UserModel? user = _connectedUsers.firstWhere((u) => u.uid == userId);
+    if (user == null) return [];
+
+    await fetchUserFocusHistory(userId); // Make sure we have the latest history
+
+    // 2. Create a specific prompt for guides
+    String prompt = """
+      A user named '${user.username}' has this data:
+      - Current Streak: ${user.currentStreak ?? 0} days
+      - Daily Target: ${user.dailyTargetHours ?? 2} hours
+      - Recent Focus: ${_userProgressHistory.isEmpty ? "None" : _userProgressHistory.map((p) => "${p.focusedMinutes} mins").join(", ")}
+      
+      Based on this, generate exactly 3 short, actionable "guide" strategies for me (as their coach) to suggest.
+      Start each suggestion with a '*' and a space. Do not add any other text.
+      Example:
+      * Try breaking your task into smaller 25-min sessions.
+      * Set a small, achievable goal for your next session.
+      * Take a 5-minute walk when you feel distracted.
+    """;
+
+    try {
+      // 3. Call Gemini
+      final response = await GeminiService.generateText(prompt);
+
+      // 4. Parse the response into a list
+      if (response.isEmpty) return [];
+      
+      final suggestions = response.split('* ')
+          .where((s) => s.trim().isNotEmpty) // Remove empty entries
+          .map((s) => s.trim().replaceAll('*', '')) // Clean up
+          .toList();
+          
+      return suggestions.isNotEmpty ? suggestions : ["No suggestions found."];
+
+    } catch (e) {
+      print("Error fetching AI guides: $e");
+      return ["Error: Could not get AI suggestions."];
     }
   }
 }

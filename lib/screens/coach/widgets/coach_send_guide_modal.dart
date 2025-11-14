@@ -20,14 +20,31 @@ class CoachSendGuideModal extends StatefulWidget {
 
 class _CoachSendGuideModalState extends State<CoachSendGuideModal> {
   final _customGuideController = TextEditingController();
-  bool _isLoading = false;
+  bool _isLoading = false; // For sending
+  bool _isLoadingSuggestions = true; // For fetching
 
-  // You can pre-define common strategies
-  final List<String> _suggestedStrategies = [
-    "Try breaking your task into smaller 25-min sessions.",
-    "Make sure to take a 5-minute break after each session.",
-    "Try to identify your biggest distraction and remove it.",
-  ];
+  // This list will now be filled by the AI
+  List<String> _suggestedStrategies = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSuggestions();
+  }
+
+  Future<void> _fetchSuggestions() async {
+    setState(() => _isLoadingSuggestions = true);
+    final coachProvider = context.read<CoachProvider>();
+    
+    final suggestions = await coachProvider.fetchAiGuideSuggestions(widget.userId);
+    
+    if (mounted) {
+      setState(() {
+        _suggestedStrategies = suggestions;
+        _isLoadingSuggestions = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -82,83 +99,87 @@ class _CoachSendGuideModalState extends State<CoachSendGuideModal> {
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Recommended Guides',
-                    style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            ..._suggestedStrategies.map((guide) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: OutlinedButton(
-                onPressed: _isLoading ? null : () => _sendGuide(guide),
-                style: OutlinedButton.styleFrom(
-                    foregroundColor: theme.colorScheme.onSurface,
-                    side: BorderSide(color: theme.colorScheme.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Recommended Guides',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
-                  child: Text(
-                    guide,
-                    textAlign: TextAlign.center,
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // --- THIS IS THE NEW DYNAMIC SECTION ---
+              if (_isLoadingSuggestions)
+                const Center(child: CircularProgressIndicator())
+              else
+                ..._suggestedStrategies.map((guide) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : () => _sendGuide(guide),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.onSurface,
+                      side: BorderSide(color: theme.colorScheme.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      guide,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )),
+              // ------------------------------------
+              
+              const SizedBox(height: 16),
+              
+              TextField(
+                controller: _customGuideController,
+                decoration: InputDecoration(
+                  labelText: 'Custom Guide',
+                  fillColor: theme.scaffoldBackgroundColor,
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              )),
-            
-            const SizedBox(height: 16),
-            
-            TextField(
-              controller: _customGuideController,
-              decoration: InputDecoration(
-                labelText: 'Custom Guide',
-                fillColor: theme.scaffoldBackgroundColor,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              
+              ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : () => _sendGuide(_customGuideController.text),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.black,
                 ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                      )
+                    : const Text('Send'),
               ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () => _sendGuide(_customGuideController.text),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.black,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
-                    )
-                  : const Text('Send'),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );

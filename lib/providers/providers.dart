@@ -3,3 +3,5 @@ export 'theme_provider.dart';
 export 'progress_provider.dart';
 export 'user_provider.dart';
 export 'coach_provider.dart';
+export 'admin_users_provider.dart';
+export 'admin_stats_provider.dart';

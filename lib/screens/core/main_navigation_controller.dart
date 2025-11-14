@@ -8,7 +8,7 @@ import 'package:focusflow/screens/coach/coach.dart';
 
 import '../common/placeholder_pages.dart';
 import '../coach/coach_home_screen.dart';
-import '../admin/admin_dashboard_screen.dart';
+import '../admin/admin.dart';
 import '../user/user_home_screen.dart';
 import '../user/user_profile_screen.dart';
 import '../auth/auth.dart';
@@ -36,6 +36,11 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
   void initState() {
     super.initState();
     _setupNavigationForRole(widget.currentUserRole);
+
+    if (widget.currentUserRole == UserRole.admin) {
+      context.read<AdminStatsProvider>().ensureInitialized();
+      context.read<AdminUsersProvider>().ensureInitialized();
+    }
   }
 
   void _setupNavigationForRole(UserRole role) {
@@ -82,6 +87,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
       case UserRole.admin:
         _pageOptions = const [
           AdminDashboardScreen(),
+          AdminUserMenuScreen(),
           PlaceholderPage(title: 'Users'),
           PlaceholderPage(title: 'Events'),
           PlaceholderPage(title: 'Notifications'),
@@ -115,27 +121,32 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text(
             'Confirm Logout',
             style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
-                fontSize: 18),
+              color: isDark ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
           content: Text(
             'Are you sure you want to log out?',
             style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.black54, fontSize: 16),
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontSize: 16,
+            ),
           ),
           actions: [
             TextButton(
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                    fontSize: 16),
+                  color: isDark ? Colors.white70 : Colors.black54,
+                  fontSize: 16,
+                ),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(false),
             ),
@@ -143,9 +154,10 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
               child: Text(
                 'Logout',
                 style: TextStyle(
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               onPressed: () => Navigator.of(dialogContext).pop(true),
             ),
@@ -182,9 +194,13 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     // Lighter color for top & bottom bars
     final Color barColor = isDark ? const Color(0xFF3A3D42) : Color(0xFFE8F5E9);
     // Darker color for screen background
-    final Color backgroundColor = isDark ? const Color(0xFF2C2F33) : Colors.grey[100]!;
+    final Color backgroundColor = isDark
+        ? const Color(0xFF2C2F33)
+        : Colors.grey[100]!;
 
-    final Color activeColor =  isDark ? AppTheme.primaryColor : const Color(0xFF007A5E);
+    final Color activeColor = isDark
+        ? AppTheme.primaryColor
+        : const Color(0xFF007A5E);
     final Color inactiveColor = isDark ? Colors.white70 : Colors.grey.shade700;
 
     return Scaffold(
@@ -195,13 +211,12 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         title: Text(
           _labels[_selectedIndex],
           style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.w600,
-              fontSize: 20),
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
         ),
-        iconTheme: IconThemeData(
-          color: isDark ? Colors.white : Colors.black87,
-        ),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -234,10 +249,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
           const SizedBox(width: 10),
         ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pageOptions,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pageOptions),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         itemCount: _iconList.length,
         tabBuilder: (int index, bool isActive) {

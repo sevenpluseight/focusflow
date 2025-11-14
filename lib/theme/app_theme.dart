@@ -29,6 +29,7 @@ class AppTheme {
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white),
       bodyMedium: TextStyle(color: Colors.white70),
+      titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -78,6 +79,7 @@ class AppTheme {
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.black87),
       bodyMedium: TextStyle(color: Colors.black54),
+      titleLarge: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/services/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -157,7 +156,6 @@ class AuthProvider with ChangeNotifier {
 
   // Sign out
   Future<void> signOut() async {
-    await FirebaseFirestore.instance.clearPersistence();
     await _authService.signOut();
     _setUser(null);
   }

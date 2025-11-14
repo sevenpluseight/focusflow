@@ -85,7 +85,7 @@ const List<String> productivityTips = [
   "Use recurring reminders for regular tasks.",
   "Learn to recognize low-energy times.",
   "Prioritize tasks that create impact.",
-  "Keep a ‘done’ list to visualize achievements.",
+  "Keep a 'done' list to visualize achievements.",
   "Reduce decision fatigue by standardizing routines.",
   "Use templates for emails or reports.",
   "Avoid unnecessary context switching.",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class CoachAiRiskFlagsScreen extends StatefulWidget {
   final String userId;
@@ -61,12 +62,18 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                       ],
                     ),
                   )
-                : Text(
-                    coachProvider.aiInsights.isEmpty
-                        ? 'No insights generated.'
-                        : coachProvider.aiInsights,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                : MarkdownBody( // <-- Changed from Text to MarkdownBody
+                  data: coachProvider.aiInsights.isEmpty
+                      ? 'No insights generated.'
+                      : coachProvider.aiInsights,
+                  styleSheet: MarkdownStyleSheet(
+                    // Customize text styles here if needed
+                    p: TextStyle(fontSize: 16, height: 1.5, color: theme.textTheme.bodyMedium?.color),
+                    strong: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color),
+                    listBullet: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                    // You can add more customizations for h1, h2, ul, li, etc.
                   ),
+                ),
           ),
         ),
       ),

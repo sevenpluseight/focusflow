@@ -14,6 +14,7 @@ class UserModel {
   final int? currentStreak;
   final int? longestStreak;
   final Timestamp? lastFocusDate;
+  final String? coachId;
 
   UserModel({
     required this.uid,
@@ -29,6 +30,7 @@ class UserModel {
     this.currentStreak,
     this.longestStreak,
     this.lastFocusDate,
+    this.coachId,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -48,6 +50,7 @@ class UserModel {
       currentStreak: _toInt(data['currentStreak']),
       longestStreak: _toInt(data['longestStreak']),
       lastFocusDate: data['lastFocusDate'],
+      coachId: data['coachId'],
     );
   }
 
@@ -66,6 +69,7 @@ class UserModel {
       'currentStreak': currentStreak,
       'longestStreak': longestStreak,
       'lastFocusDate': lastFocusDate,
+      'coachId': coachId,
     };
   }
 
@@ -84,6 +88,7 @@ class UserModel {
     int? currentStreak,
     int? longestStreak,
     Timestamp? lastFocusDate,
+    String? coachId,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -99,6 +104,7 @@ class UserModel {
       currentStreak: currentStreak ?? this.currentStreak,
       longestStreak: longestStreak ?? this.longestStreak,
       lastFocusDate: lastFocusDate ?? this.lastFocusDate,
+      coachId: coachId ?? this.coachId,
     );
   }
 

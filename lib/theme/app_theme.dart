@@ -48,11 +48,11 @@ class AppTheme {
   static final ThemeData lightTheme = FormTheme.formFieldTheme(isDarkMode: false).copyWith(
     brightness: Brightness.light,
     scaffoldBackgroundColor: lightBackground,
-    cardColor: Colors.grey[100],
+    cardColor: const Color(0xFFE8F5E9),
     colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: primaryColor,
-      surface: Color(0xFFF4F4F4),
+      surface: const Color(0xFFE8F5E9),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFF4F4F4),

@@ -69,13 +69,10 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
     final date = log.createdAt.toDate();
     final formattedDate = '${date.month}/${date.day}/${date.year} - ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
 
-    return Card(
-      color: theme.cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: StyledCard(
+        title: 'Category: ${log.category}',
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,14 +88,6 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Category: ${log.category}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
                   if (log.note != null && log.note!.isNotEmpty)
                     Text(
                       'Note: ${log.note}',

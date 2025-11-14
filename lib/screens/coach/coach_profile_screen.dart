@@ -3,6 +3,7 @@ import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/auth/auth.dart';
 import 'package:focusflow/screens/core/main_navigation_controller.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -103,18 +104,23 @@ class CoachProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Switch to User Mode Button
-              ElevatedButton.icon(
-              icon: const Icon(Pixel.repeat),
-              label: const Text('Switch to User Mode'),
+            PrimaryButton(
               onPressed: () => _switchToUserMode(context),
               style: ElevatedButton.styleFrom(
-                // Using a distinct color to make it stand out
-                backgroundColor: Colors.lightGreenAccent, 
+                backgroundColor: Colors.lightGreenAccent,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Pixel.repeat),
+                  SizedBox(width: 8),
+                  Text('Switch to User Mode'),
+                ],
               ),
             ),
 
@@ -152,12 +158,8 @@ class CoachProfileScreen extends StatelessWidget {
     required String text,
     bool isHeader = false,
   }) {
-    return Container(
+    return StyledCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Text(
         text,
         style: TextStyle(
@@ -178,12 +180,7 @@ class CoachProfileScreen extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
+      child: StyledCard(
         child: Row(
           children: [
             Icon(

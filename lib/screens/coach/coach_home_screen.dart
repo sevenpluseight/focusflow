@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/coach/coach.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -68,13 +69,8 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            StyledCard(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -104,13 +100,8 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            StyledCard(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
@@ -153,13 +144,8 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            StyledCard(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : atRiskUsers.isEmpty

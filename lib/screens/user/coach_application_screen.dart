@@ -89,31 +89,31 @@ class _CoachApplicationScreenState extends State<CoachApplicationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _nameController,
-                label: 'Full Name',
+                labelText: 'Full Name',
                 icon: Pixel.user,
                 validator: (val) => val!.isEmpty ? 'Please enter your full name' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _expertiseController,
-                label: 'Area of Expertise (e.g., Productivity, Study)',
+                labelText: 'Area of Expertise (e.g., Productivity, Study)',
                 icon: Pixel.book,
                 validator: (val) => val!.isEmpty ? 'Please enter your expertise' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _bioController,
-                label: 'Short Bio',
+                labelText: 'Short Bio',
                 icon: Pixel.editbox,
                 maxLines: 4,
                 validator: (val) => val!.isEmpty ? 'Please enter a short bio' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _portfolioController,
-                label: 'Portfolio Link (Optional)',
+                labelText: 'Portfolio Link (Optional)',
                 icon: Pixel.link,
               ),
               const SizedBox(height: 32),
@@ -130,32 +130,6 @@ class _CoachApplicationScreenState extends State<CoachApplicationScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildTextFormField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    int? maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    final theme = Theme.of(context);
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
-        prefixIcon: Icon(icon, color: theme.colorScheme.onSurface),
-        filled: true,
-        fillColor: theme.cardColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/screens/coach/coach.dart';
@@ -41,18 +42,12 @@ class CoachReportSummaryScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             // 2. "Quick Stats" Card (no title inside)
-            Card(
-              color: theme.cardColor,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildStatItem(theme, Pixel.users, 'Total Users', '$totalUsers'),
-                    _buildStatItem(theme, Pixel.trending, 'Average Streak', '${avgStreak.toStringAsFixed(1)} days'),
-                  ],
-                ),
+            StyledCard(
+              child: Column(
+                children: [
+                  _buildStatItem(theme, Pixel.users, 'Total Users', '$totalUsers'),
+                  _buildStatItem(theme, Pixel.trending, 'Average Streak', '${avgStreak.toStringAsFixed(1)} days'),
+                ],
               ),
             ),
             // -----------------------
@@ -65,12 +60,7 @@ class CoachReportSummaryScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            StyledCard(
               child: atRiskUsers.isEmpty
                   ? Text(
                       'Great job! No users are currently at risk.',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -34,12 +35,7 @@ class CoachLeaderboardScreen extends StatelessWidget {
           // "Top Performers" Card (Figure 23)
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            child: StyledCard(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -135,12 +131,7 @@ class CoachLeaderboardScreen extends StatelessWidget {
   Widget _buildRankCard(ThemeData theme, UserModel user, int rank) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
+      child: StyledCard(
         child: Row(
           children: [
             Text(

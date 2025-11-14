@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 
 import 'package:focusflow/screens/coach/coach.dart';
@@ -78,12 +79,8 @@ class CoachChallengeScreen extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: StyledCard(
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: theme.cardColor, // This will use your theme color
-          borderRadius: BorderRadius.circular(12),
-        ),
         child: Row(
           children: [
             Icon(icon, size: 32, color: theme.colorScheme.onSurface),

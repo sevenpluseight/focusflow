@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -76,20 +77,20 @@ class _CoachFocusTrendScreenState extends State<CoachFocusTrendScreen> {
       focusTime += '${minutes}m';
     }
 
-    return Card(
-      color: theme.cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: const Icon(Pixel.calendar, size: 32),
-        title: Text(
-          progress.date, // This is the date string, e.g., "2025-11-14"
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          'Total Focus: $focusTime',
-          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: StyledCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          leading: const Icon(Pixel.calendar, size: 32),
+          title: Text(
+            progress.date, // This is the date string, e.g., "2025-11-14"
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            'Total Focus: $focusTime',
+            style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          ),
         ),
       ),
     );

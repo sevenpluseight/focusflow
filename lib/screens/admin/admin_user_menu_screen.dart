@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
+import 'package:focusflow/screens/admin/admin.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +41,12 @@ class AdminUserMenuScreen extends StatelessWidget {
                       subtitle: '$totalUsers total users in the system',
                       buttonText: 'Manage Users',
                       onPressed: () {
-                        // TODO: Navigate to all users screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AdminUsersScreen(),
+                          ),
+                        );
                       },
                     );
                   },

@@ -141,7 +141,17 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
               theme: theme,
               icon: Pixel.flag,
               label: 'AI Risk Flags',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoachAiRiskFlagsScreen(
+                      userId: _user!.uid,
+                      username: _user!.username,
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
 

@@ -6,6 +6,8 @@ import 'package:focusflow/models/challenge_model.dart';
 import 'package:focusflow/models/report_model.dart';
 import 'package:focusflow/models/distraction_log_model.dart';
 import 'package:focusflow/models/daily_progress_model.dart';
+import 'package:focusflow/services/services.dart';
+import 'package:flutter/foundation.dart';
 
 class CoachProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -29,6 +31,7 @@ class CoachProvider with ChangeNotifier {
   List<DistractionLogModel> get userLogs => _userLogs;
   bool get logsLoading => _logsLoading;
 
+  // ignore: prefer_final_fields
   Map<String, int> _todayFocusMinutes = {};
   Map<String, int> get todayFocusMinutes => _todayFocusMinutes;
 
@@ -37,6 +40,12 @@ class CoachProvider with ChangeNotifier {
 
   List<DailyProgressModel> get userProgressHistory => _userProgressHistory;
   bool get progressHistoryLoading => _progressHistoryLoading;
+
+  String _aiInsights = "";
+  bool _aiLoading = false;
+
+  String get aiInsights => _aiInsights;
+  bool get aiLoading => _aiLoading;
 
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
@@ -279,6 +288,53 @@ class CoachProvider with ChangeNotifier {
       print('Error fetching focus history: $e');
     } finally {
       _progressHistoryLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchAiRiskFlags(String userId) async {
+    _aiLoading = true;
+    _aiInsights = "";
+    notifyListeners();
+
+    try {
+      // 1. Get the data we've already fetched
+      final UserModel? user = _connectedUsers.firstWhere((u) => u.uid == userId);
+      if (user == null) throw Exception("User not found");
+
+      // Fetch the latest logs and progress
+      await fetchDistractionLogs(userId);
+      await fetchUserFocusHistory(userId);
+      
+      // 2. Build a prompt for the Gemini API
+      String prompt = """
+        You are a helpful productivity coach. Analyze the following data for a user named '${user.username}' and provide a list of "AI Risk Flags" or positive insights. Be concise.
+
+        User's Profile:
+        - Current Streak: ${user.currentStreak ?? 0} days
+        - Longest Streak: ${user.longestStreak ?? 0} days
+        - Daily Target: ${user.dailyTargetHours ?? 2} hours
+
+        Recent Focus History (last 14 days):
+        ${_userProgressHistory.isEmpty ? "- No focus history." : _userProgressHistory.map((p) => "- ${p.date}: ${p.focusedMinutes} minutes focused.").join("\n")}
+
+        Recent Distraction Logs:
+        ${_userLogs.isEmpty ? "- No distraction logs." : _userLogs.map((l) => "- ${l.category}: ${l.note ?? ''}").join("\n")}
+
+        Analysis:
+      """;
+
+      debugPrint("--- Sending Prompt to Gemini ---");
+      debugPrint(prompt);
+      
+      // 3. Call the Gemini Service
+      final response = await GeminiService.generateText(prompt);
+      _aiInsights = response;
+
+    } catch (e) {
+      _aiInsights = "Error generating AI insights: $e";
+    } finally {
+      _aiLoading = false;
       notifyListeners();
     }
   }

@@ -302,7 +302,30 @@ class CoachProvider with ChangeNotifier {
       final UserModel? user = _connectedUsers.firstWhere((u) => u.uid == userId);
       if (user == null) throw Exception("User not found");
 
-      // Fetch the latest logs and progress
+      // 1. Check Firebase for a saved analysis
+      final userDocRef = _firestore.collection('users').doc(userId);
+      final userSnapshot = await userDocRef.get();
+      final userData = userSnapshot.data();
+
+      final savedAnalysis = userData?['aiAnalysis'] as Map<String, dynamic>?;
+      final savedTimestamp = savedAnalysis?['updatedAt'] as Timestamp?;
+
+      if (savedTimestamp != null) {
+        final now = Timestamp.now();
+        final hoursDiff = (now.seconds - savedTimestamp.seconds) / 3600;
+
+        // If analysis is less than 24 hours old, just use it
+        if (hoursDiff < 24) {
+          _aiInsights = savedAnalysis?['insights'] ?? "No insights found.";
+          debugPrint("--- Using Cached AI Analysis ---");
+          _aiLoading = false;
+          notifyListeners();
+          return; // Stop here, we don't need to call Gemini
+        }
+      }
+
+      // 2. If no recent analysis, fetch data and call Gemini
+      debugPrint("--- No cache. Fetching new AI Analysis... ---");
       await fetchDistractionLogs(userId);
       await fetchUserFocusHistory(userId);
       
@@ -335,6 +358,13 @@ class CoachProvider with ChangeNotifier {
       // 3. Call the Gemini Service
       final response = await GeminiService.generateText(prompt);
       _aiInsights = response;
+
+      await userDocRef.update({
+        'aiAnalysis': {
+          'insights': _aiInsights, // Save the single response
+          'updatedAt': Timestamp.now(),
+        }
+      });
 
     } catch (e) {
       _aiInsights = "Error generating AI insights: $e";

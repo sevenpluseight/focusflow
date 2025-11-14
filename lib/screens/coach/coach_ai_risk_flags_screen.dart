@@ -37,7 +37,9 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("AI Risk Flags for ${widget.username}"),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: isDark
+            ? const Color(0xFF3A3D42)
+            : const Color(0xFFE8F5E9),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -49,7 +51,9 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
         child: Card(
           color: theme.cardColor,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: coachProvider.aiLoading
@@ -62,21 +66,21 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                       ],
                     ),
                   )
-                : MarkdownBody( 
-                  data: coachProvider.aiInsights.isEmpty
-                      ? 'No insights generated.'
-                      : coachProvider.aiInsights,
-                  styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                : MarkdownBody(
+                    data: coachProvider.aiInsights.isEmpty
+                        ? 'No insights generated.'
+                        : coachProvider.aiInsights,
+                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       // Style for regular text
                       p: TextStyle(
-                        fontSize: 16, 
-                        height: 1.5, 
-                        color: theme.textTheme.bodyMedium?.color
+                        fontSize: 16,
+                        height: 1.5,
+                        color: theme.textTheme.bodyMedium?.color,
                       ),
                       // Style for **bold** text
                       strong: TextStyle(
-                        fontWeight: FontWeight.bold, 
-                        color: theme.colorScheme.onSurface
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
                       ),
                       // Style for '## Heading'
                       h2: TextStyle(
@@ -90,9 +94,13 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                         color: theme.textTheme.bodyMedium?.color,
                         height: 1.5,
                       ),
-                      listBulletPadding: const EdgeInsets.only(left: 4, right: 8, top: 4),
+                      listBulletPadding: const EdgeInsets.only(
+                        left: 4,
+                        right: 8,
+                        top: 4,
+                      ),
                     ),
-                ),
+                  ),
           ),
         ),
       ),

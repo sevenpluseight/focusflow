@@ -302,6 +302,7 @@ class CoachProvider with ChangeNotifier {
       final UserModel? user = _connectedUsers.firstWhere((u) => u.uid == userId);
       if (user == null) throw Exception("User not found");
 
+      // --- NEW 5 AM REFRESH LOGIC ---
       // 1. Check Firebase for a saved analysis
       final userDocRef = _firestore.collection('users').doc(userId);
       final userSnapshot = await userDocRef.get();
@@ -311,16 +312,28 @@ class CoachProvider with ChangeNotifier {
       final savedTimestamp = savedAnalysis?['updatedAt'] as Timestamp?;
 
       if (savedTimestamp != null) {
-        final now = Timestamp.now();
-        final hoursDiff = (now.seconds - savedTimestamp.seconds) / 3600;
+        final now = DateTime.now();
+        final today5AM = DateTime(now.year, now.month, now.day, 5); // 5 AM today
 
-        // If analysis is less than 24 hours old, just use it
-        if (hoursDiff < 24) {
+        DateTime appDayStart;
+        if (now.isBefore(today5AM)) {
+          // It's currently before 5 AM, so the "app day" started at 5 AM yesterday
+          appDayStart = today5AM.subtract(const Duration(days: 1));
+        } else {
+          // It's after 5 AM, so the "app day" started at 5 AM today
+          appDayStart = today5AM;
+        }
+
+        final savedDate = savedTimestamp.toDate();
+        
+        // Check if the saved analysis is from the "current app day"
+        if (savedDate.isAfter(appDayStart)) {
+          // The cache is good (saved *after* 5 AM on the current app day), so use it.
           _aiInsights = savedAnalysis?['insights'] ?? "No insights found.";
-          debugPrint("--- Using Cached AI Analysis ---");
+          debugPrint("--- Using Cached AI Analysis (from ${savedDate.toIso8601String()}) ---");
           _aiLoading = false;
           notifyListeners();
-          return; // Stop here, we don't need to call Gemini
+          return; // Stop here
         }
       }
 

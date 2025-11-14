@@ -142,7 +142,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     child: TextField(
                       controller: _targetController,
                       keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         labelText: 'Daily Target Hours',
                         border: OutlineInputBorder(

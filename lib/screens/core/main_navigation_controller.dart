@@ -8,11 +8,11 @@ import 'package:focusflow/screens/coach/coach.dart';
 
 import '../common/placeholder_pages.dart';
 import '../coach/coach_home_screen.dart';
-import '../admin/admin_dashboard_screen.dart';
+import '../admin/admin.dart';
 import '../user/user_home_screen.dart';
 import '../user/user_profile_screen.dart';
 import '../auth/auth.dart';
-import '../../theme/app_theme.dart';
+// import '../../theme/app_theme.dart';
 import '../../widgets/widgets.dart';
 
 class MainNavigationController extends StatefulWidget {
@@ -36,11 +36,15 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
   void initState() {
     super.initState();
     _setupNavigationForRole(widget.currentUserRole);
+
+    if (widget.currentUserRole == UserRole.admin) {
+      context.read<AdminStatsProvider>().ensureInitialized();
+      context.read<AdminUsersProvider>().ensureInitialized();
+    }
   }
 
   void _setupNavigationForRole(UserRole role) {
     switch (role) {
-      // User
       case UserRole.user:
         _pageOptions = [
           UserHomeScreen(),
@@ -59,7 +63,6 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _labels = const ['Home', 'Reports', 'Timer', 'Coaches', 'Profile'];
         break;
 
-      // Coach
       case UserRole.coach:
         _pageOptions = const [
           CoachHomeScreen(),
@@ -78,10 +81,10 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _labels = const ['Home', 'Users', 'Challenge', 'Reports', 'Profile'];
         break;
 
-      // Admin
       case UserRole.admin:
         _pageOptions = const [
           AdminDashboardScreen(),
+          AdminUserMenuScreen(),
           PlaceholderPage(title: 'Users'),
           PlaceholderPage(title: 'Events'),
           PlaceholderPage(title: 'Notifications'),
@@ -106,57 +109,22 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
 
   Future<void> _showLogoutConfirmationDialog() async {
     final authProvider = context.read<AuthProvider>();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final bool? confirmLogout = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text(
-            'Confirm Logout',
-            style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
-                fontSize: 18),
-          ),
-          content: Text(
-            'Are you sure you want to log out?',
-            style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.black54, fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                    fontSize: 16),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              child: Text(
-                'Logout',
-                style: TextStyle(
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
-          ],
+        return const ConfirmationDialog(
+          title: 'Confirm Logout',
+          contentText: 'Are you sure you want to log out?',
+          confirmText: 'Logout',
         );
       },
     );
 
     if (confirmLogout == true && mounted) {
       try {
-        await authProvider.signOut();
+        await authProvider.signOut(context);
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
@@ -179,36 +147,23 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Lighter color for top & bottom bars
-    final Color barColor = isDark ? const Color(0xFF3A3D42) : Color(0xFFE8F5E9);
-    // Darker color for screen background
-    final Color backgroundColor = isDark ? const Color(0xFF2C2F33) : Colors.grey[100]!;
-
-    final Color activeColor =  isDark ? AppTheme.primaryColor : const Color(0xFF007A5E);
-    final Color inactiveColor = isDark ? Colors.white70 : Colors.grey.shade700;
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: barColor,
-        elevation: 0,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: theme.appBarTheme.elevation,
         title: Text(
           _labels[_selectedIndex],
-          style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.w600,
-              fontSize: 20),
+          style: theme.appBarTheme.titleTextStyle,
         ),
-        iconTheme: IconThemeData(
-          color: isDark ? Colors.white : Colors.black87,
-        ),
+        iconTheme: theme.appBarTheme.iconTheme,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             tooltip: 'Toggle Theme',
             icon: Icon(
               isDark ? Pixel.sunalt : Pixel.moon,
-              color: isDark ? Colors.white : Colors.black87,
+              color: theme.appBarTheme.iconTheme?.color,
             ),
             onPressed: () => context.read<ThemeProvider>().toggleTheme(),
           ),
@@ -219,7 +174,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
               icon: Icon(
                 Pixel.notification,
                 size: 28,
-                color: isDark ? Colors.white : Colors.black87,
+                color: theme.appBarTheme.iconTheme?.color,
               ),
               onPressed: () {},
             ),
@@ -227,17 +182,14 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
             tooltip: 'Logout',
             icon: Icon(
               Pixel.logout,
-              color: isDark ? Colors.white : Colors.black87,
+              color: theme.appBarTheme.iconTheme?.color,
             ),
             onPressed: _showLogoutConfirmationDialog,
           ),
           const SizedBox(width: 10),
         ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pageOptions,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pageOptions),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         itemCount: _iconList.length,
         tabBuilder: (int index, bool isActive) {
@@ -247,13 +199,13 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
             label: _labels[index],
             isActive: isActive,
             onTap: () => _handleItemTap(index),
-            activeColor: activeColor,
-            inactiveColor: inactiveColor,
+            activeColor: theme.colorScheme.primary,
+            inactiveColor: theme.bottomNavigationBarTheme.unselectedItemColor ?? Colors.grey,
           );
         },
         activeIndex: _selectedIndex,
         onTap: _handleItemTap,
-        backgroundColor: barColor,
+        backgroundColor: isDark ? const Color(0xFF2C2F33) : theme.bottomNavigationBarTheme.backgroundColor,
         gapLocation: GapLocation.none,
         notchSmoothness: NotchSmoothness.sharpEdge,
         height: 65,

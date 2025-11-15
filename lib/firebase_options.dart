@@ -13,7 +13,8 @@ class DefaultFirebaseOptions {
         projectId: dotenv.env['WEB_PROJECT_ID'] ?? '',
         authDomain: dotenv.env['WEB_AUTH_DOMAIN'] ?? '',
         storageBucket: dotenv.env['WEB_STORAGE_BUCKET'] ?? '',
-        measurementId: dotenv.env['WEB_MEASUREMENT_ID'] ?? '',      );
+        measurementId: dotenv.env['WEB_MEASUREMENT_ID'] ?? '',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

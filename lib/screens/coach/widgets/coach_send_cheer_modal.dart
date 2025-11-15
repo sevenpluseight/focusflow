@@ -127,16 +127,9 @@ class _CoachSendCheerModalState extends State<CoachSendCheerModal> {
               
               const SizedBox(height: 16),
               
-              TextField(
+              CustomTextField(
                 controller: _customCheerController,
-                decoration: InputDecoration(
-                  labelText: 'Custom Cheer',
-                  fillColor: theme.scaffoldBackgroundColor,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                labelText: 'Custom Cheer',
               ),
               const SizedBox(height: 16),
               

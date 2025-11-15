@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart'; // Import widgets for CustomSnackBar
 import 'other/productivity_tips.dart';
 
 class UserHomeScreen extends StatefulWidget {
@@ -86,9 +87,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final dailyTarget = userProvider.user?.dailyTargetHours ?? 2.0;
 
     final theme = Theme.of(context);
-    final tipBoxColor = theme.brightness == Brightness.light
-        ? const Color(0xFFE8F5E9)
-        : theme.colorScheme.surface;
+    final tipBoxColor = theme.cardColor; // Simplified to theme.cardColor
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -109,10 +108,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           value: progressProvider.todayProgress.clamp(0.0, 1.0),
                           strokeWidth: 16,
                           backgroundColor: theme.brightness == Brightness.light
-                              ? Colors.grey.shade300
+                              ? theme.colorScheme.surfaceVariant // More theme-adaptive
                               : theme.colorScheme.surfaceContainerHighest,
-                          valueColor: const AlwaysStoppedAnimation(
-                            Color(0xFFBFFB4F),
+                          valueColor: AlwaysStoppedAnimation(
+                            theme.colorScheme.primary, // Use theme primary color
                           ),
                           strokeCap: StrokeCap.round,
                         ),
@@ -130,9 +129,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   Text(
                     'Today\'s Progress: ${(progressProvider.todayProgress * 100).toStringAsFixed(0)}%',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withValues(
-                        alpha: 0.8,
-                      ),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8), // Fixed withValues
                       height: 1.4,
                     ),
                   ),
@@ -148,15 +145,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      textAlign: TextAlign.center,
                       onSubmitted: (value) async {
                         final newValue = double.tryParse(value);
                         if (newValue == null || newValue < 1 || newValue > 8) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Enter a number between 1 and 8"),
-                              backgroundColor: Colors.red,
-                            ),
+                          CustomSnackBar.show(
+                            context,
+                            message: "Enter a number between 1 and 8",
+                            type: SnackBarType.error,
+                            position: SnackBarPosition.top,
                           );
                           _targetController.text = dailyTarget.toStringAsFixed(
                             0,
@@ -170,11 +166,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             dailyTargetHours: newValue,
                           );
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Daily target updated ✅"),
-                              backgroundColor: Colors.green,
-                            ),
+                          CustomSnackBar.show(
+                            context,
+                            message: "Daily target updated ✅",
+                            type: SnackBarType.success,
+                            position: SnackBarPosition.top,
                           );
                         }
                       },
@@ -210,9 +206,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       _dailyTip,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(
-                          alpha: 0.9,
-                        ),
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.9), // Fixed withValues
                       ),
                     ),
                   ),

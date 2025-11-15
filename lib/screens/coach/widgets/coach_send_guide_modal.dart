@@ -148,16 +148,9 @@ class _CoachSendGuideModalState extends State<CoachSendGuideModal> {
               
               const SizedBox(height: 16),
               
-              TextField(
+              CustomTextField(
                 controller: _customGuideController,
-                decoration: InputDecoration(
-                  labelText: 'Custom Guide',
-                  fillColor: theme.scaffoldBackgroundColor,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                labelText: 'Custom Guide',
                 maxLines: 3,
               ),
               const SizedBox(height: 16),

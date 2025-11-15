@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 // import 'package:focusflow/theme/app_theme.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _CoachUserListScreenState extends State<CoachUserListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // final isDark = theme.brightness == Brightness.dark;
     
     // Watch the provider here
     final coachProvider = context.watch<CoachProvider>();
@@ -59,27 +60,11 @@ class _CoachUserListScreenState extends State<CoachUserListScreen> {
           // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
+            child: CustomTextField(
               controller: _searchController,
+              labelText: 'Search by username...',
+              icon: Pixel.search,
               onChanged: (value) => setState(() => _searchQuery = value),
-              decoration: InputDecoration(
-                labelText: 'Search by username...',
-                labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                prefixIcon: Icon(
-                  Pixel.search,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-                filled: true,
-                fillColor: theme.cardColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                ),
-              ),
             ),
           ),
 
@@ -149,11 +134,11 @@ class _UserListView extends StatelessWidget {
   Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user, int minutes) {
     // --- Status Logic ---
     String status = "Active";
-    Color statusColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
+    Color statusColor = theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
 
     if ((user.currentStreak ?? 0) == 0) {
       status = "At Risk";
-      statusColor = Colors.orangeAccent;
+      statusColor = theme.colorScheme.tertiary;
     }
 
     String focusText;
@@ -168,12 +153,7 @@ class _UserListView extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
+      child: StyledCard(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

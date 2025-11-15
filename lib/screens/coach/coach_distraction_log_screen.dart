@@ -31,14 +31,14 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // final isDark = theme.brightness == Brightness.dark;
     final coachProvider = context.watch<CoachProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("${widget.username}'s Logs"),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -69,13 +69,10 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
     final date = log.createdAt.toDate();
     final formattedDate = '${date.month}/${date.day}/${date.year} - ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
 
-    return Card(
-      color: theme.cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: StyledCard(
+        title: 'Category: ${log.category}',
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,14 +88,6 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Category: ${log.category}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
                   if (log.note != null && log.note!.isNotEmpty)
                     Text(
                       'Note: ${log.note}',
@@ -112,7 +101,7 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
                       _showReportConfirmation(context, log);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightGreenAccent,
+                      backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -176,10 +165,10 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(false),
           ),
           TextButton(
-            child: const Text(
+            child: Text(
               'Report',
               style: TextStyle(
-                color: Colors.red,
+                color: theme.colorScheme.error,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

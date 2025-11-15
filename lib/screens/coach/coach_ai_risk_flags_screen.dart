@@ -10,10 +10,10 @@ class CoachAiRiskFlagsScreen extends StatefulWidget {
   final String username;
 
   const CoachAiRiskFlagsScreen({
-    Key? key,
+    super.key,
     required this.userId,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   State<CoachAiRiskFlagsScreen> createState() => _CoachAiRiskFlagsScreenState();
@@ -32,7 +32,7 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final coachProvider = context.watch<CoachProvider>();
-
+    final textColor = theme.colorScheme.onSurface;
     final insights = coachProvider.aiInsights;
 
     // -------- SPLIT THE MARKDOWN INTO 2 PARTS --------
@@ -82,7 +82,21 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
 
             // ------------ CARD 1: AI RISK FLAGS -------------
             StyledCard(
-              title: "AI Risk Flags",
+              titleWidget: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center, // ensures icon aligns with text
+                children: [
+                  const Icon(Pixel.flag, color: Colors.red), // example icon
+                  const SizedBox(width: 8),
+                  Text(
+                    "AI Risk Flags",
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: textColor 
+                    ),
+                  ),
+                ],
+              ),
               child: coachProvider.aiLoading
                   ? const Center(
                       child: Column(
@@ -94,17 +108,48 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                       ),
                     )
                   : MarkdownBody(
-                      data:
-                          riskFlags.isEmpty ? "No risk flags detected." : riskFlags,
-                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
+                      data: riskFlags.isEmpty ? "No risk flags detected." : riskFlags,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: theme.textTheme.bodyMedium?.color, // descriptions grayish
+                        ),
+                        strong: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: textColor, 
+                        ),
+                        listBullet: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          height: 1.5,
+                        ),
+                        listBulletPadding: const EdgeInsets.only(
+                          left: 4,
+                          right: 8,
+                          top: 4,
+                        ),
+                      ),
                     ),
             ),
-
             const SizedBox(height: 24),
 
             // ------------ CARD 2: POSITIVE INSIGHTS -------------
             StyledCard(
-              title: "Positive Insights",
+              titleWidget: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center, // ensures icon aligns with text
+                children: [
+                  const Icon(Pixel.heart, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Positive Insights",
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                ],
+              ),
               child: coachProvider.aiLoading
                   ? const Center(
                       child: Column(
@@ -119,7 +164,26 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                       data: positiveInsights.isEmpty
                           ? "No positive insights available."
                           : positiveInsights,
-                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                        strong: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                        listBullet: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          height: 1.5,
+                        ),
+                        listBulletPadding: const EdgeInsets.only(
+                          left: 4,
+                          right: 8,
+                          top: 4,
+                        ),
+                      ),
                     ),
             ),
           ],

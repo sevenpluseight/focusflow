@@ -461,13 +461,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final dateFormat = DateFormat('MMM dd, yyyy');
     final joinDate = dateFormat.format(user.createdAt.toDate());
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: theme.cardColor,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: StyledCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -478,7 +474,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   backgroundColor: _getRoleColor(
                     user.role,
                     isDark,
-                  ).withValues(alpha: 0.2),
+                  ).withOpacity(0.2),
                   child: Icon(
                     _getRoleIcon(user.role),
                     color: _getRoleColor(user.role, isDark),
@@ -516,7 +512,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     color: _getRoleColor(
                       user.role,
                       isDark,
-                    ).withValues(alpha: 0.2),
+                    ).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

@@ -46,9 +46,19 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: StyledCard(
-          title: 'AI Generated Insights',
-          child: coachProvider.aiLoading
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'AI Generated Insights',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            StyledCard(
+              child: coachProvider.aiLoading
               ? const Center(
                   child: Column(
                     children: [
@@ -93,6 +103,8 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                     ),
                   ),
                 ),
+            ),
+          ],
         ),
       ),
     );

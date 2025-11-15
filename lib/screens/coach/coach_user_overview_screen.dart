@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class CoachUserOverviewScreen extends StatelessWidget {
   final String userId;
 
-  const CoachUserOverviewScreen({Key? key, required this.userId}) : super(key: key);
+  const CoachUserOverviewScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {

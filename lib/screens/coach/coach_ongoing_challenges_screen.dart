@@ -24,14 +24,13 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final coachProvider = context.watch<CoachProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Ongoing Challenges'),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -61,15 +60,20 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
   // This widget matches Figure 24 
   Widget _buildChallengeCard(ThemeData theme, ChallengeModel challenge) {
     Color statusColor;
+    Color onStatusColor;
+
     switch (challenge.status) {
       case 'approved':
-        statusColor = Colors.green;
+        statusColor = Colors.green.shade600;
+        onStatusColor = Colors.white;
         break;
       case 'rejected':
-        statusColor = Colors.red;
+        statusColor = theme.colorScheme.error;
+        onStatusColor = theme.colorScheme.onError;
         break;
       default: // pending
-        statusColor = Colors.orange;
+        statusColor = theme.colorScheme.tertiary;
+        onStatusColor = theme.colorScheme.onTertiary;
     }
 
     return Padding(
@@ -96,8 +100,8 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
                   ),
                   child: Text(
                     challenge.status.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: onStatusColor,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),

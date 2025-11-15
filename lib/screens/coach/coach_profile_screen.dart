@@ -26,50 +26,15 @@ class CoachProfileScreen extends StatelessWidget {
   // --- Logic for "Log Out" ---
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final bool? confirmLogout = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text(
-            'Confirm Logout',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to log out?',
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              child: Text(
-                'Logout',
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
-          ],
+        return const ConfirmationDialog(
+          title: 'Confirm Logout',
+          contentText: 'Are you sure you want to log out?',
+          confirmText: 'Logout',
         );
       },
     );
@@ -96,24 +61,21 @@ class CoachProfileScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Username Card
-            _buildProfileCard(
-              theme: theme,
-              text: user?.username ?? 'Coach',
-              isHeader: true,
+            StyledCard(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                user?.username ?? 'Coach',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 16),
 
             // Switch to User Mode Button
             PrimaryButton(
               onPressed: () => _switchToUserMode(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightGreenAccent,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -123,82 +85,39 @@ class CoachProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 32), // Gap before settings
 
             // --- Settings ---
-            const Text(
+            Text(
               "Settings",
-              style: TextStyle(
-                fontSize: 18,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            _buildProfileButton(
-              theme: theme,
-              icon: theme.brightness == Brightness.dark ? Pixel.sunalt : Pixel.moon,
-              label: 'Theme Preferences',
-              onTap: () => context.read<ThemeProvider>().toggleTheme(),
-            ),
-            const SizedBox(height: 12),
-            _buildProfileButton(
-              theme: theme,
-              icon: Pixel.logout,
-              label: 'Log Out',
-              onTap: () => _showLogoutConfirmation(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Helper for username card
-  Widget _buildProfileCard({
-    required ThemeData theme,
-    required String text,
-    bool isHeader = false,
-  }) {
-    return StyledCard(
-      padding: const EdgeInsets.all(20),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: isHeader ? 20 : 16,
-          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-
-  // Helper for the buttons
-  Widget _buildProfileButton({
-    required ThemeData theme,
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: StyledCard(
-        child: Row(
-          children: [
-            Icon(
-              icon, 
-              size: 28,
-              color: theme.colorScheme.onSurface,
-              ),
-            const SizedBox(width: 16),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            SecondaryButton(
+              onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(theme.brightness == Brightness.dark ? Pixel.sunalt : Pixel.moon),
+                  const SizedBox(width: 8),
+                  const Text('Theme Preferences'),
+                ],
               ),
             ),
-            const Spacer(),
-            if (label != 'Theme Preferences' && label != 'Log Out')
-              const Icon(Pixel.chevronright, color: Colors.grey),
+            const SizedBox(height: 8),
+            SecondaryButton(
+              onPressed: () => _showLogoutConfirmation(context),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Pixel.logout),
+                  SizedBox(width: 8),
+                  Text('Log Out'),
+                ],
+              ),
+            ),
           ],
         ),
       ),

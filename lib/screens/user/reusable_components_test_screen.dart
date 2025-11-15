@@ -2,14 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 
-class ReusableComponentsTestScreen extends StatelessWidget {
+class ReusableComponentsTestScreen extends StatefulWidget {
   const ReusableComponentsTestScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController _textFieldController = TextEditingController();
-    final TextEditingController _formFieldController = TextEditingController();
+  State<ReusableComponentsTestScreen> createState() =>
+      _ReusableComponentsTestScreenState();
+}
 
+class _ReusableComponentsTestScreenState
+    extends State<ReusableComponentsTestScreen> {
+  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _formFieldController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textFieldController.dispose();
+    _formFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reusable Components Test'),
@@ -19,10 +34,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Primary Button
-            const Text(
+            Text(
               'Primary Button:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             PrimaryButton(
@@ -37,10 +51,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Secondary Button
-            const Text(
+            Text(
               'Secondary Button:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             SecondaryButton(
@@ -62,10 +75,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Custom Text Field
-            const Text(
+            Text(
               'Custom Text Field:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             CustomTextField(
@@ -75,10 +87,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Custom Text Form Field
-            const Text(
+            Text(
               'Custom Text Form Field:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Form(
@@ -96,10 +107,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Styled Card
-            const Text(
+            Text(
               'Styled Card:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             StyledCard(
@@ -118,33 +128,20 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Info Modal
-            const Text(
-              'Info Modal (via button):',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'Info Icon (shows dialog):',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            PrimaryButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return InfoModal(
-                      title: 'Information',
-                      message: 'This is a reusable info modal!',
-                      onClose: () => Navigator.of(context).pop(),
-                    );
-                  },
-                );
-              },
-              child: const Text('Show Info Modal'),
+            InfoIcon(
+              dialogTitle: 'Information',
+              dialogContentText: 'This is a reusable info dialog!',
             ),
             const SizedBox(height: 16),
 
-            // Custom SnackBar
-            const Text(
+            Text(
               'Custom SnackBar (via button):',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             PrimaryButton(
@@ -159,10 +156,9 @@ class ReusableComponentsTestScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Animated Nav Bar Item (conceptual)
-            const Text(
+            Text(
               'Animated Nav Bar Item (conceptual):',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(

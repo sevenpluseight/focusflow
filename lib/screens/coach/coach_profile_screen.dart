@@ -15,9 +15,8 @@ class CoachProfileScreen extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const MainNavigationController(
-          currentUserRole: UserRole.user,
-        ),
+        builder: (_) =>
+            const MainNavigationController(currentUserRole: UserRole.user),
       ),
     );
   }
@@ -34,7 +33,9 @@ class CoachProfileScreen extends StatelessWidget {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text(
             'Confirm Logout',
             style: TextStyle(
@@ -44,9 +45,7 @@ class CoachProfileScreen extends StatelessWidget {
           ),
           content: Text(
             'Are you sure you want to log out?',
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
           actions: [
             TextButton(
@@ -74,7 +73,7 @@ class CoachProfileScreen extends StatelessWidget {
     );
 
     if (confirmLogout == true && context.mounted) {
-      await authProvider.signOut();
+      await authProvider.signOut(context);
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -103,13 +102,13 @@ class CoachProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Switch to User Mode Button
-              ElevatedButton.icon(
+            ElevatedButton.icon(
               icon: const Icon(Pixel.repeat),
               label: const Text('Switch to User Mode'),
               onPressed: () => _switchToUserMode(context),
               style: ElevatedButton.styleFrom(
                 // Using a distinct color to make it stand out
-                backgroundColor: Colors.lightGreenAccent, 
+                backgroundColor: Colors.lightGreenAccent,
                 foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -121,15 +120,14 @@ class CoachProfileScreen extends StatelessWidget {
             // --- Settings ---
             const Text(
               "Settings",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _buildProfileButton(
               theme: theme,
-              icon: theme.brightness == Brightness.dark ? Pixel.sunalt : Pixel.moon,
+              icon: theme.brightness == Brightness.dark
+                  ? Pixel.sunalt
+                  : Pixel.moon,
               label: 'Theme Preferences',
               onTap: () => context.read<ThemeProvider>().toggleTheme(),
             ),
@@ -186,18 +184,11 @@ class CoachProfileScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon, 
-              size: 28,
-              color: theme.colorScheme.onSurface,
-              ),
+            Icon(icon, size: 28, color: theme.colorScheme.onSurface),
             const SizedBox(width: 16),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const Spacer(),
             if (label != 'Theme Preferences' && label != 'Log Out')

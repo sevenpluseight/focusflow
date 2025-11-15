@@ -60,6 +60,21 @@ class AdminUsersProvider with ChangeNotifier {
     );
   }
 
+  void reset() {
+    _usersSubscription?.cancel();
+    _usersSubscription = null;
+
+    _allUsers = [];
+    _filteredUsers = [];
+    _searchQuery = '';
+    _selectedRoleFilter = 'all';
+    _isLoading = false;
+    _errorMessage = null;
+    _isInitialized = false;
+
+    notifyListeners();
+  }
+
   // filter the list based on states
   void _applyFilters() {
     _filteredUsers = _allUsers.where((user) {

@@ -15,9 +15,8 @@ class UserProfileScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         // We reload the main controller, forcing it back to CoachRole
-        builder: (_) => const MainNavigationController(
-          currentUserRole: UserRole.coach,
-        ),
+        builder: (_) =>
+            const MainNavigationController(currentUserRole: UserRole.coach),
       ),
     );
   }
@@ -33,7 +32,9 @@ class UserProfileScreen extends StatelessWidget {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: Text(
             'Confirm Logout',
             style: TextStyle(
@@ -77,7 +78,7 @@ class UserProfileScreen extends StatelessWidget {
     );
 
     if (confirmLogout == true && context.mounted) {
-      await authProvider.signOut();
+      await authProvider.signOut(context);
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -96,7 +97,9 @@ class UserProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final textColor = theme.colorScheme.onSurface;
-    final cardColor = !isDark ? const Color(0xFFE8F5E9) : theme.colorScheme.surfaceVariant;
+    final cardColor = !isDark
+        ? const Color(0xFFE8F5E9)
+        : theme.colorScheme.surfaceVariant;
 
     // Fetch user data if not loaded yet
     if (user == null && !userProvider.isLoading) {
@@ -162,14 +165,17 @@ class UserProfileScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   "Current Streak",
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: textColor,
+                                  ),
                                 ),
                                 Text(
                                   "${user?.currentStreak ?? 0} days",
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
                                 ),
                               ],
                             ),
@@ -178,14 +184,17 @@ class UserProfileScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   "Longest Streak",
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: textColor,
+                                  ),
                                 ),
                                 Text(
                                   "${user?.longestStreak ?? 0} days",
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
                                 ),
                               ],
                             ),
@@ -228,24 +237,24 @@ class UserProfileScreen extends StatelessWidget {
                         label: const Text("Switch to Coach Mode"),
                         onPressed: () => _switchToCoachMode(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightGreenAccent, 
+                          backgroundColor: Colors.lightGreenAccent,
                         ),
                       )
                     else
-
-                    // ------------------- Request to be Coach Button -------------------
-                    ElevatedButton.icon(
-                      icon: const Icon(Pixel.plus),
-                      label: const Text("Request to be Coach"),
-                      onPressed: () {
-                            Navigator.push(
+                      // ------------------- Request to be Coach Button -------------------
+                      ElevatedButton.icon(
+                        icon: const Icon(Pixel.plus),
+                        label: const Text("Request to be Coach"),
+                        onPressed: () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const CoachApplicationScreen(),
+                              builder: (context) =>
+                                  const CoachApplicationScreen(),
                             ),
                           );
-                      },
-                    ),
+                        },
+                      ),
                     const SizedBox(height: 32),
 
                     // ------------------- Settings -------------------
@@ -268,7 +277,8 @@ class UserProfileScreen extends StatelessWidget {
                       child: ListTile(
                         leading: const Icon(Pixel.sunalt),
                         title: const Text("Theme Preferences"),
-                        onTap: () => context.read<ThemeProvider>().toggleTheme(),
+                        onTap: () =>
+                            context.read<ThemeProvider>().toggleTheme(),
                       ),
                     ),
                     const SizedBox(height: 8),

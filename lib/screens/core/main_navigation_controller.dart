@@ -10,6 +10,7 @@ import 'package:focusflow/screens/user/user.dart';
 import 'package:focusflow/screens/admin/admin.dart';
 import 'package:focusflow/screens/user/user_notification_screen.dart';
 import 'package:focusflow/screens/coach/coach_notification_screen.dart'; // Added import
+import 'package:focusflow/screens/user/user_timer_screen.dart'; // Added import
 import '../auth/auth.dart';
 
 import '../common/placeholder_pages.dart';
@@ -54,7 +55,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _pageOptions = [
           UserHomeScreen(),
           PlaceholderPage(title: 'User Reports'),
-          PlaceholderPage(title: 'User Timer'),
+          UserTimeScreen(),
           PlaceholderPage(title: 'Coaches'),
           UserProfileScreen(),
         ];
@@ -164,14 +165,6 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         iconTheme: theme.appBarTheme.iconTheme,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            tooltip: 'Toggle Theme',
-            icon: Icon(
-              isDark ? Pixel.sunalt : Pixel.moon,
-              color: theme.appBarTheme.iconTheme?.color,
-            ),
-            onPressed: () => context.read<ThemeProvider>().toggleTheme(),
-          ),
           if (widget.currentUserRole == UserRole.user ||
               widget.currentUserRole == UserRole.coach)
             IconButton(

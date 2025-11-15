@@ -16,9 +16,8 @@ class CoachProfileScreen extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const MainNavigationController(
-          currentUserRole: UserRole.user,
-        ),
+        builder: (_) =>
+            const MainNavigationController(currentUserRole: UserRole.user),
       ),
     );
   }
@@ -40,7 +39,7 @@ class CoachProfileScreen extends StatelessWidget {
     );
 
     if (confirmLogout == true && context.mounted) {
-      await authProvider.signOut();
+      await authProvider.signOut(context);
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,

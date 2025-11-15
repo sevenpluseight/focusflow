@@ -39,7 +39,7 @@ class UserProfileScreen extends StatelessWidget {
     );
 
     if (confirmLogout == true && context.mounted) {
-      await authProvider.signOut();
+      await authProvider.signOut(context);
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -185,7 +185,8 @@ class UserProfileScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const CoachApplicationScreen(),
+                              builder: (context) =>
+                                  const CoachApplicationScreen(),
                             ),
                           );
                         },

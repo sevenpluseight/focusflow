@@ -124,7 +124,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
 
     if (confirmLogout == true && mounted) {
       try {
-        await authProvider.signOut();
+        await authProvider.signOut(context);
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,

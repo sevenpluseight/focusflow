@@ -53,6 +53,18 @@ class AdminStatsProvider with ChangeNotifier {
     );
   }
 
+  void reset() {
+    _userCountsSubscription?.cancel();
+    _userCountsSubscription = null;
+
+    _userCounts = {};
+    _isLoading = false;
+    _errorMessage = null;
+    _isInitialized = false;
+
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _userCountsSubscription?.cancel();

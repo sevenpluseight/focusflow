@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/services/services.dart';
+import 'package:provider/provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -155,8 +157,32 @@ class AuthProvider with ChangeNotifier {
   }
 
   // Sign out
-  Future<void> signOut() async {
+  // Future<void> signOut() async {
+  //   await _authService.signOut();
+  //   _setUser(null);
+  // }
+
+  Future<void> signOut(BuildContext context) async {
+    _resetAllProviders(context);
+
     await _authService.signOut();
     _setUser(null);
+  }
+
+  void _resetAllProviders(BuildContext context) {
+    try {
+      final adminUsersProvider = Provider.of<AdminUsersProvider>(
+        context,
+        listen: false,
+      );
+      adminUsersProvider.reset();
+    } catch (e) {}
+    try {
+      final adminStatsProvider = Provider.of<AdminStatsProvider>(
+        context,
+        listen: false,
+      );
+      adminStatsProvider.reset();
+    } catch (e) {}
   }
 }

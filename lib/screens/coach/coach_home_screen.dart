@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/coach/coach.dart';
-import 'package:focusflow/widgets/widgets.dart';
+import 'package:focusflow/widgets/widgets.dart'; // <-- Make sure this is imported
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -29,9 +29,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
     final coachProvider = context.read<CoachProvider>();
     final coachId = authProvider.user?.uid ?? '';
     
-    // Fetch both users and challenges
-    await coachProvider.fetchConnectedUsers(coachId);
-    await coachProvider.fetchMyChallenges();
+    // Fetch all coach data in parallel
+    await Future.wait([
+      coachProvider.fetchConnectedUsers(coachId),
+      coachProvider.fetchMyChallenges(),
+      coachProvider.fetchPendingRequests() // This fetches the requests
+    ]);
   }
 
   @override
@@ -40,10 +43,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
     // We use "watch" to listen for data changes
     final coachProvider = context.watch<CoachProvider>();
     
-    // --- Calculate Stats ---
+    // --- Get all data ---
     final users = coachProvider.connectedUsers;
     final challenges = coachProvider.challenges;
+    final pendingRequests = coachProvider.pendingRequests; // <-- GET REQUESTS
 
+    // --- Calculate Stats ---
     final totalUsers = users.length;
     final atRiskUsers = users.where((u) => (u.currentStreak ?? 0) == 0).toList();
     
@@ -66,26 +71,32 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
+            
+            // --- THIS IS THE FIXED CARD ---
             StyledCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // TODO: Implement Pending Requests Logic
-                  Text(
-                    'No pending requests.',
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'View More >',
-                      style: TextStyle(color: theme.colorScheme.primary),
-                    ),
-                  ),
-                ],
-              ),
+              // Use vertical padding if list is not empty
+              padding: pendingRequests.isEmpty 
+                  ? const EdgeInsets.all(16) 
+                  : const EdgeInsets.symmetric(vertical: 8),
+              child: coachProvider.isLoading
+                  ? const Center(child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ))
+                  : pendingRequests.isEmpty
+                      ? Text(
+                          'No pending requests.',
+                          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                        )
+                      : Column(
+                          children: pendingRequests.map((req) {
+                            // Use the correct helper widget
+                            return _buildRequestTile(context, req);
+                          }).toList(),
+                        ),
             ),
+            // -------------------------------
+
             const SizedBox(height: 30),
 
             Text(
@@ -134,6 +145,9 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
             const SizedBox(height: 10),
             StyledCard(
+              padding: atRiskUsers.isEmpty 
+                  ? const EdgeInsets.all(16) // Keep padding if empty
+                  : EdgeInsets.zero, // Use ListTile's default padding
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : atRiskUsers.isEmpty
@@ -154,6 +168,31 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  // --- THIS IS THE CORRECT HELPER WIDGET ---
+  Widget _buildRequestTile(BuildContext context, ConnectionRequestModel request) {
+    final coachProvider = context.read<CoachProvider>();
+    return ListTile(
+      title: Text("${request.username} wants to connect."),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Pixel.check, color: Colors.green), // Use Pixel icon
+            onPressed: () {
+              coachProvider.approveConnectionRequest(request.id, request.userId);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Pixel.close, color: Colors.red), // Use Pixel icon
+            onPressed: () {
+              coachProvider.rejectConnectionRequest(request.id);
+            },
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/screens/admin/admin.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -85,9 +86,6 @@ class AdminUserMenuScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: Text(
         title,
-        // style: Theme.of(
-        //   context,
-        // ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.bold,
           color: isDark ? Colors.white : Colors.black87,
@@ -100,11 +98,8 @@ class AdminUserMenuScreen extends StatelessWidget {
   Widget _buildCoachRequestsCard(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      color: theme.cardColor,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
+    return StyledCard(
+      padding: EdgeInsets.zero,
       child: Consumer<AdminUsersProvider>(
         builder: (context, usersProvider, child) {
           if (usersProvider.isLoading && usersProvider.allUsers.isEmpty) {
@@ -149,7 +144,7 @@ class AdminUserMenuScreen extends StatelessWidget {
               Divider(
                 height: 1,
                 thickness: 1,
-                color: theme.dividerColor.withValues(alpha: 0.2),
+                color: theme.dividerColor.withOpacity(0.2),
               ),
 
               // BUTTON HERE
@@ -190,7 +185,7 @@ class AdminUserMenuScreen extends StatelessWidget {
       children: [
         ListTile(
           leading: CircleAvatar(
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
             child: Icon(Pixel.user, color: theme.colorScheme.primary),
           ),
           title: Text(
@@ -228,11 +223,8 @@ class AdminUserMenuScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      color: theme.cardColor,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
+    return StyledCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -257,12 +249,6 @@ class AdminUserMenuScreen extends StatelessWidget {
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
-                    // Text(
-                    //   title,
-                    //   style: theme.textTheme.titleMedium?.copyWith(
-                    //     fontWeight: FontWeight.bold,
-                    //   ),
-                    // ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -274,7 +260,7 @@ class AdminUserMenuScreen extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: theme.dividerColor.withValues(alpha: 0.2),
+            color: theme.dividerColor.withOpacity(0.2),
           ),
 
           SizedBox(

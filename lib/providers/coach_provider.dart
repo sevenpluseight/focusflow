@@ -272,7 +272,7 @@ class CoachProvider with ChangeNotifier {
           .doc(userId)
           .collection('dailyProgress')
           .orderBy('date', descending: true) // Show newest first
-          .limit(14) // Get the last 14 days
+          .limit(30) 
           .get();
 
       _userProgressHistory = querySnapshot.docs

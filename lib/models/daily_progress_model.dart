@@ -37,7 +37,7 @@ class DailyProgressModel {
     return {
       'date': date,
       'focusedMinutes': focusedMinutes,
-      'updatedAt': updatedAt.toIso8601String(),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 }

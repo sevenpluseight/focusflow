@@ -52,9 +52,8 @@ class ProgressProvider with ChangeNotifier {
       currentStreak = data['currentStreak'] ?? 0;
       longestStreak = data['longestStreak'] ?? 0;
 
-      final lastDateStr = data['lastFocusDate'];
-      lastFocusDate =
-          lastDateStr != null ? DateTime.tryParse(lastDateStr) : null;
+      final lastFocusTimestamp = data['lastFocusDate'] as Timestamp?;
+      lastFocusDate = lastFocusTimestamp?.toDate();
     }
 
     notifyListeners();

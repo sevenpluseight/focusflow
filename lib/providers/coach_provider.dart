@@ -124,7 +124,8 @@ class CoachProvider with ChangeNotifier {
   // This function will save the new challenge
   Future<void> submitChallengeForApproval({
     required String name,
-    required int durationDays,
+    required Timestamp startDate,
+    required Timestamp endDate,
     required int focusGoalHours,
     required String description,
   }) async {
@@ -139,12 +140,13 @@ class CoachProvider with ChangeNotifier {
       final newChallenge = ChallengeModel(
         id: newChallengeRef.id,
         name: name,
-        durationDays: durationDays,
         focusGoalHours: focusGoalHours,
         description: description,
         coachId: coachId,
         createdAt: Timestamp.now(),
         status: 'pending', // Awaiting admin approval
+        startDate: startDate,
+        endDate: endDate,
       );
 
       await newChallengeRef.set(newChallenge.toMap());
@@ -168,20 +170,11 @@ class CoachProvider with ChangeNotifier {
           .orderBy('createdAt', descending: true)
           .get();
 
-      _challenges = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        // Manually create ChallengeModel from map
-        return ChallengeModel(
-          id: data['id'] ?? '',
-          name: data['name'] ?? '',
-          durationDays: data['durationDays'] ?? 0,
-          focusGoalHours: data['focusGoalHours'] ?? 0,
-          description: data['description'] ?? '',
-          coachId: data['coachId'] ?? '',
-          createdAt: data['createdAt'] ?? Timestamp.now(),
-          status: data['status'] ?? 'pending',
-        );
-      }).toList();
+      // Use the new ChallengeModel.fromFirestore factory
+      _challenges = querySnapshot.docs
+          .map((doc) => ChallengeModel.fromFirestore(doc))
+          .toList();
+
     } catch (e) {
       print('Error fetching challenges: $e');
     } finally {

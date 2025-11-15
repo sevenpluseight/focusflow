@@ -33,6 +33,26 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
     final theme = Theme.of(context);
     final coachProvider = context.watch<CoachProvider>();
 
+    final insights = coachProvider.aiInsights;
+
+    // -------- SPLIT THE MARKDOWN INTO 2 PARTS --------
+    String riskFlags = "";
+    String positiveInsights = "";
+
+    if (insights.contains("## AI Risk Flags")) {
+      final sections = insights.split("## AI Risk Flags");
+      if (sections.length > 1) {
+        final afterRisk = sections[1];
+        if (afterRisk.contains("## Positive Insights")) {
+          final split = afterRisk.split("## Positive Insights");
+          riskFlags = split[0].trim();
+          positiveInsights = split[1].trim();
+        } else {
+          riskFlags = afterRisk.trim();
+        }
+      }
+    }
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -49,6 +69,7 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ---------- BIG TITLE ----------
             Text(
               'AI Generated Insights',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -56,53 +77,50 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 20),
+
+            // ------------ CARD 1: AI RISK FLAGS -------------
             StyledCard(
+              title: "AI Risk Flags",
               child: coachProvider.aiLoading
-              ? const Center(
-                  child: Column(
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Analyzing user data with AI...'),
-                    ],
-                  ),
-                )
-              : MarkdownBody(
-                  data: coachProvider.aiInsights.isEmpty
-                      ? 'No insights generated.'
-                      : coachProvider.aiInsights,
-                  styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                    // Style for regular text
-                    p: TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      color: theme.textTheme.bodyMedium?.color,
+                  ? const Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Analyzing user data with AI...'),
+                        ],
+                      ),
+                    )
+                  : MarkdownBody(
+                      data:
+                          riskFlags.isEmpty ? "No risk flags detected." : riskFlags,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
                     ),
-                    // Style for **bold** text
-                    strong: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
+            ),
+
+            const SizedBox(height: 24),
+
+            // ------------ CARD 2: POSITIVE INSIGHTS -------------
+            StyledCard(
+              title: "Positive Insights",
+              child: coachProvider.aiLoading
+                  ? const Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Analyzing user data with AI...'),
+                        ],
+                      ),
+                    )
+                  : MarkdownBody(
+                      data: positiveInsights.isEmpty
+                          ? "No positive insights available."
+                          : positiveInsights,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme),
                     ),
-                    // Style for '## Heading'
-                    h2: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    h2Padding: const EdgeInsets.only(top: 16, bottom: 4),
-                    // Indent bullet points
-                    listBullet: TextStyle(
-                      color: theme.textTheme.bodyMedium?.color,
-                      height: 1.5,
-                    ),
-                    listBulletPadding: const EdgeInsets.only(
-                      left: 4,
-                      right: 8,
-                      top: 4,
-                    ),
-                  ),
-                ),
             ),
           ],
         ),

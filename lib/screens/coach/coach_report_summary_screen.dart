@@ -100,10 +100,10 @@ class CoachReportSummaryScreen extends StatelessWidget {
   // Helper for the "At-Risk Users" list
   Widget _buildAtRiskUserTile(BuildContext context, ThemeData theme, UserModel user) {
     return ListTile(
-      leading: Icon(Pixel.user, color: Colors.orangeAccent),
+      leading: Icon(Pixel.user, color: theme.colorScheme.tertiary),
       title: Text(user.username, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('Streak: 0 days', style: TextStyle(color: theme.textTheme.bodyMedium?.color)),
-      trailing: const Icon(Pixel.chevronright, color: Colors.grey),
+      trailing: Icon(Pixel.chevronright, color: theme.textTheme.bodyMedium?.color),
       onTap: () {
         // Navigate to the user's report screen
         Navigator.push(

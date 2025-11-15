@@ -31,14 +31,13 @@ class _CoachFocusTrendScreenState extends State<CoachFocusTrendScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final coachProvider = context.watch<CoachProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("${widget.username}'s Focus Trend"),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -82,7 +81,7 @@ class _CoachFocusTrendScreenState extends State<CoachFocusTrendScreen> {
       child: StyledCard(
         padding: EdgeInsets.zero,
         child: ListTile(
-          leading: const Icon(Pixel.calendar, size: 32),
+          leading: Icon(Pixel.calendar, size: 32, color: theme.colorScheme.onSurface),
           title: Text(
             progress.date, // This is the date string, e.g., "2025-11-14"
             style: const TextStyle(fontWeight: FontWeight.bold),

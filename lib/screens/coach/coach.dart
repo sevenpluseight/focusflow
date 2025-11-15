@@ -11,3 +11,4 @@ export 'coach_report_summary_screen.dart';
 export 'coach_user_overview_screen.dart';
 export 'coach_focus_trend_screen.dart';
 export 'coach_ai_risk_flags_screen.dart';
+export 'coach_notification_screen.dart';

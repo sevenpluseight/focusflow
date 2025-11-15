@@ -27,7 +27,35 @@ class _CoachSendCheerModalState extends State<CoachSendCheerModal> {
     "Awesome focus session!",
     "Don't give up, you've got this!",
     "Great consistency!",
+    "Your dedication is inspiring!",
+    "Small steps lead to big progress — keep going!",
+    "You're building great habits, one session at a time!",
+    "Stay strong! You're closer than you think.",
+    "Amazing work — your effort really shows!",
+    "Proud of your progress today!",
+    "You showed great discipline — well done!",
+    "Every bit of focus counts. Great job!",
+    "You're on a roll! Keep pushing forward!",
+    "Fantastic momentum — keep it up!",
+    "You're proving your commitment every day!",
+    "Your hard work is paying off!",
+    "Love your energy today — keep that spirit!",
+    "Nice! You overcame distraction and stayed focused!",
+    "You're improving more than you realize!",
+    "Incredible effort — keep believing in yourself!",
   ];
+
+  late List<String> _randomCheers;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Shuffle and pick a few random cheers
+    _randomCheers = List.of(_predefinedCheers)..shuffle();
+
+    _randomCheers = _randomCheers.take(3).toList();
+  }
 
   @override
   void dispose() {
@@ -106,7 +134,7 @@ class _CoachSendCheerModalState extends State<CoachSendCheerModal> {
               ),
               const SizedBox(height: 16),
               
-              ..._predefinedCheers.map((cheer) => Padding(
+              ..._randomCheers.map((cheer) => Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: OutlinedButton(
                   onPressed: _isLoading ? null : () => _sendCheer(cheer),

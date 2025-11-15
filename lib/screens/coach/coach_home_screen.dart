@@ -61,16 +61,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
+            Text(
               'Pending User Requests',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             StyledCard(
-              width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -92,16 +88,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
             const SizedBox(height: 30),
 
-            const Text(
+            Text(
               'Quick Stats',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             StyledCard(
-              width: double.infinity,
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
@@ -136,16 +128,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
             const SizedBox(height: 30),
 
-            const Text(
+            Text(
               'AI Highlights (At-Risk Users)',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             StyledCard(
-              width: double.infinity,
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : atRiskUsers.isEmpty
@@ -172,18 +160,19 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
 
   // Helper widget to build the At-Risk user tile
   Widget _buildAtRiskTile(BuildContext context, UserModel user) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: const Icon(Pixel.alert, color: Colors.orangeAccent),
+      leading: Icon(Pixel.alert, color: theme.colorScheme.tertiary),
       title: Text(
         'Alert: ${user.username} is at risk.',
-        style: const TextStyle(
-          color: Colors.orangeAccent,
+        style: TextStyle(
+          color: theme.colorScheme.tertiary,
           fontSize: 16,
           height: 1.5,
         ),
       ),
       subtitle: const Text('Streak has reset to 0 days.'),
-      trailing: const Icon(Pixel.chevronright, color: Colors.grey),
+      trailing: Icon(Pixel.chevronright, color: theme.textTheme.bodyMedium?.color),
       onTap: () {
         Navigator.push(
           context,

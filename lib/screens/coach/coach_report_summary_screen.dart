@@ -14,6 +14,7 @@ class CoachReportSummaryScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final coachProvider = context.watch<CoachProvider>();
     final List<UserModel> users = coachProvider.connectedUsers;
+    final textColor = theme.colorScheme.onSurface;
 
     // --- Calculate Stats ---
     final totalUsers = users.length;
@@ -35,9 +36,12 @@ class CoachReportSummaryScreen extends StatelessWidget {
           children: [
 
             // 1. "Quick Stats" Title
-            const Text(
+            Text(
               'Quick Stats',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: textColor, // <-- ADDED
+              ),
             ),
             const SizedBox(height: 12),
 
@@ -55,9 +59,12 @@ class CoachReportSummaryScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // --- At-Risk Users Card ---
-            const Text(
+            Text(
               'At-Risk Users',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: textColor, // <-- ADDED
+              ),
             ),
             const SizedBox(height: 12),
             StyledCard(

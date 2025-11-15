@@ -4,16 +4,21 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:focusflow/screens/coach/coach.dart';
+import 'package:focusflow/screens/user/user.dart';
+import 'package:focusflow/screens/admin/admin.dart';
+import 'package:focusflow/screens/user/user_notification_screen.dart';
+import 'package:focusflow/screens/coach/coach_notification_screen.dart'; // Added import
+import '../auth/auth.dart';
 
 import '../common/placeholder_pages.dart';
-import '../coach/coach_home_screen.dart';
-import '../admin/admin.dart';
-import '../user/user_home_screen.dart';
-import '../user/user_profile_screen.dart';
-import '../auth/auth.dart';
+// import '../coach/coach_home_screen.dart';
+// import '../admin/admin.dart';
+// import '../user/user_home_screen.dart';
+// import '../user/user_profile_screen.dart';
+// import '../auth/auth.dart';
 // import '../../theme/app_theme.dart';
-import '../../widgets/widgets.dart';
 
 class MainNavigationController extends StatefulWidget {
   final UserRole currentUserRole;
@@ -176,7 +181,23 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
                 size: 28,
                 color: theme.appBarTheme.iconTheme?.color,
               ),
-              onPressed: () {},
+              onPressed: () {
+                if (widget.currentUserRole == UserRole.user) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const UserNotificationScreen(),
+                    ),
+                  );
+                } else if (widget.currentUserRole == UserRole.coach) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CoachNotificationScreen(),
+                    ),
+                  );
+                }
+              },
             ),
           IconButton(
             tooltip: 'Logout',

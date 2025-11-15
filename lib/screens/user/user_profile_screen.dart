@@ -57,7 +57,7 @@ class UserProfileScreen extends StatelessWidget {
 
     final theme = Theme.of(context);
     final textColor = theme.colorScheme.onSurface;
-    final cardColor = theme.cardColor;
+    // final cardColor = theme.cardColor;
 
     if (user == null && !userProvider.isLoading) {
       Future.microtask(() => userProvider.fetchUser());
@@ -80,9 +80,9 @@ class UserProfileScreen extends StatelessWidget {
                         children: [
                           Text(
                             user?.username ?? "User",
-                            style: theme.textTheme.headlineSmall?.copyWith(
+                            style: const TextStyle(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -158,7 +158,7 @@ class UserProfileScreen extends StatelessWidget {
                             "Active Challenge",
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
+                              color: textColor,
                             ),
                           ),
                           const SizedBox(),
@@ -205,7 +205,7 @@ class UserProfileScreen extends StatelessWidget {
                       "Settings",
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -229,7 +229,7 @@ class UserProfileScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 17),
                     
                     // Theme Preferences
                     SecondaryButton(
@@ -243,7 +243,7 @@ class UserProfileScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 17),
 
                     // Log Out
                     SecondaryButton(

@@ -105,7 +105,7 @@ class CoachProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 17),
             SecondaryButton(
               onPressed: () => _showLogoutConfirmation(context),
               child: const Row(

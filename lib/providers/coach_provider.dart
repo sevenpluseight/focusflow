@@ -8,11 +8,12 @@ import 'package:focusflow/models/distraction_log_model.dart';
 import 'package:focusflow/models/daily_progress_model.dart';
 import 'package:focusflow/services/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:focusflow/models/connection_request_model.dart';
 
 class CoachProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   List<UserModel> _connectedUsers = [];
   bool _isLoading = false;
 
@@ -27,7 +28,7 @@ class CoachProvider with ChangeNotifier {
 
   List<DistractionLogModel> _userLogs = [];
   bool _logsLoading = false;
-  
+
   List<DistractionLogModel> get userLogs => _userLogs;
   bool get logsLoading => _logsLoading;
 
@@ -47,6 +48,9 @@ class CoachProvider with ChangeNotifier {
   String get aiInsights => _aiInsights;
   bool get aiLoading => _aiLoading;
 
+  List<ConnectionRequestModel> _pendingRequests = [];
+  List<ConnectionRequestModel> get pendingRequests => _pendingRequests;
+
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
     if (coachId.isEmpty) return;
@@ -60,14 +64,13 @@ class CoachProvider with ChangeNotifier {
           .collection('users')
           .where('coachId', isEqualTo: coachId)
           .get();
-      
+
       _connectedUsers = querySnapshot.docs
           .map((doc) => UserModel.fromFirestore(doc))
           .toList();
-      
+
       // After fetching users, fetch their progress in parallel
       await _fetchUsersProgress(_connectedUsers);
-
     } catch (e) {
       print('Error fetching connected users: $e');
     } finally {
@@ -91,16 +94,18 @@ class CoachProvider with ChangeNotifier {
             .doc(todayId)
             .get()
             .then((doc) {
-          if (doc.exists) {
-            // Store minutes in the map: 'userId' -> 120
-            _todayFocusMinutes[user.uid] = (doc.data()?['minutesFocused'] as num? ?? 0).toInt();
-          } else {
-            _todayFocusMinutes[user.uid] = 0;
-          }
-        }).catchError((e) {
-          print('Error fetching progress for ${user.uid}: $e');
-          _todayFocusMinutes[user.uid] = 0; // Default to 0 on error
-        })
+              if (doc.exists) {
+                // Store minutes in the map: 'userId' -> 120
+                _todayFocusMinutes[user.uid] =
+                    (doc.data()?['minutesFocused'] as num? ?? 0).toInt();
+              } else {
+                _todayFocusMinutes[user.uid] = 0;
+              }
+            })
+            .catchError((e) {
+              print('Error fetching progress for ${user.uid}: $e');
+              _todayFocusMinutes[user.uid] = 0; // Default to 0 on error
+            }),
       );
     }
     // Wait for all progress fetches to complete
@@ -115,7 +120,7 @@ class CoachProvider with ChangeNotifier {
         "${adjusted.month.toString().padLeft(2, '0')}-"
         "${adjusted.day.toString().padLeft(2, '0')}";
   }
-  
+
   // This function will save the new challenge
   Future<void> submitChallengeForApproval({
     required String name,
@@ -130,7 +135,7 @@ class CoachProvider with ChangeNotifier {
 
     try {
       final newChallengeRef = _firestore.collection('challenges').doc();
-      
+
       final newChallenge = ChallengeModel(
         id: newChallengeRef.id,
         name: name,
@@ -139,11 +144,10 @@ class CoachProvider with ChangeNotifier {
         description: description,
         coachId: coachId,
         createdAt: Timestamp.now(),
-        status: 'pending', // Awaiting admin approval 
+        status: 'pending', // Awaiting admin approval
       );
 
       await newChallengeRef.set(newChallenge.toMap());
-      
     } catch (e) {
       print('Error submitting challenge: $e');
       throw Exception('Failed to submit challenge.');
@@ -163,7 +167,7 @@ class CoachProvider with ChangeNotifier {
           .where('coachId', isEqualTo: coachId)
           .orderBy('createdAt', descending: true)
           .get();
-      
+
       _challenges = querySnapshot.docs.map((doc) {
         final data = doc.data();
         // Manually create ChallengeModel from map
@@ -178,7 +182,6 @@ class CoachProvider with ChangeNotifier {
           status: data['status'] ?? 'pending',
         );
       }).toList();
-
     } catch (e) {
       print('Error fetching challenges: $e');
     } finally {
@@ -246,7 +249,7 @@ class CoachProvider with ChangeNotifier {
           .doc(userId)
           .collection('messages')
           .doc();
-      
+
       final newMessage = MessageModel(
         id: messageRef.id,
         coachId: coachId,
@@ -257,7 +260,6 @@ class CoachProvider with ChangeNotifier {
       );
 
       await messageRef.set(newMessage.toMap());
-
     } catch (e) {
       print('Error sending message: $e');
       throw Exception('Failed to send message.');
@@ -279,11 +281,10 @@ class CoachProvider with ChangeNotifier {
           .orderBy('date', descending: true) // Show newest first
           .limit(14) // Get the last 14 days
           .get();
-      
+
       _userProgressHistory = querySnapshot.docs
           .map((doc) => DailyProgressModel.fromMap(doc.data()))
           .toList();
-
     } catch (e) {
       print('Error fetching focus history: $e');
     } finally {
@@ -299,7 +300,9 @@ class CoachProvider with ChangeNotifier {
 
     try {
       // 1. Get the data we've already fetched
-      final UserModel? user = _connectedUsers.firstWhere((u) => u.uid == userId);
+      final UserModel? user = _connectedUsers.firstWhere(
+        (u) => u.uid == userId,
+      );
       if (user == null) throw Exception("User not found");
 
       // --- NEW 5 AM REFRESH LOGIC ---
@@ -313,7 +316,12 @@ class CoachProvider with ChangeNotifier {
 
       if (savedTimestamp != null) {
         final now = DateTime.now();
-        final today5AM = DateTime(now.year, now.month, now.day, 5); // 5 AM today
+        final today5AM = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          5,
+        ); // 5 AM today
 
         DateTime appDayStart;
         if (now.isBefore(today5AM)) {
@@ -325,12 +333,14 @@ class CoachProvider with ChangeNotifier {
         }
 
         final savedDate = savedTimestamp.toDate();
-        
+
         // Check if the saved analysis is from the "current app day"
         if (savedDate.isAfter(appDayStart)) {
           // The cache is good (saved *after* 5 AM on the current app day), so use it.
           _aiInsights = savedAnalysis?['insights'] ?? "No insights found.";
-          debugPrint("--- Using Cached AI Analysis (from ${savedDate.toIso8601String()}) ---");
+          debugPrint(
+            "--- Using Cached AI Analysis (from ${savedDate.toIso8601String()}) ---",
+          );
           _aiLoading = false;
           notifyListeners();
           return; // Stop here
@@ -341,9 +351,10 @@ class CoachProvider with ChangeNotifier {
       debugPrint("--- No cache. Fetching new AI Analysis... ---");
       await fetchDistractionLogs(userId);
       await fetchUserFocusHistory(userId);
-      
+
       // 2. Build a prompt for the Gemini API
-      String prompt = """
+      String prompt =
+          """
         You are a helpful productivity coach. Analyze the following data for a user named '${user.username}'.
         Provide your analysis in clean markdown format.
         Use markdown headings (like '## AI Risk Flags') for sections.
@@ -367,7 +378,7 @@ class CoachProvider with ChangeNotifier {
 
       debugPrint("--- Sending Prompt to Gemini ---");
       debugPrint(prompt);
-      
+
       // 3. Call the Gemini Service
       final response = await GeminiService.generateText(prompt);
       _aiInsights = response;
@@ -376,7 +387,7 @@ class CoachProvider with ChangeNotifier {
         'aiAnalysis': {
           'insights': _aiInsights, // Save the single response
           'updatedAt': Timestamp.now(),
-        }
+        },
       });
     } catch (e) {
       _aiInsights = "Error generating AI insights: $e";
@@ -394,7 +405,8 @@ class CoachProvider with ChangeNotifier {
     await fetchUserFocusHistory(userId); // Make sure we have the latest history
 
     // 2. Create a specific prompt for guides
-    String prompt = """
+    String prompt =
+        """
       A user named '${user.username}' has this data:
       - Current Streak: ${user.currentStreak ?? 0} days
       - Daily Target: ${user.dailyTargetHours ?? 2} hours
@@ -414,17 +426,60 @@ class CoachProvider with ChangeNotifier {
 
       // 4. Parse the response into a list
       if (response.isEmpty) return [];
-      
-      final suggestions = response.split('* ')
+
+      final suggestions = response
+          .split('* ')
           .where((s) => s.trim().isNotEmpty) // Remove empty entries
           .map((s) => s.trim().replaceAll('*', '')) // Clean up
           .toList();
-          
-      return suggestions.isNotEmpty ? suggestions : ["No suggestions found."];
 
+      return suggestions.isNotEmpty ? suggestions : ["No suggestions found."];
     } catch (e) {
       print("Error fetching AI guides: $e");
       return ["Error: Could not get AI suggestions."];
     }
+  }
+
+  Future<void> fetchPendingRequests() async {
+    final coachId = _auth.currentUser?.uid;
+    if (coachId == null) return;
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('connectionRequests')
+          .where('coachId', isEqualTo: coachId)
+          .where('status', isEqualTo: 'pending')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      _pendingRequests = querySnapshot.docs
+          .map((doc) => ConnectionRequestModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error fetching pending requests: $e');
+    }
+    notifyListeners(); // Notify listeners even if it's just to clear the list
+  }
+
+  Future<void> approveConnectionRequest(String requestId, String userId) async {
+    // 1. Update the user's document to link them to this coach
+    await _firestore.collection('users').doc(userId).update({
+      'coachId': _auth.currentUser?.uid,
+    });
+
+    // 2. Delete the request (or set status to 'approved')
+    await _firestore.collection('connectionRequests').doc(requestId).delete();
+
+    // 3. Refresh the data
+    await fetchPendingRequests();
+    await fetchConnectedUsers(_auth.currentUser!.uid); // Re-fetch user list
+  }
+
+  Future<void> rejectConnectionRequest(String requestId) async {
+    // 1. Just delete the request
+    await _firestore.collection('connectionRequests').doc(requestId).delete();
+    
+    // 2. Refresh the list
+    await fetchPendingRequests();
   }
 }

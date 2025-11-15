@@ -148,7 +148,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      textAlign: TextAlign.center,
                       onSubmitted: (value) async {
                         final newValue = double.tryParse(value);
                         if (newValue == null || newValue < 1 || newValue > 8) {

@@ -17,19 +17,23 @@ class CustomSnackBar {
 
     IconData icon;
     Color backgroundColor;
+    Color textColor;
 
     switch (type) {
       case SnackBarType.success:
         icon = Pixel.checkdouble;
-        backgroundColor = const Color(0xFFBFFB4F);
+        backgroundColor = theme.colorScheme.primary;
+        textColor = theme.colorScheme.onPrimary;
         break;
       case SnackBarType.error:
         icon = Pixel.alert;
-        backgroundColor = const Color(0xFFD32F2F);
+        backgroundColor = theme.colorScheme.error;
+        textColor = theme.colorScheme.onError;
         break;
       case SnackBarType.info:
         icon = Pixel.infobox;
         backgroundColor = theme.colorScheme.primary;
+        textColor = theme.colorScheme.onPrimary;
         break;
     }
 
@@ -41,13 +45,13 @@ class CustomSnackBar {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Row(
           children: [
-            Icon(icon, color: theme.colorScheme.onSecondary, size: 26),
+            Icon(icon, color: textColor, size: 26),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSecondary,
+                  color: textColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -70,7 +74,7 @@ class CustomSnackBar {
           icon: icon,
           message: message,
           backgroundColor: backgroundColor,
-          textColor: theme.colorScheme.onSecondary,
+          textColor: textColor,
           duration: duration,
         ),
       ),

@@ -22,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: style ??
           ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFBFFB4F),
+            backgroundColor: theme.colorScheme.primary,
             elevation: 2,
             foregroundColor: Colors.black,
             minimumSize: Size(double.infinity, SizeConfig.hp(6)),

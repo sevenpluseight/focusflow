@@ -142,9 +142,13 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _auth.sendPasswordResetEmail(email: normalizedEmail);
-      _setMessage("If this email exists, a reset link was sent. Check your inbox.");
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox.",
+      );
     } catch (_) {
-      _setMessage("If this email exists, a reset link was sent. Check your inbox.");
+      _setMessage(
+        "If this email exists, a reset link was sent. Check your inbox.",
+      );
     } finally {
       _setLoading(false);
     }

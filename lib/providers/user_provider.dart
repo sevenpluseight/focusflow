@@ -4,9 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/models/coach_request_model.dart';
+import 'package:focusflow/services/services.dart';
 
 class UserProvider with ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
+  final AdminStatService _statsService;
+
+  UserProvider({AdminStatService? statsService})
+    : _statsService = statsService ?? AdminStatService();
+
   UserModel? _user;
   bool _isLoading = false;
 
@@ -49,6 +55,7 @@ class UserProvider with ChangeNotifier {
     required int breakInterval,
     required String focusType,
   }) async {
+    final batch = _firestore.batch();
     final userDoc = _firestore.collection('users').doc(uid);
 
     final newUser = UserModel(
@@ -67,7 +74,13 @@ class UserProvider with ChangeNotifier {
       lastFocusDate: null,
     );
 
-    await userDoc.set(newUser.toMap(), SetOptions(merge: true));
+    // create the new user
+    batch.set(userDoc, newUser.toMap(), SetOptions(merge: true));
+    _statsService.updateUserCount(batch, 'user', true);
+
+    await batch.commit();
+
+    // loca state update
     _user = newUser;
     _safeNotifyListeners();
   }
@@ -86,7 +99,9 @@ class UserProvider with ChangeNotifier {
       final diff = today.difference(lastFocusDate).inDays;
       if (diff == 1) {
         currentStreak += 1;
-        longestStreak = currentStreak > longestStreak ? currentStreak : longestStreak;
+        longestStreak = currentStreak > longestStreak
+            ? currentStreak
+            : longestStreak;
       } else if (diff > 1) {
         currentStreak = 1;
       }
@@ -114,7 +129,8 @@ class UserProvider with ChangeNotifier {
     if (uid == null) return;
 
     final updates = <String, dynamic>{};
-    if (dailyTargetHours != null) updates['dailyTargetHours'] = dailyTargetHours;
+    if (dailyTargetHours != null)
+      updates['dailyTargetHours'] = dailyTargetHours;
     if (workInterval != null) updates['workInterval'] = workInterval;
     if (breakInterval != null) updates['breakInterval'] = breakInterval;
     if (focusType != null) updates['focusType'] = focusType;
@@ -135,7 +151,7 @@ class UserProvider with ChangeNotifier {
     if (_user == null || uid == null) {
       throw Exception('User not logged in.');
     }
-    
+
     _setLoading(true);
     try {
       final newRequestRef = _firestore.collection('coachRequests').doc(uid);
@@ -145,7 +161,7 @@ class UserProvider with ChangeNotifier {
       if (doc.exists) {
         throw Exception('You already have a pending application.');
       }
-      
+
       final newRequest = CoachRequestModel(
         id: newRequestRef.id,
         userId: uid,
@@ -158,7 +174,6 @@ class UserProvider with ChangeNotifier {
       );
 
       await newRequestRef.set(newRequest.toMap());
-
     } catch (e) {
       // Re-throw the error to show in the UI
       throw Exception(e.toString());

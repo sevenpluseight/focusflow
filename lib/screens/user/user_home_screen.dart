@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
-import 'package:focusflow/widgets/widgets.dart'; // Import widgets for CustomSnackBar
+import 'package:focusflow/widgets/widgets.dart';
 import 'other/productivity_tips.dart';
 
 class UserHomeScreen extends StatefulWidget {

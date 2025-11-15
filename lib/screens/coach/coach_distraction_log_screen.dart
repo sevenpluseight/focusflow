@@ -31,14 +31,14 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // final isDark = theme.brightness == Brightness.dark;
     final coachProvider = context.watch<CoachProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("${widget.username}'s Logs"),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -101,7 +101,7 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
                       _showReportConfirmation(context, log);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightGreenAccent,
+                      backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -165,10 +165,10 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(false),
           ),
           TextButton(
-            child: const Text(
+            child: Text(
               'Report',
               style: TextStyle(
-                color: Colors.red,
+                color: theme.colorScheme.error,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

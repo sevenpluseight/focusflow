@@ -4,6 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:focusflow/theme/app_theme.dart'; // Import AppTheme
 
 class CoachLeaderboardScreen extends StatelessWidget {
   const CoachLeaderboardScreen({Key? key}) : super(key: key);
@@ -11,7 +12,6 @@ class CoachLeaderboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final coachProvider = context.watch<CoachProvider>();
 
     // Sort the connected users by their streak (descending)
@@ -22,7 +22,7 @@ class CoachLeaderboardScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Leaderboard'),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -40,19 +40,19 @@ class CoachLeaderboardScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildTopPerformer(
-                    theme,
                     rank: 1,
                     user: rankedUsers.isNotEmpty ? rankedUsers[0] : null,
+                    theme: theme,
                   ),
                   _buildTopPerformer(
-                    theme,
                     rank: 2,
                     user: rankedUsers.length > 1 ? rankedUsers[1] : null,
+                    theme: theme,
                   ),
                   _buildTopPerformer(
-                    theme,
                     rank: 3,
                     user: rankedUsers.length > 2 ? rankedUsers[2] : null,
+                    theme: theme,
                   ),
                 ],
               ),
@@ -89,7 +89,7 @@ class CoachLeaderboardScreen extends StatelessWidget {
   }
 
   // Helper for the top 3
-  Widget _buildTopPerformer(ThemeData theme, {required int rank, UserModel? user}) {
+  Widget _buildTopPerformer({required int rank, UserModel? user, required ThemeData theme}) {
     String name = 'N/A';
     String score = '0';
     IconData icon = Pixel.user;
@@ -102,13 +102,13 @@ class CoachLeaderboardScreen extends StatelessWidget {
 
     if (rank == 1) {
       icon = Pixel.moodhappy;
-      color = Colors.amber;
+      color = AppTheme.goldColor;
     } else if (rank == 2) {
       icon = Pixel.moodneutral;
-      color = Colors.grey.shade400;
+      color = AppTheme.silverColor;
     } else if (rank == 3) {
       icon = Pixel.moodsad;
-      color = const Color(0xFFCD7F32); // Bronze
+      color = AppTheme.bronzeColor; // Bronze
     }
 
     return Column(
@@ -121,7 +121,7 @@ class CoachLeaderboardScreen extends StatelessWidget {
         ),
         Text(
           score,
-          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color), // Using theme text color
         ),
       ],
     );

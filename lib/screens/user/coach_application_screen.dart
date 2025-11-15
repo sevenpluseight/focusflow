@@ -69,13 +69,12 @@ class _CoachApplicationScreenState extends State<CoachApplicationScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Coach Application'),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -121,11 +120,11 @@ class _CoachApplicationScreenState extends State<CoachApplicationScreen> {
                 onPressed: _isLoading ? null : _submitApplication,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.black)
+                    ? CircularProgressIndicator(color: theme.colorScheme.onPrimary)
                     : const Text('Submit Application'),
               ),
             ],

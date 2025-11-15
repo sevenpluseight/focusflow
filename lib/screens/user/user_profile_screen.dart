@@ -7,6 +7,7 @@ import 'package:focusflow/screens/core/main_navigation_controller.dart';
 import 'package:focusflow/screens/user/coach_application_screen.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:focusflow/screens/auth/auth.dart';
+import 'reusable_components_test_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -24,54 +25,15 @@ class UserProfileScreen extends StatelessWidget {
 
   Future<void> _showLogoutConfirmation(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final bool? confirmLogout = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text(
-            'Confirm Logout',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to log out?',
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-              fontSize: 16,
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black54,
-                  fontSize: 16,
-                ),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-            ),
-            TextButton(
-              child: Text(
-                'Logout',
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-            ),
-          ],
+        return const ConfirmationDialog(
+          title: 'Confirm Logout',
+          contentText: 'Are you sure you want to log out?',
+          confirmText: 'Logout',
         );
       },
     );
@@ -94,9 +56,8 @@ class UserProfileScreen extends StatelessWidget {
     final bool isCoachInUserMode = (actualRole == 'coach');
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final textColor = theme.colorScheme.onSurface;
-    final cardColor = !isDark ? const Color(0xFFE8F5E9) : theme.colorScheme.surfaceVariant;
+    final cardColor = theme.cardColor;
 
     if (user == null && !userProvider.isLoading) {
       Future.microtask(() => userProvider.fetchUser());
@@ -114,7 +75,6 @@ class UserProfileScreen extends StatelessWidget {
                   children: [
                     // Username + Focused time
                     StyledCard(
-                      color: cardColor,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -122,14 +82,14 @@ class UserProfileScreen extends StatelessWidget {
                             user?.username ?? "User",
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: textColor,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             "-- hrs",
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontStyle: FontStyle.italic,
-                              color: Colors.grey,
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -139,7 +99,6 @@ class UserProfileScreen extends StatelessWidget {
 
                     // Streaks card + Longest streak
                     StyledCard(
-                      color: cardColor,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -150,7 +109,6 @@ class UserProfileScreen extends StatelessWidget {
                               Text(
                                 "Current Streak",
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: textColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -160,7 +118,7 @@ class UserProfileScreen extends StatelessWidget {
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 22,
-                                  color: Colors.green.shade700,
+                                  color: theme.colorScheme.primary, // Theme-adaptive
                                 ),
                               ),
                             ],
@@ -172,7 +130,6 @@ class UserProfileScreen extends StatelessWidget {
                               Text(
                                 "Longest Streak",
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: textColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -182,7 +139,7 @@ class UserProfileScreen extends StatelessWidget {
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 22,
-                                  color: Colors.blue.shade700,
+                                  color: theme.colorScheme.secondary,
                                 ),
                               ),
                             ],
@@ -194,7 +151,6 @@ class UserProfileScreen extends StatelessWidget {
 
                     // Active challenge card 
                     StyledCard(
-                      color: cardColor,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -202,7 +158,7 @@ class UserProfileScreen extends StatelessWidget {
                             "Active Challenge",
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: textColor,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(),
@@ -212,12 +168,15 @@ class UserProfileScreen extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     if (isCoachInUserMode)
-                      ElevatedButton.icon(
-                        icon: const Icon(Pixel.repeat),
-                        label: const Text("Switch to Coach Mode"),
+                      PrimaryButton(
                         onPressed: () => _switchToCoachMode(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightGreenAccent,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Pixel.repeat),
+                            SizedBox(width: 8),
+                            Text("Switch to Coach Mode"),
+                          ],
                         ),
                       )
                     else
@@ -239,56 +198,63 @@ class UserProfileScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 30),
 
                     // Settings 
                     Text(
                       "Settings",
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: textColor,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // Reusable components test - uncomment if want to test
-                    /*
-                    StyledCard(
-                      color: cardColor,
-                      title: "Reusable Components Test",
-                      child: ListTile(
-                        leading: const Icon(Pixel.warningbox),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ReusableComponentsTestScreen(),
-                            ),
-                          );
-                        },
+                    // Reusable components test
+                    SecondaryButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ReusableComponentsTestScreen(),
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Pixel.humanhandsup),
+                          SizedBox(width: 8),
+                          Text('Open Test Screen'),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
-                    */
-
+                    
                     // Theme Preferences
-                    StyledCard(
-                      color: cardColor,
-                      child: ListTile(
-                        leading: const Icon(Pixel.sunalt),
-                        title: const Text("Theme Preferences"),
-                        onTap: () => context.read<ThemeProvider>().toggleTheme(),
+                    SecondaryButton(
+                      onPressed: () => context.read<ThemeProvider>().toggleTheme(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(theme.brightness == Brightness.dark ? Pixel.sunalt : Pixel.moon),
+                          const SizedBox(width: 8),
+                          const Text('Theme Preferences'),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
 
                     // Log Out
-                    StyledCard(
-                      color: cardColor,
-                      child: ListTile(
-                        leading: const Icon(Pixel.logout),
-                        title: const Text("Log Out"),
-                        onTap: () => _showLogoutConfirmation(context),
+                    SecondaryButton(
+                      onPressed: () => _showLogoutConfirmation(context),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Pixel.logout),
+                          SizedBox(width: 8),
+                          Text('Log Out'),
+                        ],
                       ),
                     ),
                   ],
@@ -297,4 +263,6 @@ class UserProfileScreen extends StatelessWidget {
       ),
     );
   }
+
+
 }

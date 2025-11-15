@@ -146,11 +146,14 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final navBarColor = isDark 
+      ? const Color(0xFF2C2F33) 
+      : theme.bottomNavigationBarTheme.backgroundColor ?? Colors.white;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        backgroundColor: navBarColor,
         elevation: theme.appBarTheme.elevation,
         title: Text(
           _labels[_selectedIndex],
@@ -205,7 +208,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         },
         activeIndex: _selectedIndex,
         onTap: _handleItemTap,
-        backgroundColor: isDark ? const Color(0xFF2C2F33) : theme.bottomNavigationBarTheme.backgroundColor,
+        backgroundColor: navBarColor,
         gapLocation: GapLocation.none,
         notchSmoothness: NotchSmoothness.sharpEdge,
         height: 65,

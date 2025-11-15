@@ -1,5 +1,3 @@
-/* TODO - Remove top nav bar with the theme toggle */
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/providers/providers.dart';
@@ -288,16 +286,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  isDarkMode ? Pixel.sunalt : Pixel.moon,
-                  size: SizeConfig.wp(6.8),
-                ),
-                onPressed: () => context.read<ThemeProvider>().toggleTheme(),
-              ),
-              SizedBox(width: SizeConfig.wp(1.2)),
-            ],
+            actions: [],
           ),
           backgroundColor: theme.scaffoldBackgroundColor,
           body: Center(

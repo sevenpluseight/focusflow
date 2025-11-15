@@ -1,145 +1,162 @@
-import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:focusflow/models/daily_progress_model.dart';
+import 'package:intl/intl.dart';
 
-class ProgressProvider extends ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class ProgressProvider with ChangeNotifier {
+  String _uid;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  double todayProgress = 0.0;
-  int todayMinutes = 0;
-  double _dailyTargetHours = 2.0;
+  String get uid => _uid;
 
-  StreamSubscription? _progressSubscription;
-  StreamSubscription? _userSubscription;
-  StreamSubscription? _authSubscription;
-
-  ProgressProvider() {
-    _authSubscription = _auth.authStateChanges().listen((user) {
-      if (user != null) {
-        _listenToData(user.uid);
-      } else {
-        cancelSubscriptions();
-        _resetState();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    cancelSubscriptions();
-    _authSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _listenToData(String uid) {
-    cancelSubscriptions(); // Cancel any existing listeners
-
-    // Listen to user data for target updates
-    final userStream = _firestore.collection('users').doc(uid).snapshots();
-    _userSubscription = userStream.listen((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data();
-        final numTarget = data?['dailyTargetHours'];
-        if (numTarget != null) {
-          final newTarget = (numTarget as num).toDouble();
-          if (newTarget != _dailyTargetHours) {
-            _dailyTargetHours = newTarget;
-            _recalculateProgress();
-            notifyListeners();
-          }
-        }
-      }
-    });
-
-    // Listen to today's progress
-    final docId = _getTodayId();
-    final progressStream = _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('dailyProgress')
-        .doc(docId)
-        .snapshots();
-
-    _progressSubscription = progressStream.listen((snapshot) {
-      int minutes = 0;
-      if (snapshot.exists) {
-        final data = snapshot.data();
-        final numValue = data?['minutesFocused'];
-        if (numValue != null) {
-          minutes = (numValue as num).toInt();
-        }
-      }
-      todayMinutes = minutes;
-      _recalculateProgress();
+  /// Setter to update UID and fetch new progress
+  set uid(String newUid) {
+    if (_uid != newUid) {
+      _uid = newUid;
+      fetchDailyProgress();
       notifyListeners();
-    });
+    }
   }
 
-  void _recalculateProgress() {
-    todayProgress =
-        (_dailyTargetHours > 0) ? (todayMinutes / 60 / _dailyTargetHours) : 0.0;
-  }
+  /// Map of 'yyyy-MM-dd' => DailyProgressModel
+  final Map<String, DailyProgressModel> _dailyFocusMap = {};
 
-  void cancelSubscriptions() {
-    _progressSubscription?.cancel();
-    _userSubscription?.cancel();
-  }
+  int currentStreak = 0;
+  int longestStreak = 0;
+  DateTime? lastFocusDate;
 
-  void _resetState() {
-    todayProgress = 0.0;
-    todayMinutes = 0;
-    _dailyTargetHours = 2.0;
+  ProgressProvider({required String uid}) : _uid = uid;
+
+  /// Fetch all daily progress documents for the user
+  Future<void> fetchDailyProgress() async {
+    if (_uid.isEmpty) return;
+
+    // Fetch all daily progress docs
+    final query = await _db
+        .collection('users')
+        .doc(_uid)
+        .collection('dailyProgress')
+        .get();
+
+    _dailyFocusMap
+      ..clear()
+      ..addEntries(query.docs.map((doc) {
+        final progress = DailyProgressModel.fromFirestore(doc);
+        return MapEntry(doc.id, progress);
+      }));
+
+    // Fetch streaks and last focus date from the main user doc
+    final userDoc = await _db.collection('users').doc(_uid).get();
+    if (userDoc.exists) {
+      final data = userDoc.data()!;
+      currentStreak = data['currentStreak'] ?? 0;
+      longestStreak = data['longestStreak'] ?? 0;
+
+      final lastDateStr = data['lastFocusDate'];
+      lastFocusDate =
+          lastDateStr != null ? DateTime.tryParse(lastDateStr) : null;
+    }
+
     notifyListeners();
   }
 
-  Future<void> addFocusMinutes(int minutesToAdd) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
-
-    final docId = _getTodayId();
-    final docRef = _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('dailyProgress')
-        .doc(docId);
-
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(docRef);
-      int newMinutes = minutesToAdd;
-      if (snapshot.exists) {
-        final existingNum = snapshot.data()?['minutesFocused'];
-        final existingMinutes =
-            existingNum != null ? (existingNum as num).toInt() : 0;
-        newMinutes += existingMinutes;
-      }
-      transaction.set(
-          docRef, {'date': docId, 'minutesFocused': newMinutes});
-    });
+  /// Minutes focused today
+  int get minutesFocusedToday {
+    final todayKey = _todayKey();
+    return _dailyFocusMap[todayKey]?.focusedMinutes ?? 0;
   }
 
-  String _getTodayId() {
-    final now = DateTime.now();
-    final adjusted = now.hour < 4 ? now.subtract(const Duration(days: 1)) : now;
-    return "${adjusted.year.toString().padLeft(4, '0')}-"
-        "${adjusted.month.toString().padLeft(2, '0')}-"
-        "${adjusted.day.toString().padLeft(2, '0')}";
+  /// Fraction of daily target completed (0.0 – 1.0)
+  double todayProgress(double dailyTargetHours) {
+    final minutesToday = minutesFocusedToday;
+    return dailyTargetHours > 0
+        ? (minutesToday / (dailyTargetHours * 60)).clamp(0.0, 1.0)
+        : 0.0;
   }
 
+  /// Formatted progress for display
   String getFormattedProgress(double dailyTargetHours) {
-    final target = _dailyTargetHours;
-    if (todayMinutes < 60) {
-      return '$todayMinutes m / ${target.toStringAsFixed(0)}h';
+    final minutesToday = minutesFocusedToday;
+    if (minutesToday < 60) {
+      final targetMinutes = (dailyTargetHours * 60).round();
+      return "$minutesToday / $targetMinutes min";
     } else {
-      final hours = todayMinutes ~/ 60;
-      final minutes = todayMinutes % 60;
-      if (minutes == 0) {
-        return '$hours h / ${target.toStringAsFixed(0)}h';
-      } else {
-        return '$hours h $minutes m / ${target.toStringAsFixed(0)}h';
-      }
+      final hoursToday = minutesToday / 60;
+      return "${hoursToday.toStringAsFixed(1)} / ${dailyTargetHours.toStringAsFixed(1)} hrs";
     }
   }
+
+  /// Called when a focus session ends
+  Future<void> endSession(int durationSeconds) async {
+    if (_uid.isEmpty) return;
+
+    final minutes = (durationSeconds / 60).round();
+    final todayKey = _todayKey();
+
+    final dailyDocRef =
+        _db.collection('users').doc(_uid).collection('dailyProgress').doc(todayKey);
+    final userRef = _db.collection('users').doc(_uid);
+
+    await _db.runTransaction((tx) async {
+      final dailySnapshot = await tx.get(dailyDocRef);
+      final userSnap = await tx.get(userRef);
+
+      // Current minutes
+      final previousMinutes = dailySnapshot.exists
+          ? (dailySnapshot.data()?['focusedMinutes'] as int? ?? 0)
+          : 0;
+      final newMinutes = previousMinutes + minutes;
+
+      // Streak logic
+      int newStreak = userSnap.data()?['currentStreak'] ?? 0;
+      int newLongest = userSnap.data()?['longestStreak'] ?? 0;
+      final lastFocusTimestamp = userSnap.data()?['lastFocusDate'] as Timestamp?;
+      final lastDate = lastFocusTimestamp?.toDate();
+
+      if (lastDate == null) {
+        newStreak = 1;
+        newLongest = 1;
+      } else {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final lastFocusDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        final diffDays = today.difference(lastFocusDay).inDays;
+
+        if (diffDays == 1) {
+          newStreak += 1;
+          if (newStreak > newLongest) newLongest = newStreak;
+        } else if (diffDays > 1) {
+          newStreak = 1;
+        }
+      }
+
+      // Update Firestore
+      final newProgress = DailyProgressModel(
+        date: todayKey,
+        focusedMinutes: newMinutes,
+        updatedAt: DateTime.now(),
+      );
+      tx.set(dailyDocRef, newProgress.toMap(), SetOptions(merge: true));
+
+      tx.update(userRef, {
+        'currentStreak': newStreak,
+        'longestStreak': newLongest,
+        'lastFocusDate': Timestamp.now(),
+      });
+
+      // Update local state
+      _dailyFocusMap[todayKey] = newProgress;
+      currentStreak = newStreak;
+      longestStreak = newLongest;
+      lastFocusDate = DateTime.now();
+    });
+
+    notifyListeners();
+  }
+
+  /// Skip break (doesn't modify Firestore)
+  void skipBreak() => notifyListeners();
+
+  /// Helper: Today key in 'yyyy-MM-dd' format
+  String _todayKey() => DateFormat('yyyy-MM-dd').format(DateTime.now());
 }

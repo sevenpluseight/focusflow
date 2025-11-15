@@ -90,56 +90,48 @@ Future<void> _submitChallenge() async {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _nameController,
-                label: 'Challenge Name',
+                labelText: 'Challenge Name',
                 icon: Pixel.edit,
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a name' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _durationController,
-                label: 'Duration (in days)',
+                labelText: 'Duration (in days)',
                 icon: Pixel.calendar,
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a duration' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _goalController,
-                label: 'Focus Goal (in hours)',
+                labelText: 'Focus Goal (in hours)',
                 icon: Pixel.clock,
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a goal' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextFormField(
+              CustomTextFormField(
                 controller: _descriptionController,
-                label: 'Description',
+                labelText: 'Description',
                 icon: Pixel.editbox,
                 maxLines: 4,
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a description' : null,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
+              PrimaryButton(
                 onPressed: _isLoading ? null : _submitChallenge,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading 
+                child: _isLoading
                     ? const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                       )
-                      : const Text(
+                    : const Text(
                         'Submit for Approval',
                         style: TextStyle(
                           fontSize: 16,
@@ -149,38 +141,6 @@ Future<void> _submitChallenge() async {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextFormField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    int? maxLines = 1,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    final theme = Theme.of(context);
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
-        prefixIcon: Icon(icon, color: theme.colorScheme.onSurface),
-        filled: true,
-        fillColor: theme.cardColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
       ),
     );

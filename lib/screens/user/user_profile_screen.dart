@@ -5,7 +5,8 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/screens/core/main_navigation_controller.dart';
 import 'package:focusflow/screens/user/coach_application_screen.dart';
-import '../auth/auth.dart';
+import 'package:focusflow/widgets/widgets.dart';
+import 'package:focusflow/screens/auth/auth.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -14,7 +15,6 @@ class UserProfileScreen extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        // We reload the main controller, forcing it back to CoachRole
         builder: (_) => const MainNavigationController(
           currentUserRole: UserRole.coach,
         ),
@@ -63,7 +63,7 @@ class UserProfileScreen extends StatelessWidget {
             TextButton(
               child: Text(
                 'Logout',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.redAccent,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -98,7 +98,6 @@ class UserProfileScreen extends StatelessWidget {
     final textColor = theme.colorScheme.onSurface;
     final cardColor = !isDark ? const Color(0xFFE8F5E9) : theme.colorScheme.surfaceVariant;
 
-    // Fetch user data if not loaded yet
     if (user == null && !userProvider.isLoading) {
       Future.microtask(() => userProvider.fetchUser());
     }
@@ -113,142 +112,136 @@ class UserProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ------------------- Username + Focused Time -------------------
-                    Card(
+                    // Username + Focused time
+                    StyledCard(
                       color: cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              user?.username ?? "User",
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            user?.username ?? "User",
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
                             ),
-                            Text(
-                              "-- hrs",
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey,
-                              ),
+                          ),
+                          Text(
+                            "-- hrs",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // ------------------- Streaks Card -------------------
-                    Card(
+                    // Streaks card + Longest streak
+                    StyledCard(
                       color: cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Current Streak",
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Current Streak",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                Text(
-                                  "${user?.currentStreak ?? 0} days",
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "${user?.currentStreak ?? 0} days",
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: Colors.green.shade700,
                                 ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Longest Streak",
-                                  style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Longest Streak",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                Text(
-                                  "${user?.longestStreak ?? 0} days",
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "${user?.longestStreak ?? 0} days",
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: Colors.blue.shade700,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // ------------------- Active Challenge Card -------------------
-                    Card(
+                    // Active challenge card 
+                    StyledCard(
                       color: cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Active Challenge",
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Active Challenge",
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
                             ),
-                            const SizedBox(),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
 
                     if (isCoachInUserMode)
-                      // Show "Switch Back" button if you are a coach
                       ElevatedButton.icon(
                         icon: const Icon(Pixel.repeat),
                         label: const Text("Switch to Coach Mode"),
                         onPressed: () => _switchToCoachMode(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightGreenAccent, 
+                          backgroundColor: Colors.lightGreenAccent,
                         ),
                       )
                     else
-
-                    // ------------------- Request to be Coach Button -------------------
-                    ElevatedButton.icon(
-                      icon: const Icon(Pixel.plus),
-                      label: const Text("Request to be Coach"),
-                      onPressed: () {
-                            Navigator.push(
+                      PrimaryButton(
+                        onPressed: () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const CoachApplicationScreen(),
                             ),
                           );
-                      },
-                    ),
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Pixel.plus),
+                            SizedBox(width: 8),
+                            Text("Request to be Coach"),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: 32),
 
-                    // ------------------- Settings -------------------
+                    // Settings 
                     Text(
                       "Settings",
                       style: theme.textTheme.headlineSmall?.copyWith(
@@ -258,13 +251,29 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Theme Preferences
-                    Card(
+                    // Reusable components test - uncomment if want to test
+                    /*
+                    StyledCard(
                       color: cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      title: "Reusable Components Test",
+                      child: ListTile(
+                        leading: const Icon(Pixel.warningbox),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ReusableComponentsTestScreen(),
+                            ),
+                          );
+                        },
                       ),
-                      elevation: 1,
+                    ),
+                    const SizedBox(height: 8),
+                    */
+
+                    // Theme Preferences
+                    StyledCard(
+                      color: cardColor,
                       child: ListTile(
                         leading: const Icon(Pixel.sunalt),
                         title: const Text("Theme Preferences"),
@@ -274,12 +283,8 @@ class UserProfileScreen extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     // Log Out
-                    Card(
+                    StyledCard(
                       color: cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 1,
                       child: ListTile(
                         leading: const Icon(Pixel.logout),
                         title: const Text("Log Out"),

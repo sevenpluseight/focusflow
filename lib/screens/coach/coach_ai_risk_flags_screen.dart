@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -48,60 +49,53 @@ class _CoachAiRiskFlagsScreenState extends State<CoachAiRiskFlagsScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Card(
-          color: theme.cardColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: coachProvider.aiLoading
-                ? const Center(
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Analyzing user data with AI...'),
-                      ],
+        child: StyledCard(
+          title: 'AI Generated Insights',
+          child: coachProvider.aiLoading
+              ? const Center(
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Analyzing user data with AI...'),
+                    ],
+                  ),
+                )
+              : MarkdownBody(
+                  data: coachProvider.aiInsights.isEmpty
+                      ? 'No insights generated.'
+                      : coachProvider.aiInsights,
+                  styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                    // Style for regular text
+                    p: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: theme.textTheme.bodyMedium?.color,
                     ),
-                  )
-                : MarkdownBody(
-                    data: coachProvider.aiInsights.isEmpty
-                        ? 'No insights generated.'
-                        : coachProvider.aiInsights,
-                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      // Style for regular text
-                      p: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                      // Style for **bold** text
-                      strong: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      // Style for '## Heading'
-                      h2: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      h2Padding: const EdgeInsets.only(top: 16, bottom: 4),
-                      // Indent bullet points
-                      listBullet: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
-                        height: 1.5,
-                      ),
-                      listBulletPadding: const EdgeInsets.only(
-                        left: 4,
-                        right: 8,
-                        top: 4,
-                      ),
+                    // Style for **bold** text
+                    strong: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    // Style for '## Heading'
+                    h2: TextStyle(
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    h2Padding: const EdgeInsets.only(top: 16, bottom: 4),
+                    // Indent bullet points
+                    listBullet: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color,
+                      height: 1.5,
+                    ),
+                    listBulletPadding: const EdgeInsets.only(
+                      left: 4,
+                      right: 8,
+                      top: 4,
                     ),
                   ),
-          ),
+                ),
         ),
       ),
     );

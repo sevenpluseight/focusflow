@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/screens/coach/coach.dart';
@@ -159,19 +160,17 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Pixel.moodhappy),
-                    label: const Text('Cheer'),
+                  child: PrimaryButton(
                     onPressed: () {
-                       _showCheerModal(context, _user!);
+                      _showCheerModal(context, _user!);
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Pixel.moodhappy),
+                        SizedBox(width: 8),
+                        Text('Cheer'),
+                      ],
                     ),
                   ),
                 ),
@@ -212,12 +211,8 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: StyledCard(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
         child: Row(
           children: [
             Icon(

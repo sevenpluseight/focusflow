@@ -7,3 +7,5 @@ export 'secondary_button.dart'; // Secondary button - Outlined button
 export 'custom_text_field.dart'; // Custom text field
 export 'custom_text_form_field.dart'; // Custom text form field
 export 'styled_card.dart'; // Styled card
+export 'confirmation_dialog.dart'; // Confirmation dialog
+export 'profile_button.dart'; // Profile button

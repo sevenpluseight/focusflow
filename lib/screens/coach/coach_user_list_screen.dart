@@ -134,11 +134,11 @@ class _UserListView extends StatelessWidget {
   Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user, int minutes) {
     // --- Status Logic ---
     String status = "Active";
-    Color statusColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
+    Color statusColor = theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
 
     if ((user.currentStreak ?? 0) == 0) {
       status = "At Risk";
-      statusColor = Colors.orangeAccent;
+      statusColor = theme.colorScheme.tertiary;
     }
 
     String focusText;

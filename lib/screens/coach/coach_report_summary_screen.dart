@@ -93,11 +93,21 @@ class CoachReportSummaryScreen extends StatelessWidget {
         children: [
           Icon(icon, color: theme.colorScheme.onSurface, size: 24),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 16)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
           ),
         ],
       ),

@@ -1,2 +1,8 @@
 // EXPORT THIS FILE
 export 'user_home_screen.dart';
+export 'user_profile_screen.dart';
+export 'user_reports_screen.dart';
+export 'user_timer_screen.dart';
+export 'user_coaches_screen.dart';
+export 'user_notification_screen.dart';
+export 'coach_application_screen.dart';

@@ -75,7 +75,7 @@ const List<String> productivityTips = [
   "Organize tasks by context, not just priority.",
   "Set achievable micro-goals for complex projects.",
   "Limit scrolling on social media apps.",
-  "Use focus apps to block distractions.",
+  "Use FocusFlow to enhance focus.",
   "Plan breaks with a purpose (walk, meditate).",
   "Use calendar blocks to protect focused time.",
   "Track progress visually with charts or graphs.",

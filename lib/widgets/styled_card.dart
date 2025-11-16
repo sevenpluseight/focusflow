@@ -5,6 +5,7 @@ class StyledCard extends StatelessWidget {
   final Color? color;
   final EdgeInsetsGeometry? padding;
   final String? title;
+  final Widget? titleWidget;
   final bool hasBorder;
 
   const StyledCard({
@@ -13,6 +14,7 @@ class StyledCard extends StatelessWidget {
     this.color,
     this.padding,
     this.title,
+    this.titleWidget,
     this.hasBorder = false,
   }) : super(key: key);
 
@@ -45,7 +47,9 @@ class StyledCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (title != null)
+          if (titleWidget != null)
+            titleWidget!
+          else if (title != null)
             Text(
               title!,
               style: theme.textTheme.titleMedium?.copyWith(
@@ -53,7 +57,7 @@ class StyledCard extends StatelessWidget {
                 color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
-          if (title != null) const SizedBox(height: 12),
+          if (title != null || titleWidget != null) const SizedBox(height: 12),
           child,
         ],
       ),

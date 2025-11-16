@@ -60,7 +60,6 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (_user == null) {
       return Scaffold(
@@ -74,7 +73,7 @@ class _CoachUserReportScreenState extends State<CoachUserReportScreen> {
       // We add an AppBar to this new screen
       appBar: AppBar(
         title: Text(_user!.username),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),

@@ -4,9 +4,10 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class CoachOngoingChallengesScreen extends StatefulWidget {
-  const CoachOngoingChallengesScreen({Key? key}) : super(key: key);
+  const CoachOngoingChallengesScreen({super.key});
 
   @override
   State<CoachOngoingChallengesScreen> createState() => _CoachOngoingChallengesScreenState();
@@ -57,7 +58,6 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
     );
   }
 
-  // This widget matches Figure 24 
   Widget _buildChallengeCard(ThemeData theme, ChallengeModel challenge) {
     Color statusColor;
     Color onStatusColor;
@@ -75,6 +75,14 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
         statusColor = theme.colorScheme.tertiary;
         onStatusColor = theme.colorScheme.onTertiary;
     }
+    // Format the dates
+    final formatter = DateFormat('MMM d, h:mm a');
+    String startDate = challenge.startDate != null
+        ? formatter.format(challenge.startDate!.toDate())
+        : 'N/A';
+    String endDate = challenge.endDate != null
+        ? formatter.format(challenge.endDate!.toDate())
+        : 'N/A';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -114,8 +122,13 @@ class _CoachOngoingChallengesScreenState extends State<CoachOngoingChallengesScr
               'Focus Goal: ${challenge.focusGoalHours} hours',
               style: TextStyle(color: theme.textTheme.bodyMedium?.color),
             ),
+            const SizedBox(height: 4),
             Text(
-              'Duration: ${challenge.durationDays} days',
+              'Starts: $startDate',
+              style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+            ),
+            Text(
+              'Ends:   $endDate',
               style: TextStyle(color: theme.textTheme.bodyMedium?.color),
             ),
           ],

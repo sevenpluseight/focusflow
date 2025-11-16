@@ -51,6 +51,7 @@ class CoachProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = context.watch<UserProvider>().user;
+    final textColor = theme.colorScheme.onSurface;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -91,6 +92,7 @@ class CoachProfileScreen extends StatelessWidget {
               "Settings",
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: textColor,
               ),
             ),
             const SizedBox(height: 12),

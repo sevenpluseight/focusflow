@@ -178,21 +178,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (_) => const UserLoadingScreen(),
                           ),
                         );
+                      } else if (authProvider.errorMessage != null &&
+                          authProvider.errorMessage!.isNotEmpty) {
+                        _showTemporaryError(authProvider.errorMessage!);
                       } else {
-                        final err =
-                            authProvider.errorMessage?.toLowerCase() ?? "";
-                        if (err.contains("invalid-credential") ||
-                            err.contains("user-not-found") ||
-                            err.contains("wrong-password") ||
-                            err.contains("invalid email") ||
-                            err.contains("password is invalid")) {
-                          _showTemporaryError("Incorrect email or password.");
-                        } else if (authProvider.errorMessage != null &&
-                            authProvider.errorMessage!.isNotEmpty) {
-                          _showTemporaryError(authProvider.errorMessage!);
-                        } else {
-                          _showTemporaryError("Incorrect email or password.");
-                        }
+                        _showTemporaryError("An unknown error occurred.");
                       }
                     },
                     child: const Text("Sign In"),
@@ -234,7 +224,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (_) => const UserLoadingScreen(),
                           ),
                         );
-                      } else if (authProvider.errorMessage != null) {
+                      } else if (authProvider.errorMessage != null &&
+                          authProvider.errorMessage!.isNotEmpty) {
                         _showTemporaryError(authProvider.errorMessage!);
                       }
                     },

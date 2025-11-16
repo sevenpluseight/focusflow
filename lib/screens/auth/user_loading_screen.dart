@@ -77,7 +77,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       if (!mounted) return;
       CustomSnackBar.show(
         context,
-        message: "An error occurred. Please try again.",
+        message: "An error occurred: $e",
         type: SnackBarType.error,
         position: SnackBarPosition.top,
       );
@@ -90,11 +90,9 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
 
   Future<bool> _fetchWithTimeout(UserProvider userProvider) async {
     try {
-      await userProvider.fetchUser().timeout(const Duration(seconds: 4));
+      await userProvider.fetchUser().timeout(const Duration(seconds: 10));
       return userProvider.user != null;
     } on TimeoutException {
-      return false;
-    } catch (_) {
       return false;
     }
   }

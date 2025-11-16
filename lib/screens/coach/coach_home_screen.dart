@@ -29,9 +29,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
     final coachProvider = context.read<CoachProvider>();
     final coachId = authProvider.user?.uid ?? '';
     
-    // Fetch both users and challenges
-    await coachProvider.fetchConnectedUsers(coachId);
-    await coachProvider.fetchMyChallenges();
+    // Fetch all coach data in parallel
+    await Future.wait([
+      coachProvider.fetchConnectedUsers(coachId),
+      coachProvider.fetchMyChallenges(),
+      coachProvider.fetchPendingRequests() // This fetches the requests
+    ]);
   }
 
   @override
@@ -40,10 +43,12 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
     // We use "watch" to listen for data changes
     final coachProvider = context.watch<CoachProvider>();
     
-    // --- Calculate Stats ---
+    // --- Get all data ---
     final users = coachProvider.connectedUsers;
     final challenges = coachProvider.challenges;
+    final pendingRequests = coachProvider.pendingRequests; // <-- GET REQUESTS
 
+    // --- Calculate Stats ---
     final totalUsers = users.length;
     final atRiskUsers = users.where((u) => (u.currentStreak ?? 0) == 0).toList();
     
@@ -62,30 +67,73 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Pending User Requests',
+              'User Management',
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
+            
             StyledCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // TODO: Implement Pending Requests Logic
-                  Text(
-                    'No pending requests.',
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'View More >',
-                      style: TextStyle(color: theme.colorScheme.primary),
+              padding: EdgeInsets.zero, // Use ListTile's padding
+              child: coachProvider.isLoading
+                  ? const Center(child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ))
+                  : ListTile( 
+                      leading: Icon(
+                        Pixel.users,
+                        color: theme.colorScheme.primary,
+                      ),
+                      title: Text('View My User List', 
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        height: 1.5,
+                      )),
+                      subtitle: Text(
+                        '${pendingRequests.length} pending requests',
+                        style: TextStyle(color: theme.textTheme.bodySmall?.color),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Show a notification badge if there are requests
+                          if (pendingRequests.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.tertiary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${pendingRequests.length}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onTertiary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Pixel.chevronright,
+                            color: theme.textTheme.bodyMedium?.color
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        // Navigate to the new screen we are about to create
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CoachUserManagementScreen(),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ],
-              ),
             ),
+
             const SizedBox(height: 30),
 
             Text(
@@ -99,33 +147,58 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '• Total Users Coached: $totalUsers',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Total Users Coached: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '$totalUsers'),
+                            ],
                           ),
                         ),
-                        Text(
-                          '• Average Streak: ${avgStreak.toStringAsFixed(1)} days',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Average Streak: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '${avgStreak.toStringAsFixed(1)} days'),
+                            ],
                           ),
                         ),
-                        Text(
-                          '• Ongoing Challenges: ${challenges.length}',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Ongoing Challenges: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '${challenges.length}'),
+                            ],
                           ),
                         ),
                       ],
                     ),
             ),
+
             const SizedBox(height: 30),
 
             Text(
@@ -134,6 +207,9 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
             const SizedBox(height: 10),
             StyledCard(
+              padding: atRiskUsers.isEmpty 
+                  ? const EdgeInsets.all(16) // Keep padding if empty
+                  : EdgeInsets.zero, // Use ListTile's default padding
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : atRiskUsers.isEmpty
@@ -157,7 +233,7 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
       ),
     );
   }
-
+  
   // Helper widget to build the At-Risk user tile
   Widget _buildAtRiskTile(BuildContext context, UserModel user) {
     final theme = Theme.of(context);

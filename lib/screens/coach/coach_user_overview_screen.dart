@@ -8,12 +8,11 @@ import 'package:provider/provider.dart';
 class CoachUserOverviewScreen extends StatelessWidget {
   final String userId;
 
-  const CoachUserOverviewScreen({Key? key, required this.userId}) : super(key: key);
+  const CoachUserOverviewScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // Get the specific user from the provider
     UserModel? user;
@@ -36,7 +35,7 @@ class CoachUserOverviewScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(user.username),
-        backgroundColor: isDark ? const Color(0xFF3A3D42) : const Color(0xFFE8F5E9),
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),

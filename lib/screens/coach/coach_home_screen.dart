@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/coach/coach.dart';
-import 'package:focusflow/widgets/widgets.dart'; // <-- Make sure this is imported
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 
@@ -67,32 +67,71 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Pending User Requests',
+              'User Management',
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             
             StyledCard(
-              // Use vertical padding if list is not empty
-              padding: pendingRequests.isEmpty 
-                  ? const EdgeInsets.all(16) 
-                  : const EdgeInsets.symmetric(vertical: 8),
+              padding: EdgeInsets.zero, // Use ListTile's padding
               child: coachProvider.isLoading
                   ? const Center(child: Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(16.0),
                       child: CircularProgressIndicator(),
                     ))
-                  : pendingRequests.isEmpty
-                      ? Text(
-                          'No pending requests.',
-                          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                        )
-                      : Column(
-                          children: pendingRequests.map((req) {
-                            // Use the correct helper widget
-                            return _buildRequestTile(context, req);
-                          }).toList(),
-                        ),
+                  : ListTile( 
+                      leading: Icon(
+                        Pixel.users,
+                        color: theme.colorScheme.primary,
+                      ),
+                      title: Text('View My User List', 
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        height: 1.5,
+                      )),
+                      subtitle: Text(
+                        '${pendingRequests.length} pending requests',
+                        style: TextStyle(color: theme.textTheme.bodySmall?.color),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Show a notification badge if there are requests
+                          if (pendingRequests.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.tertiary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${pendingRequests.length}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onTertiary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Pixel.chevronright,
+                            color: theme.textTheme.bodyMedium?.color
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        // Navigate to the new screen we are about to create
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CoachUserManagementScreen(),
+                          ),
+                        );
+                      },
+                    ),
             ),
 
             const SizedBox(height: 30),
@@ -195,31 +234,6 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
     );
   }
   
-  // --- THIS IS THE CORRECT HELPER WIDGET ---
-  Widget _buildRequestTile(BuildContext context, ConnectionRequestModel request) {
-    final coachProvider = context.read<CoachProvider>();
-    return ListTile(
-      title: Text("${request.username} wants to connect."),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Pixel.check, color: Colors.green), // Use Pixel icon
-            onPressed: () {
-              coachProvider.approveConnectionRequest(request.id, request.userId);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Pixel.close, color: Colors.red), // Use Pixel icon
-            onPressed: () {
-              coachProvider.rejectConnectionRequest(request.id);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   // Helper widget to build the At-Risk user tile
   Widget _buildAtRiskTile(BuildContext context, UserModel user) {
     final theme = Theme.of(context);

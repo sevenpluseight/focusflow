@@ -72,7 +72,6 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             ),
             const SizedBox(height: 10),
             
-            // --- THIS IS THE FIXED CARD ---
             StyledCard(
               // Use vertical padding if list is not empty
               padding: pendingRequests.isEmpty 
@@ -95,7 +94,6 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
                           }).toList(),
                         ),
             ),
-            // -------------------------------
 
             const SizedBox(height: 30),
 
@@ -110,33 +108,58 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '• Total Users Coached: $totalUsers',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Total Users Coached: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '$totalUsers'),
+                            ],
                           ),
                         ),
-                        Text(
-                          '• Average Streak: ${avgStreak.toStringAsFixed(1)} days',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Average Streak: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '${avgStreak.toStringAsFixed(1)} days'),
+                            ],
                           ),
                         ),
-                        Text(
-                          '• Ongoing Challenges: ${challenges.length}',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color,
-                            fontSize: 16,
-                            height: 1.5,
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: '• Ongoing Challenges: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: '${challenges.length}'),
+                            ],
                           ),
                         ),
                       ],
                     ),
             ),
+
             const SizedBox(height: 30),
 
             Text(

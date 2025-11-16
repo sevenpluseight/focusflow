@@ -42,14 +42,14 @@ class UserModel {
       email: data['email'] ?? '',
       role: data['role'] ?? 'user',
       signInMethod: data['signInMethod'] ?? '',
-      createdAt: data['createdAt'] ?? Timestamp.now(),
+      createdAt: _toTimestamp(data['createdAt']) ?? Timestamp.now(),
       dailyTargetHours: _toDouble(data['dailyTargetHours']),
       workInterval: _toInt(data['workInterval']),
       breakInterval: _toInt(data['breakInterval']),
       focusType: data['focusType'],
       currentStreak: _toInt(data['currentStreak']),
       longestStreak: _toInt(data['longestStreak']),
-      lastFocusDate: data['lastFocusDate'],
+      lastFocusDate: _toTimestamp(data['lastFocusDate']),
       coachId: data['coachId'],
     );
   }
@@ -121,5 +121,12 @@ class UserModel {
     if (value is int) return value;
     if (value is double) return value.toInt();
     return int.tryParse(value.toString());
+  }
+
+  static Timestamp? _toTimestamp(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value;
+    if (value is String) return Timestamp.fromDate(DateTime.parse(value));
+    return null;
   }
 }

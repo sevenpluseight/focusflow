@@ -1,27 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DailyProgressModel {
-  final String date;
+  final String date; // e.g., "2025-11-16"
   final int focusedMinutes;
-  final int dailyTargetMinutes;
-  final double progress;
-  final Timestamp updatedAt;
+  final DateTime updatedAt;
 
   DailyProgressModel({
     required this.date,
     required this.focusedMinutes,
-    required this.dailyTargetMinutes,
-    required this.progress,
     required this.updatedAt,
   });
 
-  factory DailyProgressModel.fromMap(Map<String, dynamic> data) {
+  factory DailyProgressModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+
+    // Handle updatedAt as Timestamp or String
+    final updatedAtRaw = data['updatedAt'];
+    DateTime updatedAtDate;
+
+    if (updatedAtRaw is Timestamp) {
+      updatedAtDate = updatedAtRaw.toDate();
+    } else if (updatedAtRaw is String) {
+      updatedAtDate = DateTime.tryParse(updatedAtRaw) ?? DateTime.now();
+    } else {
+      updatedAtDate = DateTime.now();
+    }
+
     return DailyProgressModel(
-      date: data['date'] ?? '',
-      focusedMinutes: (data['focusedMinutes'] ?? 0).toInt(),
-      dailyTargetMinutes: (data['dailyTargetMinutes'] ?? 0).toInt(),
-      progress: (data['progress'] ?? 0.0).toDouble(),
-      updatedAt: data['updatedAt'] ?? Timestamp.now(),
+      date: data['date'] ?? doc.id,
+      focusedMinutes: (data['focusedMinutes'] ?? data['minutes'] ?? 0).toInt(),
+      updatedAt: updatedAtDate,
     );
   }
 
@@ -29,9 +37,7 @@ class DailyProgressModel {
     return {
       'date': date,
       'focusedMinutes': focusedMinutes,
-      'dailyTargetMinutes': dailyTargetMinutes,
-      'progress': progress,
-      'updatedAt': updatedAt,
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 }

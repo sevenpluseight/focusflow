@@ -5,3 +5,5 @@ export 'google_sign_in_service.dart'; // Not used currently - check providers/au
 export 'auth_service.dart'; // Authentication operations
 export 'user_service.dart'; // User data operations
 export 'admin_stat_service.dart'; // Admin stats data operations
+export 'productivity_service.dart'; // Productivity tips operations
+export 'session_timer.dart'; // Session timer operations

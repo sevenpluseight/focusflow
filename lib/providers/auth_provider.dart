@@ -77,8 +77,25 @@ class AuthProvider with ChangeNotifier {
       } else {
         _setUser(user);
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
+        _setError('Invalid email or password.');
+      } else if (e.code == 'network-request-failed') {
+        _setError('Network error. Please check your connection.');
+      } else {
+        _setError('An error occurred: ${e.message}');
+      }
     } catch (e) {
-      _setError(e.toString());
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('network') ||
+          errorString.contains('socket') ||
+          errorString.contains('failed host lookup')) {
+        _setError('Network error. Please check your connection.');
+      } else {
+        _setError('An unexpected error occurred: $e');
+      }
     } finally {
       _setLoading(false);
     }
@@ -96,8 +113,21 @@ class AuthProvider with ChangeNotifier {
       } else {
         _setUser(user);
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'network-request-failed') {
+        _setError('Network error. Please check your connection.');
+      } else {
+        _setError('An error occurred during Google sign-in: ${e.message}');
+      }
     } catch (e) {
-      _setError("Google sign-in failed: $e");
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('network') ||
+          errorString.contains('socket') ||
+          errorString.contains('failed host lookup')) {
+        _setError('Network error. Please check your connection.');
+      } else {
+        _setError("An unexpected error occurred during Google sign-in: $e");
+      }
     } finally {
       _setLoading(false);
     }
@@ -186,3 +216,4 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {}
   }
 }
+

@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/models/models.dart';
-import 'package:focusflow/models/challenge_model.dart';
-import 'package:focusflow/models/report_model.dart';
-import 'package:focusflow/models/distraction_log_model.dart';
-import 'package:focusflow/models/daily_progress_model.dart';
 import 'package:focusflow/services/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:focusflow/models/connection_request_model.dart';
 
 class CoachProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -276,7 +271,7 @@ class CoachProvider with ChangeNotifier {
           .get();
 
       _userProgressHistory = querySnapshot.docs
-          .map((doc) => DailyProgressModel.fromMap(doc.data()))
+          .map((doc) => DailyProgressModel.fromFirestore(doc))
           .toList();
     } catch (e) {
       print('Error fetching focus history: $e');

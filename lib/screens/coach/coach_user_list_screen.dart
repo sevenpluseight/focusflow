@@ -68,10 +68,6 @@ class _CoachUserListScreenState extends State<CoachUserListScreen> {
             ),
           ),
 
-          // **--- THIS IS THE FIX ---**
-          // We pass the data to a new, separate widget.
-          // This isolates the ListView from the setState calls
-          // triggered by the TextField.
           _UserListView(
             isLoading: coachProvider.isLoading,
             filteredUsers: filteredUsers,
@@ -134,11 +130,14 @@ class _UserListView extends StatelessWidget {
   Widget _buildUserReportCard(BuildContext context, ThemeData theme, UserModel user, int minutes) {
     // --- Status Logic ---
     String status = "Active";
-    Color statusColor = theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
+    Color statusColor;
 
     if ((user.currentStreak ?? 0) == 0) {
       status = "At Risk";
       statusColor = theme.colorScheme.tertiary;
+    } else {
+      status = "Active";
+      statusColor = theme.colorScheme.primary;
     }
 
     String focusText;
@@ -163,9 +162,10 @@ class _UserListView extends StatelessWidget {
                 children: [
                   Text(
                     user.username,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize:18,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -181,7 +181,7 @@ class _UserListView extends StatelessWidget {
                     'Status: $status',
                     style: TextStyle(
                       color: statusColor,
-                      fontWeight: status == 'At Risk'
+                      fontWeight: (status == 'At Risk' || status == "Active")
                           ? FontWeight.bold
                           : FontWeight.normal,
                     ),

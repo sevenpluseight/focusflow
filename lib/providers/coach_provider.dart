@@ -11,9 +11,11 @@ class CoachProvider with ChangeNotifier {
 
   List<UserModel> _connectedUsers = [];
   bool _isLoading = false;
+  String? _errorMessage;
 
   List<UserModel> get connectedUsers => _connectedUsers;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   List<ChallengeModel> _challenges = [];
   bool _challengesLoading = false;
@@ -51,6 +53,7 @@ class CoachProvider with ChangeNotifier {
     if (coachId.isEmpty) return;
 
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -68,6 +71,7 @@ class CoachProvider with ChangeNotifier {
       await _fetchUsersProgress(_connectedUsers);
     } catch (e) {
       print('Error fetching connected users: $e');
+      _errorMessage = 'Error fetching connected users: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -142,6 +146,7 @@ class CoachProvider with ChangeNotifier {
         status: 'pending', // Awaiting admin approval
         startDate: startDate,
         endDate: endDate,
+        participants: [],
       );
 
       await newChallengeRef.set(newChallenge.toMap());
@@ -156,6 +161,7 @@ class CoachProvider with ChangeNotifier {
     if (coachId == null) return;
 
     _challengesLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -172,6 +178,7 @@ class CoachProvider with ChangeNotifier {
 
     } catch (e) {
       print('Error fetching challenges: $e');
+      _errorMessage = 'Error fetching challenges: $e';
     } finally {
       _challengesLoading = false;
       notifyListeners();
@@ -181,6 +188,7 @@ class CoachProvider with ChangeNotifier {
   Future<void> fetchDistractionLogs(String userId) async {
     if (userId.isEmpty) return;
     _logsLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final querySnapshot = await _firestore
@@ -194,6 +202,7 @@ class CoachProvider with ChangeNotifier {
           .toList();
     } catch (e) {
       print('Error fetching distraction logs: $e');
+      _errorMessage = 'Error fetching distraction logs: $e';
     } finally {
       _logsLoading = false;
       notifyListeners();
@@ -230,13 +239,11 @@ class CoachProvider with ChangeNotifier {
     if (text.isEmpty) throw Exception('Message cannot be empty');
 
     try {
-      // We store messages in a subcollection on the USER's document.
-      // This makes it easy for the user to fetch their own messages.
-      final messageRef = _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('messages')
-          .doc();
+      final ids = [userId, coachId]..sort();
+      final chatId = ids.join('_');
+
+      final chatRef = _firestore.collection('chats').doc(chatId);
+      final messageRef = chatRef.collection('messages').doc();
 
       final newMessage = MessageModel(
         id: messageRef.id,
@@ -247,7 +254,24 @@ class CoachProvider with ChangeNotifier {
         createdAt: Timestamp.now(),
       );
 
-      await messageRef.set(newMessage.toMap());
+      // Use a batch to ensure atomicity
+      final batch = _firestore.batch();
+
+      // Set the message
+      batch.set(messageRef, newMessage.toMap());
+
+      // Update the chat document with last message info
+      batch.set(
+        chatRef,
+        {
+          'members': ids,
+          'lastMessage': text,
+          'lastMessageAt': Timestamp.now(),
+        },
+        SetOptions(merge: true),
+      );
+
+      await batch.commit();
     } catch (e) {
       print('Error sending message: $e');
       throw Exception('Failed to send message.');
@@ -259,6 +283,7 @@ class CoachProvider with ChangeNotifier {
 
     _progressHistoryLoading = true;
     _userProgressHistory = []; // Clear old data
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -275,6 +300,7 @@ class CoachProvider with ChangeNotifier {
           .toList();
     } catch (e) {
       print('Error fetching focus history: $e');
+      _errorMessage = 'Error fetching focus history: $e';
     } finally {
       _progressHistoryLoading = false;
       notifyListeners();
@@ -284,6 +310,7 @@ class CoachProvider with ChangeNotifier {
   Future<void> fetchAiRiskFlags(String userId) async {
     _aiLoading = true;
     _aiInsights = "";
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -379,6 +406,7 @@ class CoachProvider with ChangeNotifier {
       });
     } catch (e) {
       _aiInsights = "Error generating AI insights: $e";
+      _errorMessage = 'Error generating AI insights: $e';
     } finally {
       _aiLoading = false;
       notifyListeners();
@@ -432,6 +460,7 @@ class CoachProvider with ChangeNotifier {
     final coachId = _auth.currentUser?.uid;
     if (coachId == null) return;
 
+    _errorMessage = null;
     try {
       final querySnapshot = await _firestore
           .collection('connectionRequests')
@@ -445,6 +474,7 @@ class CoachProvider with ChangeNotifier {
           .toList();
     } catch (e) {
       print('Error fetching pending requests: $e');
+      _errorMessage = 'Error fetching pending requests: $e';
     }
     notifyListeners(); // Notify listeners even if it's just to clear the list
   }

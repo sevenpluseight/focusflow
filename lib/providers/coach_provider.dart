@@ -97,7 +97,7 @@ class CoachProvider with ChangeNotifier {
               if (doc.exists) {
                 // Store minutes in the map: 'userId' -> 120
                 _todayFocusMinutes[user.uid] =
-                    (doc.data()?['minutesFocused'] as num? ?? 0).toInt();
+                    (doc.data()?['focusedMinutes'] as num? ?? 0).toInt();
               } else {
                 _todayFocusMinutes[user.uid] = 0;
               }

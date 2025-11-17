@@ -205,7 +205,7 @@ class CoachRequestDetailsSheet extends StatelessWidget {
         onTap: isLink ? onTap : null,
         child: Text(
           content,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyLarge?.copyWith(
             color: isLink
                 ? theme.colorScheme.primary
                 : theme.colorScheme.onSurface.withOpacity(0.8),

@@ -183,7 +183,7 @@ class CoachProvider with ChangeNotifier {
           .map((doc) => ChallengeModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching challenges: $e');
+      debugPrint('Error fetching challenges: $e');
     } finally {
       _challengesLoading = false;
       notifyListeners();
@@ -205,7 +205,7 @@ class CoachProvider with ChangeNotifier {
           .map((doc) => DistractionLogModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching distraction logs: $e');
+      debugPrint('Error fetching distraction logs: $e');
     } finally {
       _logsLoading = false;
       notifyListeners();
@@ -261,7 +261,7 @@ class CoachProvider with ChangeNotifier {
 
       await messageRef.set(newMessage.toMap());
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
       throw Exception('Failed to send message.');
     }
   }

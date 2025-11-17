@@ -55,7 +55,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _pageOptions = [
           UserHomeScreen(),
           UserReportsScreen(),
-          UserTimeScreen(),
+          UserTimerScreen(),
           UserCoachesScreen(),
           UserProfileScreen(),
         ];

@@ -82,10 +82,21 @@ class _UserTimerWidgetState extends State<UserTimerScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("Focus Timer", style: theme.appBarTheme.titleTextStyle),
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        backgroundColor: Colors.transparent, // Make background transparent
+        elevation: 0, // Remove shadow
         iconTheme: theme.appBarTheme.iconTheme,
         centerTitle: false,
         actions: [
+          IconButton(
+            tooltip: 'Log Distraction',
+            icon: Icon(
+              Pixel.edit,
+              color: theme.appBarTheme.iconTheme?.color,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed(AppRoutes.distractionLog);
+            },
+          ),
           InfoIcon(
             icon: Pixel.infobox,
             dialogTitle: "Focus Session Controls",

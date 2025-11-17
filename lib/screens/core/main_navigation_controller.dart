@@ -12,7 +12,7 @@ import 'package:focusflow/screens/user/user_notification_screen.dart';
 import 'package:focusflow/screens/coach/coach_notification_screen.dart';
 import 'package:focusflow/screens/user/user_timer_screen.dart';
 import 'package:focusflow/screens/user/user_reports_screen.dart';
-import '../auth/auth.dart';
+// import '../auth/auth.dart';
 
 import '../common/placeholder_pages.dart';
 // import '../coach/coach_home_screen.dart';
@@ -113,40 +113,40 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
     setState(() => _selectedIndex = index);
   }
 
-  Future<void> _showLogoutConfirmationDialog() async {
-    final authProvider = context.read<AuthProvider>();
+  // Future<void> _showLogoutConfirmationDialog() async {
+  //   final authProvider = context.read<AuthProvider>();
 
-    final bool? confirmLogout = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return const ConfirmationDialog(
-          title: 'Confirm Logout',
-          contentText: 'Are you sure you want to log out?',
-          confirmText: 'Logout',
-        );
-      },
-    );
+  //   final bool? confirmLogout = await showDialog<bool>(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext dialogContext) {
+  //       return const ConfirmationDialog(
+  //         title: 'Confirm Logout',
+  //         contentText: 'Are you sure you want to log out?',
+  //         confirmText: 'Logout',
+  //       );
+  //     },
+  //   );
 
-    if (confirmLogout == true && mounted) {
-      try {
-        await authProvider.signOut(context);
-        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Logout failed: $e"),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
-        }
-      }
-    }
-  }
+  //   if (confirmLogout == true && mounted) {
+  //     try {
+  //       await authProvider.signOut(context);
+  //       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+  //         MaterialPageRoute(builder: (_) => const LoginScreen()),
+  //         (route) => false,
+  //       );
+  //     } catch (e) {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //             content: Text("Logout failed: $e"),
+  //             backgroundColor: Colors.redAccent,
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -195,14 +195,14 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
                 }
               },
             ),
-          IconButton(
-            tooltip: 'Logout',
-            icon: Icon(
-              Pixel.logout,
-              color: theme.appBarTheme.iconTheme?.color,
-            ),
-            onPressed: _showLogoutConfirmationDialog,
-          ),
+          // IconButton(
+          //   tooltip: 'Logout',
+          //   icon: Icon(
+          //     Pixel.logout,
+          //     color: theme.appBarTheme.iconTheme?.color,
+          //   ),
+          //   onPressed: _showLogoutConfirmationDialog,
+          // ),
           const SizedBox(width: 10),
         ],
       ),

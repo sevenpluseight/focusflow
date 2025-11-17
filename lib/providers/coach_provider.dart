@@ -80,7 +80,7 @@ class CoachProvider with ChangeNotifier {
       // After fetching users, fetch their progress in parallel
       await _fetchUsersProgress(_connectedUsers);
     } catch (e) {
-      print('Error fetching connected users: $e');
+      debugPrint('Error fetching connected users: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -111,7 +111,7 @@ class CoachProvider with ChangeNotifier {
               }
             })
             .catchError((e) {
-              print('Error fetching progress for ${user.uid}: $e');
+              debugPrint('Error fetching progress for ${user.uid}: $e');
               _todayFocusMinutes[user.uid] = 0; // Default to 0 on error
             }),
       );
@@ -286,7 +286,7 @@ class CoachProvider with ChangeNotifier {
           .map((doc) => DailyProgressModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching focus history: $e');
+      debugPrint('Error fetching focus history: $e');
     } finally {
       _progressHistoryLoading = false;
       notifyListeners();
@@ -514,7 +514,7 @@ class CoachProvider with ChangeNotifier {
           .map((doc) => ConnectionRequestModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching pending requests: $e');
+      debugPrint('Error fetching pending requests: $e');
     }
     notifyListeners(); // Notify listeners even if it's just to clear the list
   }
@@ -551,7 +551,7 @@ class CoachProvider with ChangeNotifier {
       final totalUsers = users.length;
       final totalStreak = users.fold<int>(
         0,
-        (sum, u) => sum + (u.currentStreak ?? 0),
+        (total, u) => total + (u.currentStreak ?? 0),
       );
       final avgStreak = totalUsers > 0
           ? (totalStreak / totalUsers).toStringAsFixed(1)

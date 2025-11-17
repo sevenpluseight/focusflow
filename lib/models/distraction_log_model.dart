@@ -25,4 +25,13 @@ class DistractionLogModel {
       createdAt: data['createdAt'] ?? Timestamp.now(),
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'category': category,
+      'note': note,
+      'imageUrl': imageUrl,
+      'createdAt': createdAt,
+    };
+  }
 }

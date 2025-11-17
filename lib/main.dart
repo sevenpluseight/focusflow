@@ -4,6 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/services/services.dart';
 import 'package:focusflow/theme/app_theme.dart';
 import 'package:focusflow/routes/routes.dart';
+import 'package:focusflow/utils/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,7 @@ class FocusFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return MultiProvider(
       providers: [
         // Auth & Theme
@@ -51,6 +53,11 @@ class FocusFlowApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminUsersProvider()),
         ChangeNotifierProvider(create: (_) => AdminStatsProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => CoachSearchProvider()),
+        ChangeNotifierProvider(create: (_) => ChallengeProvider()),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => DistractionProvider()),
+        Provider(create: (_) => MessageProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

@@ -86,8 +86,10 @@ class ProgressProvider with ChangeNotifier {
   }
 
   /// Called when a focus session ends
-  Future<void> endSession(int durationSeconds) async {
-    if (_uid.isEmpty) return;
+  Future<String> endSession(int durationSeconds) async {
+    String sessionId = '';
+
+    if (_uid.isEmpty) return sessionId;
 
     final minutes = (durationSeconds / 60).round();
     final todayKey = _todayKey();
@@ -100,10 +102,13 @@ class ProgressProvider with ChangeNotifier {
       final dailySnapshot = await tx.get(dailyDocRef);
       final userSnap = await tx.get(userRef);
 
-      // Current minutes
+      // Current minutes and existing moods
       final previousMinutes = dailySnapshot.exists
           ? (dailySnapshot.data()?['focusedMinutes'] as int? ?? 0)
           : 0;
+      final existingMoods = dailySnapshot.exists
+          ? (dailySnapshot.data()?['moods'] as Map<String, dynamic>?)
+          : null;
       final newMinutes = previousMinutes + minutes;
 
       // Streak logic
@@ -134,6 +139,7 @@ class ProgressProvider with ChangeNotifier {
         date: todayKey,
         focusedMinutes: newMinutes,
         updatedAt: DateTime.now(),
+        moods: existingMoods, // Preserve existing moods
       );
       tx.set(dailyDocRef, newProgress.toMap(), SetOptions(merge: true));
 
@@ -151,6 +157,7 @@ class ProgressProvider with ChangeNotifier {
     });
 
     notifyListeners();
+    return sessionId;
   }
 
   /// Skip break (doesn't modify Firestore)

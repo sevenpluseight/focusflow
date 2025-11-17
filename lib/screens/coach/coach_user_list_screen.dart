@@ -9,7 +9,7 @@ import 'package:focusflow/screens/coach/coach.dart';
 
 class CoachUserListScreen extends StatefulWidget {
   const CoachUserListScreen({Key? key}) : super(key: key);
-
+  
   @override
   State<CoachUserListScreen> createState() => _CoachUserListScreenState();
 }
@@ -78,9 +78,6 @@ class _CoachUserListScreenState extends State<CoachUserListScreen> {
   }
 }
 
-// This widget is now separate and will not conflict
-// with the keyboard resizing.
-
 class _UserListView extends StatelessWidget {
   final bool isLoading;
   final List<UserModel> filteredUsers;
@@ -114,7 +111,6 @@ class _UserListView extends StatelessWidget {
 
     return Expanded(
       child: ListView.builder(
-        // This is a nice-to-have: hides the keyboard when you scroll
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: filteredUsers.length,
         itemBuilder: (context, index) {
@@ -189,26 +185,30 @@ class _UserListView extends StatelessWidget {
                 ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CoachUserReportScreen(
-                      userId: user.uid,
-                    )
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CoachUserReportScreen(
+                          userId: user.uid,
+                        )
+                      ),
+                    );  
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary, // Use theme color
+                    foregroundColor: Colors.black, // Text color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minimumSize: const Size(110, 44),
                   ),
-                );  
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary, // Use theme color
-                foregroundColor: Colors.black, // Text color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  child: const Text('View Report'),
                 ),
-                minimumSize: const Size(0, 44),
-              ),
-              child: const Text('View Report'),
+              ],
             ),
           ],
         ),

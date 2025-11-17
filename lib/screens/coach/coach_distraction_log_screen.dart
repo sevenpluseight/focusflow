@@ -4,6 +4,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart'; 
 import 'package:focusflow/widgets/widgets.dart';
+import 'dart:convert';
 
 class CoachDistractionLogScreen extends StatefulWidget {
   final String userId;
@@ -26,6 +27,22 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CoachProvider>().fetchDistractionLogs(widget.userId);
     });
+  }
+
+  // Helper widget to display image from URL or Base64
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(imageUrl, width: 100, height: 100, fit: BoxFit.cover);
+    } else if (imageUrl == 'none') {
+      return const Icon(Pixel.close, size: 100);
+    } else {
+      try {
+        final decodedBytes = base64Decode(imageUrl);
+        return Image.memory(decodedBytes, width: 100, height: 100, fit: BoxFit.cover);
+      } catch (e) {
+        return const Icon(Icons.broken_image, size: 100);
+      }
+    }
   }
 
   @override
@@ -121,8 +138,8 @@ class _CoachDistractionLogScreenState extends State<CoachDistractionLogScreen> {
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: log.imageUrl != null
-                  ? Image.network(log.imageUrl!, fit: BoxFit.cover)
-                  : Icon(Pixel.image, color: Colors.grey.shade400, size: 40),
+                  ? _buildImage(log.imageUrl!)
+                  : Icon(Pixel.close, color: Colors.grey.shade400, size: 40),
             ),
           ],
         ),

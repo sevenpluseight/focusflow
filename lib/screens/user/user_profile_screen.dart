@@ -7,7 +7,9 @@ import 'package:focusflow/screens/core/main_navigation_controller.dart';
 import 'package:focusflow/screens/user/coach_application_screen.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:focusflow/screens/auth/auth.dart';
-import 'reusable_components_test_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:focusflow/screens/user/user.dart';
+// import 'reusable_components_test_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -51,12 +53,17 @@ class UserProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
+    final challengeProvider = context.watch<ChallengeProvider>();
 
     final String actualRole = user?.role ?? 'user';
     final bool isCoachInUserMode = (actualRole == 'coach');
 
     final theme = Theme.of(context);
     final textColor = theme.colorScheme.onSurface;
+
+    final joinedChallenges = challengeProvider.approvedChallenges
+        .where((challenge) => challenge.participants.contains(user?.uid))
+        .toList();
     // final cardColor = theme.cardColor;
 
     if (user == null && !userProvider.isLoading) {
@@ -149,23 +156,42 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Active challenge card 
-                    StyledCard(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Active Challenge",
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
+                    const SizedBox(height: 16),
+
+                    // Joined Challenges
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Joined Challenges",
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const UserJoinedChallengesScreen(),
+                              ),
+                            );
+                          },
+                          child: const StyledCard(
+                            child: Text(
+                              "Joined Challenges",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                          const SizedBox(),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
 
                     if (isCoachInUserMode)
                       PrimaryButton(
@@ -212,25 +238,25 @@ class UserProfileScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Reusable components test
-                    SecondaryButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ReusableComponentsTestScreen(),
-                          ),
-                        );
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Pixel.humanhandsup),
-                          SizedBox(width: 8),
-                          Text('Open Test Screen'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 17),
+                    // SecondaryButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) => const ReusableComponentsTestScreen(),
+                    //       ),
+                    //     );
+                    //   },
+                    //   child: const Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       Icon(Pixel.humanhandsup),
+                    //       SizedBox(width: 8),
+                    //       Text('Open Test Screen'),
+                    //     ],
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 17),
                     
                     // Theme Preferences
                     SecondaryButton(

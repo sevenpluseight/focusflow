@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusflow/models/models.dart';
-import 'package:focusflow/models/coach_request_model.dart';
 import 'package:focusflow/services/services.dart';
 
 class UserProvider with ChangeNotifier {
@@ -14,10 +13,23 @@ class UserProvider with ChangeNotifier {
     : _statsService = statsService ?? AdminStatService();
 
   UserModel? _user;
+  CoachRequestModel? _connectedCoach;
   bool _isLoading = false;
+  StreamSubscription? _pendingRequestsSubscription;
+  StreamSubscription? _userDocSubscription;
+  List<String> _pendingCoachIds = [];
 
   UserModel? get user => _user;
+  CoachRequestModel? get connectedCoach => _connectedCoach;
   bool get isLoading => _isLoading;
+  List<String> get pendingCoachIds => _pendingCoachIds;
+
+  @override
+  void dispose() {
+    _pendingRequestsSubscription?.cancel();
+    _userDocSubscription?.cancel();
+    super.dispose();
+  }
 
   void _safeNotifyListeners() {
     // Delay notifyListeners to avoid calling during build
@@ -37,13 +49,47 @@ class UserProvider with ChangeNotifier {
 
     _setLoading(true);
     try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      if (doc.exists) {
-        _user = UserModel.fromFirestore(doc);
-      }
+      listenToPendingRequests(); // Start listening
+      _userDocSubscription?.cancel(); // Cancel previous subscription if any
+      _userDocSubscription = _firestore.collection('users').doc(uid).snapshots().listen((doc) async {
+        if (doc.exists) {
+          _user = UserModel.fromFirestore(doc);
+          // If user has a coach, fetch the coach's details
+          if (_user?.coachId != null && _user!.coachId!.isNotEmpty) {
+            final coachDoc = await _firestore
+                .collection('coachRequests')
+                .doc(_user!.coachId)
+                .get();
+            if (coachDoc.exists) {
+              _connectedCoach = CoachRequestModel.fromFirestore(coachDoc);
+            } else {
+              _connectedCoach = null;
+            }
+          } else {
+            _connectedCoach = null;
+          }
+          _safeNotifyListeners();
+        }
+      });
     } finally {
       _setLoading(false);
     }
+  }
+
+  void listenToPendingRequests() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    _pendingRequestsSubscription?.cancel();
+    _pendingRequestsSubscription = _firestore
+        .collection('connectionRequests')
+        .where('userId', isEqualTo: uid)
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .listen((snapshot) {
+      _pendingCoachIds = snapshot.docs.map((doc) => doc['coachId'] as String).toList();
+      _safeNotifyListeners();
+    });
   }
 
   Future<void> createUser({
@@ -137,7 +183,7 @@ class UserProvider with ChangeNotifier {
 
     if (updates.isNotEmpty) {
       await _firestore.collection('users').doc(uid).update(updates);
-      await fetchUser();
+      // No need to call fetchUser() here, as the listener will handle it
     }
   }
 
@@ -175,10 +221,72 @@ class UserProvider with ChangeNotifier {
 
       await newRequestRef.set(newRequest.toMap());
     } catch (e) {
-      // Re-throw the error to show in the UI
       throw Exception(e.toString());
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> sendConnectionRequest(String coachId) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (_user == null || uid == null) {
+      throw Exception('User not logged in.');
+    }
+
+    _setLoading(true);
+    try {
+      final requestQuery = await _firestore
+          .collection('connectionRequests')
+          .where('userId', isEqualTo: uid)
+          .where('coachId', isEqualTo: coachId)
+          .limit(1)
+          .get();
+
+      if (requestQuery.docs.isNotEmpty) {
+        throw Exception('You have already sent a request to this coach.');
+      }
+
+      final newRequestRef = _firestore.collection('connectionRequests').doc();
+      await newRequestRef.set({
+        'coachId': coachId,
+        'userId': uid,
+        'username': _user!.username,
+        'status': 'pending',
+        'createdAt': Timestamp.now(),
+      });
+
+      if (!_pendingCoachIds.contains(coachId)) {
+        _pendingCoachIds.add(coachId);
+        _safeNotifyListeners();
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Stream<List<MessageModel>> getMessagesStream(String coachId) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      return Stream.value([]);
+    }
+
+    // Canonical chat ID
+    final ids = [uid, coachId]..sort();
+    final chatId = ids.join('_');
+
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        return [];
+      }
+      return snapshot.docs.map((doc) => MessageModel.fromFirestore(doc)).toList();
+    });
   }
 }

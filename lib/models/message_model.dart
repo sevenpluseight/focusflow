@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum MessageType { cheer, guide }
+enum MessageType { cheer, guide, text }
 
 class MessageModel {
   final String id;
@@ -21,12 +21,37 @@ class MessageModel {
     this.isRead = false,
   });
 
+  factory MessageModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
+    return MessageModel(
+      id: doc.id,
+      coachId: data['coachId'] ?? '',
+      userId: data['userId'] ?? '',
+      text: data['text'] ?? '',
+      type: _stringToMessageType(data['type']),
+      createdAt: data['createdAt'] ?? Timestamp.now(),
+      isRead: data['isRead'] ?? false,
+    );
+  }
+
+  static MessageType _stringToMessageType(String? typeStr) {
+    switch (typeStr) {
+      case 'cheer':
+        return MessageType.cheer;
+      case 'guide':
+        return MessageType.guide;
+      default:
+        return MessageType.text;
+    }
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'coachId': coachId,
       'userId': userId,
       'text': text,
-      'type': type.toString().split('.').last, // 'cheer' or 'guide'
+      'type': type.toString().split('.').last,
       'createdAt': createdAt,
       'isRead': isRead,
     };

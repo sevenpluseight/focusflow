@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/widgets/widgets.dart';
+import 'package:focusflow/widgets/snackbar.dart';
 import 'package:intl/intl.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
@@ -11,9 +12,10 @@ class UserChallengesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final challengeProvider = context.watch<ChallengeProvider>();
-    final challenges = challengeProvider.approvedChallenges;
     final userProvider = context.watch<UserProvider>();
     final userId = userProvider.user?.uid;
+
+    final challenges = challengeProvider.approvedChallenges;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,20 +36,21 @@ class UserChallengesScreen extends StatelessWidget {
                       itemCount: challenges.length,
                       itemBuilder: (context, index) {
                         final challenge = challenges[index];
-                        final createdAt =
-                            DateFormat('MMM d, yyyy').format(challenge.createdAt.toDate());
 
-                        // Calculate durationDays if startDate and endDate are available
+                        final createdAt = DateFormat('MMM d, yyyy')
+                            .format(challenge.createdAt.toDate());
+
                         int? durationDays;
-                        if (challenge.startDate != null && challenge.endDate != null) {
+                        if (challenge.startDate != null &&
+                            challenge.endDate != null) {
                           final start = challenge.startDate!.toDate();
                           final end = challenge.endDate!.toDate();
                           durationDays = end.difference(start).inDays;
                         }
 
-                        // Participants list (non-nullable)
-                        final participants = challenge.participants;
-                        final hasJoined = userId != null && participants.contains(userId);
+                        final participants = challenge.participants ?? [];
+                        final hasJoined = userId != null &&
+                            participants.contains(userId);
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16.0),
@@ -69,21 +72,30 @@ class UserChallengesScreen extends StatelessWidget {
                                         ? null
                                         : () async {
                                             try {
+                                              debugPrint(
+                                                  'Attempting to join challenge: ${challenge.id} for user: $userId');
+
+                                              // Call provider to join challenge
                                               await challengeProvider.joinChallenge(
                                                   challenge.id, userId);
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Successfully joined challenge!'),
-                                                  backgroundColor: Colors.green,
-                                                ),
-                                              );
+
+                                              if (context.mounted) {
+                                                CustomSnackBar.show(
+                                                  context,
+                                                  message: 'Successfully joined challenge!',
+                                                  type: SnackBarType.success,
+                                                  position: SnackBarPosition.top,
+                                                );
+                                              }
                                             } catch (e) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('Error joining challenge: $e'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
+                                              if (context.mounted) {
+                                                CustomSnackBar.show(
+                                                  context,
+                                                  message: 'Error joining challenge: $e',
+                                                  type: SnackBarType.error,
+                                                  position: SnackBarPosition.top,
+                                                );
+                                              }
                                             }
                                           },
                                     child: Text(hasJoined ? 'Joined' : 'Join'),

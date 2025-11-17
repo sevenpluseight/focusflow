@@ -143,11 +143,7 @@ class ChallengeRequestDetailsSheet extends StatelessWidget {
 
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Pixel.alert),
-                            SizedBox(width: 8),
-                            Text('Reject'),
-                          ],
+                          children: [SizedBox(width: 8), Text('Reject')],
                         ),
                       ),
                     ),

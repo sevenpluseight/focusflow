@@ -196,21 +196,9 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Icon(
-                  Pixel.suitcase,
-                  size: 16,
-                  color: isDark ? Colors.white54 : Colors.black45,
-                ),
+
                 const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    request.expertise,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                Expanded(child: Text("")),
                 const SizedBox(height: 12),
                 // Show View button only for pending requests
                 if (request.status == 'pending')

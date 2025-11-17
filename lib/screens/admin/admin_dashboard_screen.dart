@@ -3,6 +3,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:focusflow/screens/admin/admin.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -67,38 +68,9 @@ class AdminDashboardScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              StyledCard(
-                title: 'Focus Trends',
-                child: Container(
-                  height: 150,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '[Placeholder for Focus Trend Chart]',
-                    style: textTheme.bodyMedium,
-                  ),
-                ),
-              ),
+              const FocusTrendsSection(),
               const SizedBox(height: 20),
-              StyledCard(
-                title: 'Common Distractions',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '1. Social Media (35%)',
-                      style: textTheme.bodyLarge?.copyWith(height: 1.5),
-                    ),
-                    Text(
-                      '2. Environment Noise (22%)',
-                      style: textTheme.bodyLarge?.copyWith(height: 1.5),
-                    ),
-                    Text(
-                      '3. Messaging Apps (18%)',
-                      style: textTheme.bodyLarge?.copyWith(height: 1.5),
-                    ),
-                  ],
-                ),
-              ),
+              const CommonDistractionsSection(),
             ],
           ),
         ),

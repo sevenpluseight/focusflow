@@ -13,3 +13,5 @@ export 'admin_challenge_requests_section.dart';
 export 'admin_pending_challenges_screen.dart';
 export 'challenge_request_details.dart';
 export 'dashboard_ongoing_challenges_section.dart';
+export 'admin_focus_trends_section.dart';
+export 'admin_common_distractions.dart';

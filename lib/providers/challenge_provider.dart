@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:focusflow/models/challenge_model.dart';
+import 'package:focusflow/models/models.dart';
 
 class ChallengeProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  StreamSubscription? _challengesSubscription;
+
+  StreamSubscription<QuerySnapshot>? _challengesSubscription;
 
   List<ChallengeModel> _approvedChallenges = [];
   List<ChallengeModel> get approvedChallenges => _approvedChallenges;
@@ -31,53 +32,83 @@ class ChallengeProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void _setError(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
   void _listenToApprovedChallenges() {
     _setLoading(true);
+
     _challengesSubscription = _firestore
         .collection('challenges')
         .where('status', isEqualTo: 'approved')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .listen((snapshot) {
-      debugPrint('ChallengeProvider: Received ${snapshot.docs.length} approved challenges.');
-      _approvedChallenges = snapshot.docs
-          .map((doc) => ChallengeModel.fromFirestore(doc))
-          .toList();
-      _errorMessage = null;
-      _setLoading(false);
-    }, onError: (e) {
-      debugPrint('--- CHALLENGE PROVIDER ERROR ---');
-      debugPrint('Error listening to approved challenges: $e');
-      debugPrint('---------------------------------');
-      _errorMessage = 'Error: ${e.toString()}';
-      _setLoading(false);
-    });
+        .listen(
+      (snapshot) {
+        debugPrint('ChallengeProvider: Received ${snapshot.docs.length} approved challenges.');
+
+        _approvedChallenges =
+            snapshot.docs.map((doc) => ChallengeModel.fromFirestore(doc)).toList();
+
+        _setError(null);
+        _setLoading(false);
+      },
+      onError: (e) {
+        debugPrint('Error listening to approved challenges: $e');
+        _setError('Error: $e');
+        _setLoading(false);
+      },
+    );
   }
 
-  /// Safely join a challenge by adding the user to the participants array.
+  /// Join a challenge using Firestore arrayUnion
   Future<void> joinChallenge(String challengeId, String userId) async {
-    _setLoading(true);
-    try {
-      final challengeRef = _firestore.collection('challenges').doc(challengeId);
+    if (userId.isEmpty) return;
 
-      await challengeRef.update({
+    debugPrint('Joining challenge $challengeId as $userId');
+    _setLoading(true);
+
+    try {
+      final docRef = _firestore.collection('challenges').doc(challengeId);
+
+      await docRef.update({
         'participants': FieldValue.arrayUnion([userId]),
       });
 
-      debugPrint('User $userId successfully joined challenge $challengeId.');
+      debugPrint('Successfully joined challenge $challengeId.');
+      _markUserJoinedLocal(challengeId, userId);
+
     } on FirebaseException catch (e) {
-      debugPrint('FirebaseException joining challenge: ${e.code} - ${e.message}');
-      throw Exception('Failed to join challenge: ${e.message}');
-    } catch (e) {
-      debugPrint('Unexpected error joining challenge: $e');
-      throw Exception('Failed to join challenge.');
+      debugPrint('FirebaseException: ${e.code} — ${e.message}');
+      _setError(e.message);
+      rethrow;
+
     } finally {
       _setLoading(false);
     }
   }
 
+  void _markUserJoinedLocal(String challengeId, String userId) {
+    final index = _approvedChallenges.indexWhere((c) => c.id == challengeId);
+    if (index == -1) return;
+
+    final challenge = _approvedChallenges[index];
+    final participants = List<String>.from(challenge.participants ?? []);
+
+    if (!participants.contains(userId)) {
+      participants.add(userId);
+
+      _approvedChallenges[index] =
+          challenge.copyWith(participants: participants);
+
+      notifyListeners();
+      debugPrint('Local state updated: User $userId joined challenge $challengeId.');
+    }
+  }
+
   Future<void> refreshChallenges() async {
-    // Optional: manually refresh
     _listenToApprovedChallenges();
   }
 }

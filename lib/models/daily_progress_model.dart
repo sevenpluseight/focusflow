@@ -4,11 +4,13 @@ class DailyProgressModel {
   final String date; // e.g., "2025-11-16"
   final int focusedMinutes;
   final DateTime updatedAt;
+  final Map<String, dynamic>? moods; // Added moods map
 
   DailyProgressModel({
     required this.date,
     required this.focusedMinutes,
     required this.updatedAt,
+    this.moods, // Added to constructor
   });
 
   factory DailyProgressModel.fromFirestore(DocumentSnapshot doc) {
@@ -30,6 +32,7 @@ class DailyProgressModel {
       date: data['date'] ?? doc.id,
       focusedMinutes: (data['focusedMinutes'] ?? data['minutes'] ?? 0).toInt(),
       updatedAt: updatedAtDate,
+      moods: data['moods'] as Map<String, dynamic>?, // Read moods from data
     );
   }
 
@@ -38,6 +41,7 @@ class DailyProgressModel {
       'date': date,
       'focusedMinutes': focusedMinutes,
       'updatedAt': Timestamp.fromDate(updatedAt),
+      if (moods != null) 'moods': moods, // Include moods if not null
     };
   }
 }

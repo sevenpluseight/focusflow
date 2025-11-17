@@ -159,7 +159,7 @@ class CoachProvider with ChangeNotifier {
 
       await newChallengeRef.set(newChallenge.toMap());
     } catch (e) {
-      print('Error submitting challenge: $e');
+      debugPrint('Error submitting challenge: $e');
       throw Exception('Failed to submit challenge.');
     }
   }
@@ -227,7 +227,7 @@ class CoachProvider with ChangeNotifier {
       );
       await newReportRef.set(newReport.toMap());
     } catch (e) {
-      print('Error reporting log: $e');
+      debugPrint('Error reporting log: $e');
       throw Exception('Failed to submit report.');
     }
   }

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:focusflow/models/coach_request_model.dart';
-import 'package:focusflow/providers/coach_request_provider.dart';
+import 'package:focusflow/models/challenge_model.dart';
+import 'package:focusflow/providers/challenge_provider.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:focusflow/screens/admin/admin.dart';
 
-class AdminCoachRequestsScreen extends StatefulWidget {
-  const AdminCoachRequestsScreen({super.key});
+class AdminPendingChallengesScreen extends StatefulWidget {
+  const AdminPendingChallengesScreen({super.key});
 
   @override
-  State<AdminCoachRequestsScreen> createState() =>
-      _AdminCoachRequestsScreenState();
+  State<AdminPendingChallengesScreen> createState() =>
+      _AdminPendingChallengesScreenState();
 }
 
-class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
+class _AdminPendingChallengesScreenState
+    extends State<AdminPendingChallengesScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -28,13 +29,12 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final provider = context.watch<CoachRequestProvider>();
-    final isDark = theme.brightness == Brightness.dark;
+    final provider = context.watch<ChallengeProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('All Coach Requests'),
+        title: const Text('Pending Challenges'),
         backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
         leading: IconButton(
           icon: const Icon(Pixel.chevronleft),
@@ -54,7 +54,7 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                 });
               },
               decoration: InputDecoration(
-                labelText: 'Search by name or username...',
+                labelText: 'Search by challenge name...',
                 prefixIcon: const Icon(Pixel.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -72,8 +72,9 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<CoachRequestModel>>(
-              stream: provider.getAllRequestsStream(),
+            child: StreamBuilder<List<ChallengeModel>>(
+              // Use the dedicated pending stream
+              stream: provider.getPendingChallengesStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -84,28 +85,12 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Pixel.users,
-                          size: 48,
-                          color: isDark ? Colors.white54 : Colors.black45,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('No requests found.'),
-                      ],
-                    ),
-                  );
+                  return const Center(child: Text('No pending requests.'));
                 }
 
                 // Apply search filter
                 final filteredList = snapshot.data!.where((request) {
-                  final name = request.fullName.toLowerCase();
-                  final username = request.username.toLowerCase();
-                  return name.contains(_searchQuery) ||
-                      username.contains(_searchQuery);
+                  return request.name.toLowerCase().contains(_searchQuery);
                 }).toList();
 
                 if (filteredList.isEmpty) {
@@ -117,7 +102,7 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                   itemCount: filteredList.length,
                   itemBuilder: (context, index) {
                     final request = filteredList[index];
-                    return _buildRequestCard(request, theme, context);
+                    return _buildChallengeRequestCard(request, theme, context);
                   },
                 );
               },
@@ -128,8 +113,9 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
     );
   }
 
-  Widget _buildRequestCard(
-    CoachRequestModel request,
+  // This card is similar to the coach request card
+  Widget _buildChallengeRequestCard(
+    ChallengeModel request,
     ThemeData theme,
     BuildContext context,
   ) {
@@ -137,86 +123,59 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
     final requestDate = dateFormat.format(request.createdAt.toDate());
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color statusBackgroundColor = theme.colorScheme.primary;
-    final Color statusForegroundColor = Colors.white;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: StyledCard(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        request.fullName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        request.username,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark ? Colors.white70 : Colors.black54,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              request.name,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${request.focusGoalHours} Hour Goal',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-                // Show status
-                Text(
-                  request.status.toUpperCase(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: statusForegroundColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  Pixel.calendar,
-                  size: 16,
-                  color: isDark ? Colors.white54 : Colors.black45,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Applied: $requestDate',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? Colors.white54 : Colors.black54,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Pixel.suitcase,
-                  size: 16,
-                  color: isDark ? Colors.white54 : Colors.black45,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    request.expertise,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Show View button only for pending requests
-                if (request.status == 'pending')
+                  const SizedBox(height: 12),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      Icon(
+                        Pixel.calendar,
+                        size: 16,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Applied: $requestDate',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: isDark ? Colors.white54 : Colors.black54,
+                        ),
+                      ),
+                      const Spacer(),
                       PrimaryButton(
                         onPressed: () {
                           showModalBottomSheet(
@@ -224,15 +183,14 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
                             builder: (_) =>
-                                CoachRequestDetailsSheet(request: request),
+                                ChallengeRequestDetailsSheet(request: request),
                           );
                         },
-                        // Style button to be small
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size.zero,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
-                            vertical: 16,
+                            vertical: 14,
                           ),
                           textStyle: theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -242,7 +200,8 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                       ),
                     ],
                   ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

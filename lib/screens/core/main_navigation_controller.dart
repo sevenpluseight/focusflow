@@ -91,7 +91,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _pageOptions = const [
           AdminDashboardScreen(),
           AdminUserMenuScreen(),
-          PlaceholderPage(title: 'Events'),
+          AdminChallengeMenuScreen(),
           AdminNotificationViewScreen(),
           PlaceholderPage(title: 'Reports'),
         ];

@@ -126,8 +126,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(width: 16), // Space between dropdowns
-                        // --- NEW: Filter 2: Role ---
+                        const SizedBox(width: 16),
                         DropdownButton<String>(
                           value: provider.selectedRoleFilter,
                           style: theme.textTheme.bodyMedium?.copyWith(

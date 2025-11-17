@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:focusflow/models/coach_request_model.dart';
-import 'package:focusflow/providers/coach_request_provider.dart';
+import 'package:focusflow/models/challenge_model.dart';
+import 'package:focusflow/providers/challenge_provider.dart';
+import 'package:focusflow/screens/admin/admin.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
-import 'package:focusflow/screens/admin/admin.dart'; // Import new screen
 
-class CoachRequestsSection extends StatelessWidget {
-  const CoachRequestsSection({super.key});
+class ChallengeRequestsSection extends StatelessWidget {
+  const ChallengeRequestsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +15,8 @@ class CoachRequestsSection extends StatelessWidget {
 
     return StyledCard(
       padding: EdgeInsets.zero,
-
-      child: StreamBuilder<List<CoachRequestModel>>(
-        stream: context
-            .watch<CoachRequestProvider>()
-            .getPendingRequestsStream(),
+      child: StreamBuilder<List<ChallengeModel>>(
+        stream: context.watch<ChallengeProvider>().getPendingChallengesStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -46,7 +43,7 @@ class CoachRequestsSection extends StatelessWidget {
               if (requests.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Center(child: Text('No pending coach requests.')),
+                  child: Center(child: Text('No pending challenges.')),
                 )
               else
                 ListView.builder(
@@ -55,10 +52,9 @@ class CoachRequestsSection extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
-                    return _buildUserRequestTile(requests[index], context);
+                    return _buildChallengeRequestTile(requests[index], context);
                   },
                 ),
-
               Divider(
                 height: 1,
                 thickness: 1,
@@ -70,7 +66,8 @@ class CoachRequestsSection extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const AdminCoachRequestsScreen(),
+                        builder: (context) =>
+                            const AdminPendingChallengesScreen(),
                       ),
                     );
                   },
@@ -97,32 +94,35 @@ class CoachRequestsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildUserRequestTile(
-    CoachRequestModel request,
+  Widget _buildChallengeRequestTile(
+    ChallengeModel request,
     BuildContext context,
   ) {
     final theme = Theme.of(context);
-
     return Column(
       children: [
         ListTile(
           leading: CircleAvatar(
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
-            child: Icon(Pixel.user, color: theme.colorScheme.primary),
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+            child: Icon(Pixel.bookopen, color: theme.colorScheme.primary),
           ),
           title: Text(
-            request.fullName,
+            request.name,
             style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: Text(request.username, style: theme.textTheme.bodyMedium),
+          subtitle: Text(
+            '${request.focusGoalHours} hours',
+            style: theme.textTheme.bodyMedium,
+          ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              builder: (_) => CoachRequestDetailsSheet(request: request),
+              backgroundColor: Colors.transparent,
+              builder: (_) => ChallengeRequestDetailsSheet(request: request),
             );
           },
         ),

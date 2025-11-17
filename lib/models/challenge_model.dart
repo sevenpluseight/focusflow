@@ -36,6 +36,7 @@ class ChallengeModel {
       'endDate': endDate,
     };
   }
+
   factory ChallengeModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return ChallengeModel(
@@ -46,9 +47,8 @@ class ChallengeModel {
       coachId: data['coachId'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
       status: data['status'] ?? 'pending',
-      startDate: data['startDate'] as Timestamp?, 
+      startDate: data['startDate'] as Timestamp?,
       endDate: data['endDate'] as Timestamp?,
     );
   }
-
 }

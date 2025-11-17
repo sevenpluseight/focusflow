@@ -69,7 +69,7 @@ class CoachRequestDetailsSheet extends StatelessWidget {
                       constraints: const BoxConstraints(),
                       onPressed: () {},
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 10),
                     Text(
                       "Coach Request",
                       style: theme.textTheme.headlineSmall?.copyWith(

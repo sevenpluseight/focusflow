@@ -7,3 +7,4 @@ export 'report_model.dart';
 export 'message_model.dart';
 export 'coach_request_model.dart';
 export 'connection_request_model.dart';
+export 'mood_log_model.dart';

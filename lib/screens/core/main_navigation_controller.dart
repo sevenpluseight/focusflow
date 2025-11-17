@@ -9,8 +9,9 @@ import 'package:focusflow/screens/coach/coach.dart';
 import 'package:focusflow/screens/user/user.dart';
 import 'package:focusflow/screens/admin/admin.dart';
 import 'package:focusflow/screens/user/user_notification_screen.dart';
-import 'package:focusflow/screens/coach/coach_notification_screen.dart'; // Added import
-import 'package:focusflow/screens/user/user_timer_screen.dart'; // Added import
+import 'package:focusflow/screens/coach/coach_notification_screen.dart';
+import 'package:focusflow/screens/user/user_timer_screen.dart';
+import 'package:focusflow/screens/user/user_reports_screen.dart';
 import '../auth/auth.dart';
 
 import '../common/placeholder_pages.dart';
@@ -18,7 +19,6 @@ import '../common/placeholder_pages.dart';
 // import '../admin/admin.dart';
 // import '../user/user_home_screen.dart';
 // import '../user/user_profile_screen.dart';
-// import '../auth/auth.dart';
 // import '../../theme/app_theme.dart';
 
 class MainNavigationController extends StatefulWidget {
@@ -54,9 +54,9 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
       case UserRole.user:
         _pageOptions = [
           UserHomeScreen(),
-          PlaceholderPage(title: 'User Reports'),
-          UserTimeScreen(),
-          PlaceholderPage(title: 'Coaches'),
+          UserReportsScreen(),
+          UserTimerScreen(),
+          UserCoachesScreen(),
           UserProfileScreen(),
         ];
         _iconList = const [

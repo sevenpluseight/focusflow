@@ -4,37 +4,53 @@ import 'package:pixelarticons/pixelarticons.dart';
 import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/services/services.dart';
 import 'package:focusflow/widgets/widgets.dart';
+import 'package:focusflow/routes/app_routes.dart';
 
-class UserTimeScreen extends StatefulWidget {
-  const UserTimeScreen({super.key});
+class UserTimerScreen extends StatefulWidget {
+  const UserTimerScreen({super.key});
 
   @override
-  State<UserTimeScreen> createState() => _UserTimeScreenState();
+  State<UserTimerScreen> createState() => _UserTimerWidgetState();
 }
 
-class _UserTimeScreenState extends State<UserTimeScreen> {
+class _UserTimerWidgetState extends State<UserTimerScreen> {
   SessionTimer? _sessionTimer;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
 
-    if (_sessionTimer == null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final userProvider = context.read<UserProvider>();
       final progressProvider = context.read<ProgressProvider>();
       final user = userProvider.user;
 
       if (user != null) {
-        _sessionTimer = SessionTimer(
-          workInterval: user.workInterval ?? 25,
-          breakInterval: user.breakInterval ?? 5,
-          progressProvider: progressProvider,
-          onTick: () => setState(() {}),
-          onSessionEnd: () => setState(() {}),
-          onBreakEnd: () => setState(() {}),
-        );
+        setState(() {
+          _sessionTimer = SessionTimer(
+            workInterval: user.workInterval ?? 25,
+            breakInterval: user.breakInterval ?? 5,
+            progressProvider: progressProvider,
+            onTick: () {
+              if (mounted) setState(() {});
+            },
+            onSessionEnd: (sessionId) async {
+              if (!mounted) return;
+              setState(() {}); 
+              await Navigator.of(context).pushNamed(
+                AppRoutes.moodTracker,
+                arguments: sessionId,
+              );
+            },
+            onBreakEnd: () {
+              if (mounted) setState(() {});
+            },
+          );
+        });
       }
-    }
+    });
   }
 
   @override
@@ -66,14 +82,26 @@ class _UserTimeScreenState extends State<UserTimeScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("Focus Timer", style: theme.appBarTheme.titleTextStyle),
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         iconTheme: theme.appBarTheme.iconTheme,
+        centerTitle: false,
         actions: [
+          IconButton(
+            tooltip: 'Log Distraction',
+            icon: Icon(
+              Pixel.edit,
+              color: theme.appBarTheme.iconTheme?.color,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed(AppRoutes.distractionLog);
+            },
+          ),
           InfoIcon(
             icon: Pixel.infobox,
             dialogTitle: "Focus Session Controls",
             dialogContentText:
-                "Skip Break: Skips current break\nPause/Resume: Pause or resume timer\nCancel: Cancel current session",
+                "Skip Break: Skips current break\n\nPause/Resume: Pause or resume timer\n\nCancel: Cancel current session",
           ),
         ],
       ),
@@ -183,9 +211,7 @@ class _UserTimeScreenState extends State<UserTimeScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       icon: Icon(
-                        session.isRunning
-                            ? Pixel.pause
-                            : Pixel.play,
+                        session.isRunning ? Pixel.pause : Pixel.play,
                       ),
                       label: Text(
                         session.isRunning

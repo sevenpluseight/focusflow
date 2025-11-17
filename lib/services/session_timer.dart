@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:focusflow/providers/progress_provider.dart';
+import 'package:focusflow/providers/providers.dart';
 
 enum SessionState { idle, running, paused }
 
@@ -10,7 +10,7 @@ class SessionTimer {
   final ProgressProvider progressProvider;
 
   final VoidCallback onTick;
-  final VoidCallback onSessionEnd;
+  final Future<void> Function(String sessionId) onSessionEnd;
   final VoidCallback onBreakEnd;
 
   Timer? _timer;
@@ -87,11 +87,21 @@ class SessionTimer {
     isWorkInterval = false;
     elapsedSeconds = 0;
 
-    // Update ProgressProvider
-    await progressProvider.endSession(workInterval * 60);
+    try {
+      // Update ProgressProvider
+      await progressProvider.endSession(workInterval * 60);
 
-    onSessionEnd();
-    start();
+      // Generate a client-side unique ID for the session
+      final sessionId = DateTime.now().millisecondsSinceEpoch.toString();
+      await onSessionEnd(sessionId);
+
+    } catch (e) {
+      // In a real app, you might want to log this error to a service
+      debugPrint('Error ending session: $e');
+    } finally {
+      // Ensure the break timer always starts
+      start();
+    }
   }
 
   void _endBreak() {

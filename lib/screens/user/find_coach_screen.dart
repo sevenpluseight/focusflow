@@ -130,6 +130,7 @@ class _FindCoachScreenState extends State<FindCoachScreen> {
             context,
             message: 'Connection request sent to ${coach.fullName}!',
             type: SnackBarType.success,
+            position: SnackBarPosition.top,
           );
         } catch (e) {
           if (!mounted) return;
@@ -137,6 +138,7 @@ class _FindCoachScreenState extends State<FindCoachScreen> {
             context,
             message: e.toString(),
             type: SnackBarType.error,
+            position: SnackBarPosition.top,
           );
         }
       },

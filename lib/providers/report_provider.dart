@@ -26,6 +26,9 @@ class ReportProvider with ChangeNotifier {
   String? _distractionBreakdownReport;
   String? get distractionBreakdownReport => _distractionBreakdownReport;
 
+  DateTime? _reportUpdatedAt;
+  DateTime? get reportUpdatedAt => _reportUpdatedAt;
+
   bool _isAnalyzing = false;
   bool get isAnalyzing => _isAnalyzing;
 
@@ -69,13 +72,20 @@ class ReportProvider with ChangeNotifier {
       if (savedTimestamp != null) {
         final now = DateTime.now();
         final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
-        final startOfWeekDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+        final startOfWeekDate =
+            DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
 
         if (savedTimestamp.toDate().isAfter(startOfWeekDate)) {
-          _focusSummaryReport = savedReport?['focusSummary'];
-          _distractionBreakdownReport = savedReport?['distractionBreakdown'];
-          _setLoading(false);
-          return;
+          final focusSummary = savedReport?['focusSummary'];
+          final distractionBreakdown = savedReport?['distractionBreakdown'];
+
+          if (focusSummary != null && distractionBreakdown != null) {
+            _focusSummaryReport = focusSummary;
+            _distractionBreakdownReport = distractionBreakdown;
+            _reportUpdatedAt = savedTimestamp.toDate();
+            _setLoading(false);
+            return;
+          }
         }
       }
 
@@ -148,13 +158,15 @@ class ReportProvider with ChangeNotifier {
 
       final user = _auth.currentUser;
       if (user != null) {
+        final newTimestamp = Timestamp.now();
         await _firestore.collection('users').doc(user.uid).update({
           'weeklyReport': {
             'focusSummary': _focusSummaryReport,
             'distractionBreakdown': _distractionBreakdownReport,
-            'updatedAt': Timestamp.now(),
+            'updatedAt': newTimestamp,
           }
         });
+        _reportUpdatedAt = newTimestamp.toDate();
       }
     } catch (e) {
       _focusSummaryReport = 'Error generating analysis: $e';

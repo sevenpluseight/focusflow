@@ -4,89 +4,17 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
-import 'package:focusflow/screens/coach/coach.dart';
 
 class CoachReportSummaryScreen extends StatelessWidget {
-  const CoachReportSummaryScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final coachProvider = context.watch<CoachProvider>();
-    final List<UserModel> users = coachProvider.connectedUsers;
-    final textColor = theme.colorScheme.onSurface;
-
-    // --- Calculate Stats ---
-    final totalUsers = users.length;
-    final atRiskUsers = users.where((u) => (u.currentStreak ?? 0) == 0).toList();
-    
-    double totalStreak = 0;
-    for (var user in users) {
-      totalStreak += (user.currentStreak ?? 0);
-    }
-    final avgStreak = (totalUsers > 0) ? (totalStreak / totalUsers) : 0.0;
-    // -----------------------
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-
-            // 1. "Quick Stats" Title
-            Text(
-              'Quick Stats',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: textColor, // <-- ADDED
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 2. "Quick Stats" Card (no title inside)
-            StyledCard(
-              child: Column(
-                children: [
-                  _buildStatItem(theme, Pixel.users, 'Total Users', '$totalUsers'),
-                  _buildStatItem(theme, Pixel.trending, 'Average Streak', '${avgStreak.toStringAsFixed(1)} days'),
-                ],
-              ),
-            ),
-            // -----------------------
-
-            const SizedBox(height: 24),
-
-            // --- At-Risk Users Card ---
-            Text(
-              'At-Risk Users',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: textColor, // <-- ADDED
-              ),
-            ),
-            const SizedBox(height: 12),
-            StyledCard(
-              child: atRiskUsers.isEmpty
-                  ? Text(
-                      'Great job! No users are currently at risk.',
-                      style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                    )
-                  : Column(
-                      children: atRiskUsers.map((user) {
-                        return _buildAtRiskUserTile(context, theme, user);
-                      }).toList(),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  const CoachReportSummaryScreen({super.key});
 
   // Helper for the stat items
-  Widget _buildStatItem(ThemeData theme, IconData icon, String label, String value) {
+  Widget _buildStatItem(
+    ThemeData theme,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -95,10 +23,7 @@ class CoachReportSummaryScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 16,
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurface),
           ),
           const Spacer(),
           Text(
@@ -114,24 +39,109 @@ class CoachReportSummaryScreen extends StatelessWidget {
     );
   }
 
-  // Helper for the "At-Risk Users" list
-  Widget _buildAtRiskUserTile(BuildContext context, ThemeData theme, UserModel user) {
-    return ListTile(
-      leading: Icon(Pixel.user, color: theme.colorScheme.tertiary),
-      title: Text(user.username, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('Streak: 0 days', style: TextStyle(color: theme.textTheme.bodyMedium?.color)),
-      trailing: Icon(Pixel.chevronright, color: theme.textTheme.bodyMedium?.color),
-      onTap: () {
-        // Navigate to the user's report screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CoachUserReportScreen(
-              userId: user.uid,
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final coachProvider = context.watch<CoachProvider>();
+    final List<UserModel> users = coachProvider.connectedUsers;
+    final textColor = theme.colorScheme.onSurface;
+
+    // --- Calculate Stats ---
+    final totalUsers = users.length;
+    double totalStreak = 0;
+    for (var user in users) {
+      totalStreak += (user.currentStreak ?? 0);
+    }
+    final avgStreak = (totalUsers > 0) ? (totalStreak / totalUsers) : 0.0;
+    // -----------------------
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 1. "Quick Stats" Section
+            Text(
+              'Quick Stats',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 12),
+
+            // 2. "Quick Stats" Card (Aggregate Data)
+            StyledCard(
+              child: coachProvider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: [
+                        _buildStatItem(
+                          theme,
+                          Pixel.users,
+                          'Total Users',
+                          '$totalUsers',
+                        ),
+                        _buildStatItem(
+                          theme,
+                          Pixel.trending,
+                          'Average Streak',
+                          '${avgStreak.toStringAsFixed(1)} days',
+                        ),
+                      ],
+                    ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 3. AI System Strategy Section
+            Text(
+              'AI System Strategy',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            StyledCard(
+              padding: const EdgeInsets.all(16),
+              child: coachProvider.systemAiLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : InkWell(
+                      onTap: coachProvider
+                          .fetchSystemAiRecommendations, // Reloads on tap
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recommended Focus:',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            coachProvider.systemAiRecommendations,
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '(Tap to refresh strategy based on client average)',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -46,6 +46,12 @@ class CoachProvider with ChangeNotifier {
   List<ConnectionRequestModel> _pendingRequests = [];
   List<ConnectionRequestModel> get pendingRequests => _pendingRequests;
 
+  String _systemAiRecommendations = "Tap to load system recommendations.";
+  bool _systemAiLoading = false;
+
+  String get systemAiRecommendations => _systemAiRecommendations;
+  bool get systemAiLoading => _systemAiLoading;
+
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
     if (coachId.isEmpty) return;
@@ -469,5 +475,38 @@ class CoachProvider with ChangeNotifier {
     
     // 2. Refresh the list
     await fetchPendingRequests();
+  }
+
+    Future<void> fetchSystemAiRecommendations() async {
+    _systemAiLoading = true;
+    _systemAiRecommendations = "Analyzing connected users for system trends...";
+    notifyListeners();
+
+    try {
+      final users = _connectedUsers;
+      final totalUsers = users.length;
+      final totalStreak =
+          users.fold<int>(0, (sum, u) => sum + (u.currentStreak ?? 0));
+      final avgStreak =
+          totalUsers > 0 ? (totalStreak / totalUsers).toStringAsFixed(1) : '0';
+
+      String prompt = """
+        You are a system-level productivity consultant providing advice to a coach managing ${totalUsers} clients.
+        The average client streak is ${avgStreak} days.
+        Provide one single, high-leverage coaching strategy, 20 words maximum, that the coach can apply
+        to their entire client base this week to improve overall consistency.
+        Start with: 'System Strategy:'
+      """;
+
+      final response = await GeminiService.generateText(prompt);
+
+      _systemAiRecommendations =
+          response.replaceFirst('System Strategy:', '').trim();
+    } catch (e) {
+      _systemAiRecommendations = "Error fetching system recommendation.";
+    } finally {
+      _systemAiLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -474,13 +474,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: _getRoleColor(
-                    user.role,
-                    isDark,
-                  ).withOpacity(0.2),
+                  backgroundColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.2,
+                  ),
                   child: Icon(
                     _getRoleIcon(user.role),
-                    color: _getRoleColor(user.role, isDark),
+                    color: theme.colorScheme.primary,
                     size: 32,
                   ),
                 ),

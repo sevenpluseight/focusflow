@@ -202,14 +202,14 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
             const SizedBox(height: 30),
 
             Text(
-              'AI Highlights (At-Risk Users)',
+              'At-Risk Users',
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             StyledCard(
               padding: atRiskUsers.isEmpty 
                   ? const EdgeInsets.all(16) // Keep padding if empty
-                  : EdgeInsets.zero, // Use ListTile's default padding
+                  : EdgeInsets.zero,
               child: coachProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : atRiskUsers.isEmpty
@@ -237,17 +237,33 @@ class _CoachHomeScreenState extends State<CoachHomeScreen> {
   // Helper widget to build the At-Risk user tile
   Widget _buildAtRiskTile(BuildContext context, UserModel user) {
     final theme = Theme.of(context);
+    final alertColor = theme.colorScheme.error;
+
     return ListTile(
-      leading: Icon(Pixel.alert, color: theme.colorScheme.tertiary),
+      leading: Container( // Wrapping the icon in a Container to make it appear 'bolder' or solid
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: alertColor.withValues(alpha: 0.15), // Light background to highlight the alert area
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Pixel.alert,
+          color: alertColor, // Use the bold color for the icon
+        ),
+      ),
       title: Text(
-        'Alert: ${user.username} is at risk.',
+        'Triage Alert: ${user.username}', // Keeping the bold text title
         style: TextStyle(
-          color: theme.colorScheme.tertiary,
+          color: alertColor, 
+          fontWeight: FontWeight.bold,
           fontSize: 16,
           height: 1.5,
         ),
       ),
-      subtitle: const Text('Streak has reset to 0 days.'),
+      subtitle: Text( // 💡 CHANGED SUBTITLE
+          'User is inactive. Focus streak needs immediate reboot.',
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+      ),
       trailing: Icon(Pixel.chevronright, color: theme.textTheme.bodyMedium?.color),
       onTap: () {
         Navigator.push(

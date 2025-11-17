@@ -14,12 +14,20 @@ class NotificationProvider extends ChangeNotifier {
   NotificationFilter _selectedFilter = NotificationFilter.all;
   NotificationFilter get selectedFilter => _selectedFilter;
 
+  String _selectedRoleFilter = 'all';
+  String get selectedRoleFilter => _selectedRoleFilter;
+
   List<AppNotification> get notifications => _notifications;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
   void updateFilter(NotificationFilter filter) {
     _selectedFilter = filter;
+    notifyListeners();
+  }
+
+  void updateRoleFilter(String role) {
+    _selectedRoleFilter = role;
     notifyListeners();
   }
 

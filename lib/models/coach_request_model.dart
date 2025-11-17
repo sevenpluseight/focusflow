@@ -36,4 +36,19 @@ class CoachRequestModel {
       'createdAt': createdAt,
     };
   }
+
+  factory CoachRequestModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return CoachRequestModel(
+      id: doc.id,
+      userId: data['userId'] ?? '',
+      username: data['username'] ?? '',
+      fullName: data['fullName'] ?? '',
+      expertise: data['expertise'] ?? '',
+      bio: data['bio'] ?? '',
+      portfolioLink: data['portfolioLink'],
+      status: data['status'] ?? 'pending',
+      createdAt: data['createdAt'] ?? Timestamp.now(),
+    );
+  }
 }

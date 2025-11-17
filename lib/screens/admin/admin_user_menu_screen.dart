@@ -3,8 +3,6 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/admin/admin.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
-// Note: We removed 'widgets/widgets.dart' as it's no longer
-// needed directly in this file, but the imported widgets use it.
 
 class AdminUserMenuScreen extends StatelessWidget {
   const AdminUserMenuScreen({super.key});

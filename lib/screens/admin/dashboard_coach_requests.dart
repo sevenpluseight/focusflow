@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:focusflow/models/models.dart';
-import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/models/coach_request_model.dart';
+import 'package:focusflow/providers/coach_request_provider.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
+import 'package:focusflow/screens/admin/admin.dart'; // Import new screen
 
 class CoachRequestsSection extends StatelessWidget {
   const CoachRequestsSection({super.key});
@@ -14,52 +15,50 @@ class CoachRequestsSection extends StatelessWidget {
 
     return StyledCard(
       padding: EdgeInsets.zero,
-      child: Consumer<AdminUsersProvider>(
-        builder: (context, usersProvider, child) {
-          if (usersProvider.isLoading && usersProvider.allUsers.isEmpty) {
+
+      child: StreamBuilder<List<CoachRequestModel>>(
+        stream: context
+            .watch<CoachRequestProvider>()
+            .getPendingRequestsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
               padding: EdgeInsets.all(16.0),
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          if (usersProvider.hasError) {
+          if (snapshot.hasError) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Center(
                 child: Text(
-                  'Error: ${usersProvider.errorMessage}',
+                  'Error: ${snapshot.error}',
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),
             );
           }
 
-          // Note: This logic seems to get coaches, not *requests*.
-          // You may want to filter for user.role == 'user' and
-          // user.isRequestingCoach == true in the future.
-          // For now, I am keeping your exact logic.
-          final coaches = usersProvider.allUsers
-              .where((user) => user.role == 'coach')
-              .toList();
-
-          if (coaches.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: Text('No pending coach requests.')),
-            );
-          }
+          final requests = snapshot.data ?? [];
 
           return Column(
             children: [
-              ListView.builder(
-                itemCount: coaches.take(3).length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) {
-                  return _buildUserRequestTile(coaches[index], context);
-                },
-              ),
+              if (requests.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(child: Text('No pending coach requests.')),
+                )
+              else
+                ListView.builder(
+                  itemCount: requests.take(3).length, // Show top 3
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    return _buildUserRequestTile(requests[index], context);
+                  },
+                ),
+
               Divider(
                 height: 1,
                 thickness: 1,
@@ -69,7 +68,11 @@ class CoachRequestsSection extends StatelessWidget {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () {
-                    // TODO: Navigate to full coach requests screen
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AdminCoachRequestsScreen(),
+                      ),
+                    );
                   },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.all(24.0),
@@ -94,8 +97,10 @@ class CoachRequestsSection extends StatelessWidget {
     );
   }
 
-  // This is the private helper, co-located in the same file.
-  Widget _buildUserRequestTile(UserModel user, BuildContext context) {
+  Widget _buildUserRequestTile(
+    CoachRequestModel request,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
 
     return Column(
@@ -106,15 +111,19 @@ class CoachRequestsSection extends StatelessWidget {
             child: Icon(Pixel.user, color: theme.colorScheme.primary),
           ),
           title: Text(
-            user.username,
+            request.fullName,
             style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: Text(user.email, style: theme.textTheme.bodyMedium),
+          subtitle: Text(request.username, style: theme.textTheme.bodyMedium),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
-            // ADD HERE LATER
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => CoachRequestDetailsSheet(request: request),
+            );
           },
         ),
         Divider(

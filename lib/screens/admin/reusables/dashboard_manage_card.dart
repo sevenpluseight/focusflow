@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focusflow/widgets/widgets.dart'; // Your global StyledCard
 import 'package:pixelarticons/pixelarticons.dart';
 
+// just simple card
 class ManagementCard extends StatelessWidget {
   final IconData icon;
   final String title;

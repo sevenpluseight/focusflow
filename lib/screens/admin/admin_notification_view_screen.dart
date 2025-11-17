@@ -1,42 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/notification_model.dart';
 import 'package:focusflow/providers/notification_provider.dart';
-import 'package:focusflow/widgets/widgets.dart'; // Has StyledCard, PrimaryButton etc.
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart'; // For date formatting
-
-// Make sure you have a screen to navigate to
-import 'admin_notify_screen.dart'; // The "create" page you already built
+import 'package:intl/intl.dart';
+import 'admin_notify_screen.dart';
 
 class AdminNotificationViewScreen extends StatelessWidget {
   const AdminNotificationViewScreen({super.key});
 
-  /// Helper method to filter the list *after* it's fetched
   List<AppNotification> _filterNotifications(
     List<AppNotification> list,
-    NotificationFilter filter,
+    NotificationFilter timeFilter,
+    String roleFilter,
   ) {
-    // ... (This function is correct, no changes needed) ...
     final now = DateTime.now();
+    List<AppNotification> timeFilteredList;
 
-    switch (filter) {
+    switch (timeFilter) {
       case NotificationFilter.week:
-        // A simple "last 7 days" filter is easier
         final sevenDaysAgo = now.subtract(const Duration(days: 7));
-        return list.where((n) => n.sentAt.isAfter(sevenDaysAgo)).toList();
+        timeFilteredList = list
+            .where((n) => n.sentAt.isAfter(sevenDaysAgo))
+            .toList();
+        break;
       case NotificationFilter.month:
-        return list
+        timeFilteredList = list
             .where(
               (n) => n.sentAt.year == now.year && n.sentAt.month == now.month,
             )
             .toList();
+        break;
       case NotificationFilter.year:
-        return list.where((n) => n.sentAt.year == now.year).toList();
+        timeFilteredList = list
+            .where((n) => n.sentAt.year == now.year)
+            .toList();
+        break;
       case NotificationFilter.all:
       default:
-        return list;
+        timeFilteredList = list;
     }
+
+    if (roleFilter == 'all') {
+      return timeFilteredList;
+    }
+    return timeFilteredList.where((n) => n.target == roleFilter).toList();
   }
 
   @override
@@ -46,19 +55,16 @@ class AdminNotificationViewScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Non-scrolling Header Container
           Container(
-            padding: const EdgeInsets.all(16),
-            color: theme.cardColor,
-            // Use a Column as the main child
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            color: theme.scaffoldBackgroundColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- Row 1: Title ---
+                const SizedBox(height: 32),
                 Row(
                   children: [
                     Text(
@@ -70,13 +76,12 @@ class AdminNotificationViewScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16), // Space between the rows
-                // --- Row 2: Filter and Create Button ---
+                const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Filter Dropdown
                     Row(
                       children: [
                         Text(
@@ -121,6 +126,39 @@ class AdminNotificationViewScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(width: 16), // Space between dropdowns
+                        // --- NEW: Filter 2: Role ---
+                        DropdownButton<String>(
+                          value: provider.selectedRoleFilter,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          iconEnabledColor: theme.colorScheme.onSurface
+                              .withOpacity(0.7),
+                          dropdownColor: theme.cardColor,
+                          underline: Container(height: 0),
+                          onChanged: (value) {
+                            if (value != null) {
+                              context
+                                  .read<NotificationProvider>()
+                                  .updateRoleFilter(value);
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'all',
+                              child: Text('All Roles'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'user',
+                              child: Text('Users'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'coach',
+                              child: Text('Coaches'),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
 
@@ -136,7 +174,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: Colors.black,
-                        minimumSize: Size.zero, // Allow button to shrink
+                        minimumSize: Size.zero,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
@@ -160,6 +198,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
             ),
           ),
 
+          // 3. Scrolling List of Notifications
           Expanded(
             child: StreamBuilder<List<AppNotification>>(
               stream: provider.getAllNotificationsStream(),
@@ -177,10 +216,12 @@ class AdminNotificationViewScreen extends StatelessWidget {
                 }
 
                 final allNotifications = snapshot.data!;
-                final currentFilter = provider.selectedFilter;
+                final currentTimeFilter = provider.selectedFilter;
+                final currentRoleFilter = provider.selectedRoleFilter;
                 final filteredList = _filterNotifications(
                   allNotifications,
-                  currentFilter,
+                  currentTimeFilter,
+                  currentRoleFilter,
                 );
 
                 if (filteredList.isEmpty) {
@@ -190,7 +231,6 @@ class AdminNotificationViewScreen extends StatelessWidget {
                 }
 
                 return ListView.builder(
-                  // Add padding to the list, not the whole body
                   padding: const EdgeInsets.all(16),
                   itemCount: filteredList.length,
                   itemBuilder: (context, index) {
@@ -203,11 +243,9 @@ class AdminNotificationViewScreen extends StatelessWidget {
           ),
         ],
       ),
-      // --- End Fix 2 ---
     );
   }
 
-  /// Helper to build the card using your StyledCard
   Widget _buildNotificationCard(
     BuildContext context,
     AppNotification notification,

@@ -56,6 +56,7 @@ class FocusFlowApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CoachSearchProvider()),
         ChangeNotifierProvider(create: (_) => ChallengeProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => DistractionProvider()),
         Provider(create: (_) => MessageProvider()),
       ],
       child: Consumer<ThemeProvider>(

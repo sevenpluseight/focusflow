@@ -11,3 +11,4 @@ export 'message_provider.dart';
 export 'challenge_provider.dart';
 export 'report_provider.dart';
 export 'distraction_provider.dart';
+export 'coach_request_provider.dart';

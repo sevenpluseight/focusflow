@@ -91,9 +91,8 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
         _pageOptions = const [
           AdminDashboardScreen(),
           AdminUserMenuScreen(),
-          PlaceholderPage(title: 'Users'),
           PlaceholderPage(title: 'Events'),
-          PlaceholderPage(title: 'Notifications'),
+          AdminNotificationViewScreen(),
           PlaceholderPage(title: 'Reports'),
         ];
         _iconList = const [
@@ -152,9 +151,9 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final navBarColor = isDark 
-      ? const Color(0xFF2C2F33) 
-      : theme.bottomNavigationBarTheme.backgroundColor ?? Colors.white;
+    final navBarColor = isDark
+        ? const Color(0xFF2C2F33)
+        : theme.bottomNavigationBarTheme.backgroundColor ?? Colors.white;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -197,10 +196,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
             ),
           IconButton(
             tooltip: 'Logout',
-            icon: Icon(
-              Pixel.logout,
-              color: theme.appBarTheme.iconTheme?.color,
-            ),
+            icon: Icon(Pixel.logout, color: theme.appBarTheme.iconTheme?.color),
             onPressed: _showLogoutConfirmationDialog,
           ),
           const SizedBox(width: 10),
@@ -217,7 +213,9 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
             isActive: isActive,
             onTap: () => _handleItemTap(index),
             activeColor: theme.colorScheme.primary,
-            inactiveColor: theme.bottomNavigationBarTheme.unselectedItemColor ?? Colors.grey,
+            inactiveColor:
+                theme.bottomNavigationBarTheme.unselectedItemColor ??
+                Colors.grey,
           );
         },
         activeIndex: _selectedIndex,

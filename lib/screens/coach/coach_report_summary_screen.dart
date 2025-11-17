@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/screens/coach/coach_aggregate_stats_screen.dart';
 import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
@@ -72,26 +73,60 @@ class CoachReportSummaryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 2. "Quick Stats" Card (Aggregate Data)
-            StyledCard(
-              child: coachProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        _buildStatItem(
-                          theme,
-                          Pixel.users,
-                          'Total Users',
-                          '$totalUsers',
-                        ),
-                        _buildStatItem(
-                          theme,
-                          Pixel.trending,
-                          'Average Streak',
-                          '${avgStreak.toStringAsFixed(1)} days',
-                        ),
-                      ],
-                    ),
+            // 2. TAPPABLE "Quick Stats" Card
+            InkWell(
+              onTap: () {
+                // Navigate to the new aggregate stats screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CoachAggregateStatsScreen(),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: StyledCard(
+                child: coachProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: [
+                          _buildStatItem(
+                            theme,
+                            Pixel.users,
+                            'Total Users',
+                            '$totalUsers',
+                          ),
+                          _buildStatItem(
+                            theme,
+                            Pixel.trending,
+                            'Average Streak',
+                            '${avgStreak.toStringAsFixed(1)} days',
+                          ),
+                          // Add a visual cue for tapping
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'View Aggregate Graph',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Pixel.chevronright,
+                                  color: theme.colorScheme.primary,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
 
             const SizedBox(height: 24),

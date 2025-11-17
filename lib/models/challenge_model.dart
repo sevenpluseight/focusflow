@@ -55,4 +55,29 @@ class ChallengeModel {
     );
   }
 
+  ChallengeModel copyWith({
+    String? id,
+    String? name,
+    int? focusGoalHours,
+    String? description,
+    String? coachId,
+    Timestamp? createdAt,
+    String? status,
+    Timestamp? startDate,
+    Timestamp? endDate,
+    List<String>? participants,
+  }) {
+    return ChallengeModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      focusGoalHours: focusGoalHours ?? this.focusGoalHours,
+      description: description ?? this.description,
+      coachId: coachId ?? this.coachId,
+      createdAt: createdAt ?? this.createdAt,
+      status: status ?? this.status,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      participants: participants ?? this.participants,
+    );
+  }
 }

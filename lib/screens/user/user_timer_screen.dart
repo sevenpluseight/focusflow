@@ -82,8 +82,8 @@ class _UserTimerWidgetState extends State<UserTimerScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text("Focus Timer", style: theme.appBarTheme.titleTextStyle),
-        backgroundColor: Colors.transparent, // Make background transparent
-        elevation: 0, // Remove shadow
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         iconTheme: theme.appBarTheme.iconTheme,
         centerTitle: false,
         actions: [
@@ -101,7 +101,7 @@ class _UserTimerWidgetState extends State<UserTimerScreen> {
             icon: Pixel.infobox,
             dialogTitle: "Focus Session Controls",
             dialogContentText:
-                "Skip Break: Skips current break\nPause/Resume: Pause or resume timer\nCancel: Cancel current session",
+                "Skip Break: Skips current break\n\nPause/Resume: Pause or resume timer\n\nCancel: Cancel current session",
           ),
         ],
       ),

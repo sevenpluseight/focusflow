@@ -51,24 +51,21 @@ class ChallengeProvider with ChangeNotifier {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen(
-          (snapshot) {
-            debugPrint(
-              'ChallengeProvider: Received ${snapshot.docs.length} approved challenges.',
-            );
+      (snapshot) {
+        debugPrint('ChallengeProvider: Received ${snapshot.docs.length} approved challenges.');
 
-            _approvedChallenges = snapshot.docs
-                .map((doc) => ChallengeModel.fromFirestore(doc))
-                .toList();
+        _approvedChallenges =
+            snapshot.docs.map((doc) => ChallengeModel.fromFirestore(doc)).toList();
 
-            _setError(null);
-            _setLoading(false);
-          },
-          onError: (e) {
-            debugPrint('Error listening to approved challenges: $e');
-            _setError('Error: $e');
-            _setLoading(false);
-          },
-        );
+        _setError(null);
+        _setLoading(false);
+      },
+      onError: (e) {
+        debugPrint('Error listening to approved challenges: $e');
+        _setError('Error: $e');
+        _setLoading(false);
+      },
+    );
   }
 
   /// STREAM: pending challenges
@@ -79,22 +76,8 @@ class ChallengeProvider with ChangeNotifier {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ChallengeModel.fromFirestore(doc))
-              .toList(),
-        );
-  }
-
-  Stream<List<ChallengeModel>> getApprovedChallengesStream() {
-    return _firestore
-        .collection('challenges')
-        .where('status', isEqualTo: 'approved')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ChallengeModel.fromFirestore(doc))
-              .toList(),
+          (snapshot) =>
+              snapshot.docs.map((doc) => ChallengeModel.fromFirestore(doc)).toList(),
         );
   }
 
@@ -107,9 +90,8 @@ class ChallengeProvider with ChangeNotifier {
         .orderBy('endDate')
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ChallengeModel.fromFirestore(doc))
-              .toList(),
+          (snapshot) =>
+              snapshot.docs.map((doc) => ChallengeModel.fromFirestore(doc)).toList(),
         );
   }
 
@@ -149,14 +131,11 @@ class ChallengeProvider with ChangeNotifier {
     if (!participants.contains(userId)) {
       participants.add(userId);
 
-      _approvedChallenges[index] = challenge.copyWith(
-        participants: participants,
-      );
+      _approvedChallenges[index] =
+          challenge.copyWith(participants: participants);
 
       notifyListeners();
-      debugPrint(
-        'Local state updated: User $userId joined challenge $challengeId.',
-      );
+      debugPrint('Local state updated: User $userId joined challenge $challengeId.');
     }
   }
 

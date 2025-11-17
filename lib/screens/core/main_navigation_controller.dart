@@ -195,14 +195,6 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
                 }
               },
             ),
-          IconButton(
-            tooltip: 'Logout',
-            icon: Icon(
-              Pixel.logout,
-              color: theme.appBarTheme.iconTheme?.color,
-            ),
-            onPressed: _showLogoutConfirmationDialog,
-          ),
           const SizedBox(width: 10),
         ],
       ),

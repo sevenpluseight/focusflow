@@ -39,6 +39,13 @@ class CoachProvider with ChangeNotifier {
   List<DailyProgressModel> get userProgressHistory => _userProgressHistory;
   bool get progressHistoryLoading => _progressHistoryLoading;
 
+  List<DailyProgressModel> _aggregateProgressHistory = [];
+  bool _aggregateHistoryLoading = false;
+
+  List<DailyProgressModel> get aggregateProgressHistory =>
+      _aggregateProgressHistory;
+  bool get aggregateHistoryLoading => _aggregateHistoryLoading;
+
   String _aiInsights = "";
   bool _aiLoading = false;
 
@@ -47,6 +54,12 @@ class CoachProvider with ChangeNotifier {
 
   List<ConnectionRequestModel> _pendingRequests = [];
   List<ConnectionRequestModel> get pendingRequests => _pendingRequests;
+
+  String _systemAiRecommendations = "Tap to load system recommendations.";
+  bool _systemAiLoading = false;
+
+  String get systemAiRecommendations => _systemAiRecommendations;
+  bool get systemAiLoading => _systemAiLoading;
 
   /// Fetches all users from Firestore where the 'coachId' matches the currently logged-in coach's UID.
   Future<void> fetchConnectedUsers(String coachId) async {
@@ -102,7 +115,7 @@ class CoachProvider with ChangeNotifier {
               }
             })
             .catchError((e) {
-              print('Error fetching progress for ${user.uid}: $e');
+              debugPrint('Error fetching progress for ${user.uid}: $e');
               _todayFocusMinutes[user.uid] = 0; // Default to 0 on error
             }),
       );
@@ -151,7 +164,7 @@ class CoachProvider with ChangeNotifier {
 
       await newChallengeRef.set(newChallenge.toMap());
     } catch (e) {
-      print('Error submitting challenge: $e');
+      debugPrint('Error submitting challenge: $e');
       throw Exception('Failed to submit challenge.');
     }
   }
@@ -175,7 +188,6 @@ class CoachProvider with ChangeNotifier {
       _challenges = querySnapshot.docs
           .map((doc) => ChallengeModel.fromFirestore(doc))
           .toList();
-
     } catch (e) {
       print('Error fetching challenges: $e');
       _errorMessage = 'Error fetching challenges: $e';
@@ -224,7 +236,7 @@ class CoachProvider with ChangeNotifier {
       );
       await newReportRef.set(newReport.toMap());
     } catch (e) {
-      print('Error reporting log: $e');
+      debugPrint('Error reporting log: $e');
       throw Exception('Failed to submit report.');
     }
   }
@@ -273,7 +285,7 @@ class CoachProvider with ChangeNotifier {
 
       await batch.commit();
     } catch (e) {
-      print('Error sending message: $e');
+      debugPrint('Error sending message: $e');
       throw Exception('Failed to send message.');
     }
   }
@@ -292,7 +304,7 @@ class CoachProvider with ChangeNotifier {
           .doc(userId)
           .collection('dailyProgress')
           .orderBy('date', descending: true) // Show newest first
-          .limit(30) 
+          .limit(30)
           .get();
 
       _userProgressHistory = querySnapshot.docs
@@ -303,6 +315,64 @@ class CoachProvider with ChangeNotifier {
       _errorMessage = 'Error fetching focus history: $e';
     } finally {
       _progressHistoryLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchAggregateFocusHistory() async {
+    // Basic cache: If we already fetched it, don't fetch again.
+    if (_aggregateProgressHistory.isNotEmpty) return;
+
+    _aggregateHistoryLoading = true;
+    notifyListeners();
+
+    try {
+      Map<String, int> tempAggregates = {};
+      List<Future<QuerySnapshot>> futures = [];
+
+      // 1. Create all the fetch futures (one for each connected user)
+      for (final user in _connectedUsers) {
+        futures.add(
+          _firestore
+              .collection('users')
+              .doc(user.uid)
+              .collection('dailyProgress')
+              .orderBy('date', descending: true)
+              .limit(30) // Get last 30 days of data
+              .get(),
+        );
+      }
+
+      // 2. Wait for all users' data to return
+      final allSnapshots = await Future.wait(futures);
+
+      // 3. Process all the data
+      for (final snapshot in allSnapshots) {
+        for (final doc in snapshot.docs) {
+          final progress = DailyProgressModel.fromFirestore(doc);
+          final date = progress.date;
+          final minutes = progress.focusedMinutes;
+          // Add this day's minutes to the aggregate map
+          tempAggregates[date] = (tempAggregates[date] ?? 0) + minutes;
+        }
+      }
+
+      // 4. Convert map to a sorted list
+      _aggregateProgressHistory = tempAggregates.entries
+          .map(
+            (e) => DailyProgressModel(
+              date: e.key,
+              focusedMinutes: e.value,
+              updatedAt: DateTime.now(), // This date doesn't matter here
+            ),
+          )
+          .toList();
+
+      _aggregateProgressHistory.sort((a, b) => a.date.compareTo(b.date));
+    } catch (e) {
+      debugPrint('Error fetching aggregate focus history: $e');
+    } finally {
+      _aggregateHistoryLoading = false;
       notifyListeners();
     }
   }
@@ -496,8 +566,46 @@ class CoachProvider with ChangeNotifier {
   Future<void> rejectConnectionRequest(String requestId) async {
     // 1. Just delete the request
     await _firestore.collection('connectionRequests').doc(requestId).delete();
-    
+
     // 2. Refresh the list
     await fetchPendingRequests();
+  }
+
+  Future<void> fetchSystemAiRecommendations() async {
+    _systemAiLoading = true;
+    _systemAiRecommendations = "Analyzing connected users for system trends...";
+    notifyListeners();
+
+    try {
+      final users = _connectedUsers;
+      final totalUsers = users.length;
+      final totalStreak = users.fold<int>(
+        0,
+        (total, u) => total + (u.currentStreak ?? 0),
+      );
+      final avgStreak = totalUsers > 0
+          ? (totalStreak / totalUsers).toStringAsFixed(1)
+          : '0';
+
+      String prompt =
+          """
+        You are a system-level productivity consultant providing advice to a coach managing ${totalUsers} clients.
+        The average client streak is ${avgStreak} days.
+        Provide one single, high-leverage coaching strategy, 20 words maximum, that the coach can apply
+        to their entire client base this week to improve overall consistency.
+        Start with: 'System Strategy:'
+      """;
+
+      final response = await GeminiService.generateText(prompt);
+
+      _systemAiRecommendations = response
+          .replaceFirst('System Strategy:', '')
+          .trim();
+    } catch (e) {
+      _systemAiRecommendations = "Error fetching system recommendation.";
+    } finally {
+      _systemAiLoading = false;
+      notifyListeners();
+    }
   }
 }

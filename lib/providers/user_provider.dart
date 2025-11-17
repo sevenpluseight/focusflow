@@ -76,7 +76,7 @@ class UserProvider with ChangeNotifier {
 
     // create the new user
     batch.set(userDoc, newUser.toMap(), SetOptions(merge: true));
-    _statsService.updateUserCount(batch, 'user', true);
+    // _statsService.updateUserCount(batch, 'user', true);
 
     await batch.commit();
 

@@ -9,3 +9,4 @@ export 'coach_application_screen.dart';
 export 'find_coach_screen.dart';
 export 'user_messages_screen.dart';
 export 'user_challenges_screen.dart';
+export 'mood_tracker_screen.dart';

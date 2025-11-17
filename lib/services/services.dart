@@ -8,3 +8,5 @@ export 'admin_stat_service.dart'; // Admin stats data operations
 export 'productivity_service.dart'; // Productivity tips operations
 export 'session_timer.dart'; // Session timer operations
 export 'mood_service.dart'; // Mood tracking operations
+export 'storage_service.dart'; // Storage operations
+export 'distraction_service.dart'; // Distraction logging operations

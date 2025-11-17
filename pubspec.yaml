@@ -49,12 +49,7 @@ dependencies:
   provider: ^6.1.5+1
   flutter_markdown: ^0.7.0
   fl_chart: ^0.69.0
-<<<<<<< HEAD
-  image_picker: ^1.2.1
-  firebase_storage: ^13.0.4
-=======
   url_launcher: ^6.3.2
->>>>>>> origin/py
 
 dev_dependencies:
   flutter_test:

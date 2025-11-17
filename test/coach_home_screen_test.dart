@@ -247,6 +247,9 @@ class MockCoachProvider extends ChangeNotifier implements CoachProvider {
   bool get systemAiLoading => false;
 
   @override
+  String? get errorMessage => null;
+
+  @override
   Future<void> fetchConnectedUsers(String coachId) async {}
 
   @override

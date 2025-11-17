@@ -10,3 +10,4 @@ export 'notification_provider.dart';
 export 'message_provider.dart';
 export 'challenge_provider.dart';
 export 'report_provider.dart';
+export 'distraction_provider.dart';

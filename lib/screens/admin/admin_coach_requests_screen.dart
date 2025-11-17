@@ -29,6 +29,7 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final provider = context.watch<CoachRequestProvider>();
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -83,7 +84,20 @@ class _AdminCoachRequestsScreenState extends State<AdminCoachRequestsScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No requests found.'));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Pixel.users,
+                          size: 48,
+                          color: isDark ? Colors.white54 : Colors.black45,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('No requests found.'),
+                      ],
+                    ),
+                  );
                 }
 
                 // Apply search filter

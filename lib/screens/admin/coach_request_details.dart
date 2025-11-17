@@ -59,12 +59,25 @@ class CoachRequestDetailsSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                Text(
-                  "Coach Request",
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Pixel.mail),
+                      color: Colors.white,
+                      iconSize: 36.0,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {},
+                    ),
+                    const SizedBox(width: 14),
+                    Text(
+                      "Coach Request",
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 ListTile(
@@ -88,7 +101,7 @@ class CoachRequestDetailsSheet extends StatelessWidget {
 
                 _buildDetailCard(
                   theme,
-                  icon: Pixel.bullseye,
+                  icon: Pixel.suitcase,
                   title: "Expertise",
                   content: request.expertise,
                 ),
@@ -104,7 +117,7 @@ class CoachRequestDetailsSheet extends StatelessWidget {
                     request.portfolioLink!.isNotEmpty)
                   _buildDetailCard(
                     theme,
-                    icon: Pixel.link,
+                    icon: Pixel.externallink,
                     title: "Portfolio",
                     content: request.portfolioLink!,
                     isLink: true,

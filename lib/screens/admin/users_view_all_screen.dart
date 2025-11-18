@@ -36,15 +36,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   IconData _getRoleIcon(String role) {
-    switch (role) {
-      case 'admin':
-        return Pixel.lock;
-      case 'coach':
-        return Pixel.bullseye;
-      case 'user':
-      default:
-        return Pixel.user;
-    }
+    // switch (role) {
+    //   case 'admin':
+    //     return Pixel.lock;
+    //   case 'coach':
+    //     return Pixel.bullseye;
+    //   case 'user':
+    //   default:
+    return Pixel.user;
+    // }
   }
 
   Future<String?> _showAdminActionDialog(
@@ -271,11 +271,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final provider = context.watch<AdminUsersProvider>();
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF3A3D42) : Color(0xFFE8F5E9),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('All Users'),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        elevation: 0,
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+        leading: IconButton(
+          icon: const Icon(Pixel.chevronleft),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Column(
         children: [
@@ -471,13 +474,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: _getRoleColor(
-                    user.role,
-                    isDark,
-                  ).withOpacity(0.2),
+                  backgroundColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.2,
+                  ),
                   child: Icon(
                     _getRoleIcon(user.role),
-                    color: _getRoleColor(user.role, isDark),
+                    color: theme.colorScheme.primary,
                     size: 32,
                   ),
                 ),
@@ -512,7 +514,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     color: _getRoleColor(
                       user.role,
                       isDark,
-                    ).withOpacity(0.2),
+                    ).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

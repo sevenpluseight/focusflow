@@ -2,30 +2,60 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 
+enum NotificationFilter { all, week, month, year }
+
 class NotificationProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<AppNotification> _notifications = [];
   bool _isLoading = false;
+  String _errorMessage = '';
+
+  NotificationFilter _selectedFilter = NotificationFilter.all;
+  NotificationFilter get selectedFilter => _selectedFilter;
+
+  String _selectedRoleFilter = 'all';
+  String get selectedRoleFilter => _selectedRoleFilter;
 
   List<AppNotification> get notifications => _notifications;
   bool get isLoading => _isLoading;
+  String get errorMessage => _errorMessage;
 
-  /// Fetch notifications based on user role (user / coach)
+  void updateFilter(NotificationFilter filter) {
+    _selectedFilter = filter;
+    notifyListeners();
+  }
+
+  void updateRoleFilter(String role) {
+    _selectedRoleFilter = role;
+    notifyListeners();
+  }
+
   Stream<List<AppNotification>> getNotificationsStream(String role) {
     return _firestore
         .collection('notifications')
         .orderBy('sentAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((d) => AppNotification.fromFirestore(d))
-          .where((n) => n.target == 'all' || n.target == role)
-          .toList();
-    });
+          return snapshot.docs
+              .map((d) => AppNotification.fromFirestore(d))
+              .where((n) => n.target == 'all' || n.target == role)
+              .toList();
+        });
   }
 
-  /// One-time fetch (if needed)
+  Stream<List<AppNotification>> getAllNotificationsStream() {
+    return _firestore
+        .collection('notifications')
+        .orderBy('sentAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((d) => AppNotification.fromFirestore(d))
+              .toList();
+        });
+  }
+
   Future<void> fetchNotifications(String role) async {
     _isLoading = true;
     notifyListeners();
@@ -40,12 +70,41 @@ class NotificationProvider extends ChangeNotifier {
           .map((d) => AppNotification.fromFirestore(d))
           .where((n) => n.target == 'all' || n.target == role)
           .toList();
-
     } catch (e) {
       debugPrint("Error fetching notifications: $e");
+      _errorMessage = e.toString();
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> sendNotification({
+    required String title,
+    required String message,
+    required String target,
+  }) async {
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      await _firestore.collection('notifications').add({
+        'title': title,
+        'message': message,
+        'target': target,
+        'sentAt': FieldValue.serverTimestamp(), // Use server time
+      });
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      debugPrint("Error sending notification: $e");
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

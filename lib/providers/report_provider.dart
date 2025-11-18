@@ -72,8 +72,11 @@ class ReportProvider with ChangeNotifier {
       if (savedTimestamp != null) {
         final now = DateTime.now();
         final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
-        final startOfWeekDate =
-            DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+        final startOfWeekDate = DateTime(
+          startOfWeek.year,
+          startOfWeek.month,
+          startOfWeek.day,
+        );
 
         if (savedTimestamp.toDate().isAfter(startOfWeekDate)) {
           final focusSummary = savedReport?['focusSummary'];
@@ -133,7 +136,8 @@ class ReportProvider with ChangeNotifier {
       final distractionSummary =
           'Total distractions this week: ${weeklyDistractionData.length}';
 
-      final prompt = """
+      final prompt =
+          """
         Generate a weekly focus report for the user. Provide the "Focus Summary" and "Distraction Breakdown" as two separate sections, delimited by "---BREAK---".
         
         Focus Summary:
@@ -153,7 +157,8 @@ class ReportProvider with ChangeNotifier {
         _distractionBreakdownReport = parts[1].trim();
       } else {
         _focusSummaryReport = 'Error: Could not parse focus summary.';
-        _distractionBreakdownReport = 'Error: Could not parse distraction breakdown.';
+        _distractionBreakdownReport =
+            'Error: Could not parse distraction breakdown.';
       }
 
       final user = _auth.currentUser;
@@ -164,7 +169,7 @@ class ReportProvider with ChangeNotifier {
             'focusSummary': _focusSummaryReport,
             'distractionBreakdown': _distractionBreakdownReport,
             'updatedAt': newTimestamp,
-          }
+          },
         });
         _reportUpdatedAt = newTimestamp.toDate();
       }

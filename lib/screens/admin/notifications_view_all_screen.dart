@@ -60,7 +60,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            color: theme.scaffoldBackgroundColor,
+            color: theme.cardColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -82,83 +82,90 @@ class AdminNotificationViewScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Filter by: ',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        DropdownButton<NotificationFilter>(
-                          value: provider.selectedFilter,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                          iconEnabledColor: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.7),
-                          dropdownColor: theme.cardColor,
-                          underline: Container(height: 0),
-                          onChanged: (value) {
-                            if (value != null) {
-                              context.read<NotificationProvider>().updateFilter(
-                                value,
-                              );
-                            }
-                          },
-                          items: const [
-                            DropdownMenuItem(
-                              value: NotificationFilter.all,
-                              child: Text('All Time'),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Text(
+                              'Filter by: ',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                              ),
                             ),
-                            DropdownMenuItem(
-                              value: NotificationFilter.week,
-                              child: Text('This Week'),
+                            const SizedBox(width: 8),
+                            DropdownButton<NotificationFilter>(
+                              value: provider.selectedFilter,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              iconEnabledColor: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.7),
+                              dropdownColor: theme.cardColor,
+                              underline: Container(height: 0),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  context
+                                      .read<NotificationProvider>()
+                                      .updateFilter(
+                                        value,
+                                      );
+                                }
+                              },
+                              items: const [
+                                DropdownMenuItem(
+                                  value: NotificationFilter.all,
+                                  child: Text('All Time'),
+                                ),
+                                DropdownMenuItem(
+                                  value: NotificationFilter.week,
+                                  child: Text('This Week'),
+                                ),
+                                DropdownMenuItem(
+                                  value: NotificationFilter.month,
+                                  child: Text('This Month'),
+                                ),
+                                DropdownMenuItem(
+                                  value: NotificationFilter.year,
+                                  child: Text('This Year'),
+                                ),
+                              ],
                             ),
-                            DropdownMenuItem(
-                              value: NotificationFilter.month,
-                              child: Text('This Month'),
-                            ),
-                            DropdownMenuItem(
-                              value: NotificationFilter.year,
-                              child: Text('This Year'),
+                            const SizedBox(width: 16),
+                            DropdownButton<String>(
+                              value: provider.selectedRoleFilter,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              iconEnabledColor: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.7),
+                              dropdownColor: theme.cardColor,
+                              underline: Container(height: 0),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  context
+                                      .read<NotificationProvider>()
+                                      .updateRoleFilter(value);
+                                }
+                              },
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'all',
+                                  child: Text('All Roles'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'user',
+                                  child: Text('Users'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'coach',
+                                  child: Text('Coaches'),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(width: 16),
-                        DropdownButton<String>(
-                          value: provider.selectedRoleFilter,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                          iconEnabledColor: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.7),
-                          dropdownColor: theme.cardColor,
-                          underline: Container(height: 0),
-                          onChanged: (value) {
-                            if (value != null) {
-                              context
-                                  .read<NotificationProvider>()
-                                  .updateRoleFilter(value);
-                            }
-                          },
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'all',
-                              child: Text('All Roles'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'user',
-                              child: Text('Users'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'coach',
-                              child: Text('Coaches'),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
 
                     // Create Button

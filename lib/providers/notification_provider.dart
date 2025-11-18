@@ -31,7 +31,6 @@ class NotificationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetch notifications based on user role (user / coach)
   Stream<List<AppNotification>> getNotificationsStream(String role) {
     return _firestore
         .collection('notifications')
@@ -45,7 +44,6 @@ class NotificationProvider extends ChangeNotifier {
         });
   }
 
-  // no filter for role
   Stream<List<AppNotification>> getAllNotificationsStream() {
     return _firestore
         .collection('notifications')
@@ -58,7 +56,6 @@ class NotificationProvider extends ChangeNotifier {
         });
   }
 
-  /// One-time fetch (if needed)
   Future<void> fetchNotifications(String role) async {
     _isLoading = true;
     notifyListeners();

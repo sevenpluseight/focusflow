@@ -116,7 +116,7 @@ class ChallengeRequestsSection extends StatelessWidget {
             '${request.focusGoalHours} hours',
             style: theme.textTheme.bodyMedium,
           ),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const Icon(Pixel.chevronright),
           onTap: () {
             showModalBottomSheet(
               context: context,

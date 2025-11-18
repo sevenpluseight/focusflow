@@ -22,7 +22,6 @@ class CoachRequestProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches ONLY pending coach requests (for the admin menu)
   Stream<List<CoachRequestModel>> getPendingRequestsStream() {
     return _firestore
         .collection('coachRequests')

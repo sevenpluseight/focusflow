@@ -5,7 +5,7 @@ import 'package:focusflow/widgets/widgets.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'admin_notify_screen.dart';
+import 'notification_create_screen.dart';
 
 class AdminNotificationViewScreen extends StatelessWidget {
   const AdminNotificationViewScreen({super.key});
@@ -97,7 +97,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
                             color: theme.colorScheme.onSurface,
                           ),
                           iconEnabledColor: theme.colorScheme.onSurface
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           dropdownColor: theme.cardColor,
                           underline: Container(height: 0),
                           onChanged: (value) {
@@ -133,7 +133,7 @@ class AdminNotificationViewScreen extends StatelessWidget {
                             color: theme.colorScheme.onSurface,
                           ),
                           iconEnabledColor: theme.colorScheme.onSurface
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           dropdownColor: theme.cardColor,
                           underline: Container(height: 0),
                           onChanged: (value) {

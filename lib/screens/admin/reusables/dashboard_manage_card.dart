@@ -59,7 +59,7 @@ class ManagementCard extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: theme.dividerColor.withOpacity(0.2),
+            color: theme.dividerColor.withValues(alpha: 0.2),
           ),
           SizedBox(
             width: double.infinity,

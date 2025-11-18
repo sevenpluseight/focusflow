@@ -117,7 +117,7 @@ class CoachRequestsSection extends StatelessWidget {
             ),
           ),
           subtitle: Text(request.username, style: theme.textTheme.bodyMedium),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: const Icon(Pixel.chevronright),
           onTap: () {
             showModalBottomSheet(
               context: context,

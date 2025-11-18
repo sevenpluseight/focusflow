@@ -38,8 +38,11 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                     );
                   }
+
                   final totalUsers = statsProvider.totalUsers;
                   final activeCoaches = statsProvider.activeCoaches;
+                  final activeUsers = statsProvider.activeUsers;
+
                   return StyledCard(
                     title: 'System Stats',
                     child: Column(
@@ -60,7 +63,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         _buildStatRow(
                           context: context,
                           icon: Pixel.chartmultiple,
-                          text: 'Daily Engagement: 65%',
+                          text: 'Active Users: $activeUsers',
                         ),
                       ],
                     ),
@@ -68,9 +71,9 @@ class AdminDashboardScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              const FocusTrendsSection(),
+              // const FocusTrendsSection(),
               const SizedBox(height: 20),
-              const CommonDistractionsSection(),
+              // const CommonDistractionsSection(),
             ],
           ),
         ),

@@ -103,6 +103,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
           Pixel.chartmultiple,
         ];
         _labels = const ['Dashboard', 'Users', 'Events', 'Notify', 'Reports'];
+        // _labels = const ['Dashboard', 'Users', 'Events', 'Notify'];
         break;
     }
   }

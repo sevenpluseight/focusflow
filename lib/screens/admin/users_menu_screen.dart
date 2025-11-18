@@ -20,19 +20,18 @@ class AdminUserMenuScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- Section 1: Coach Requests ---
                 const AdminMenuSectionTitle('Requests to be Coach'),
                 const SizedBox(height: 8),
-                const CoachRequestsSection(), // Replaced the big helper
-                const SizedBox(height: 24),
 
-                // --- Section 2: User Management ---
+                const CoachRequestsSection(),
+
+                const SizedBox(height: 24),
                 const AdminMenuSectionTitle('User Management'),
                 const SizedBox(height: 8),
+
                 Consumer<AdminStatsProvider>(
                   builder: (context, statsProvider, child) {
                     final totalUsers = statsProvider.totalUsers;
-                    // Replaced _buildManagementRow with the new widget
                     return ManagementCard(
                       icon: Pixel.users,
                       title: 'Our Users',
@@ -51,10 +50,9 @@ class AdminUserMenuScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // --- Section 3: Reported Items ---
                 const AdminMenuSectionTitle('Reported Items'),
                 const SizedBox(height: 8),
-                // Replaced _buildManagementRow with the new widget
+
                 ManagementCard(
                   icon: Pixel.flag,
                   title: 'Reported Items',
@@ -62,7 +60,12 @@ class AdminUserMenuScreen extends StatelessWidget {
                       '0 items awaiting review', // TODO: connect to provider
                   buttonText: 'Manage Reported Items',
                   onPressed: () {
-                    // TODO: Navigate to reports screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminReportedLogsScreen(),
+                      ),
+                    );
                   },
                 ),
               ],

@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.focusflow"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -202,10 +202,6 @@ class MockCoachProvider extends ChangeNotifier implements CoachProvider {
   @override
   bool get isLoading => false;
 
-  // --- FIX: Added errorMessage implementation ---
-  @override
-  String? get errorMessage => null; 
-
   @override
   List<ChallengeModel> get challenges => [];
 

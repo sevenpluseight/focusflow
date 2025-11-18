@@ -9,7 +9,6 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/coach/coach_home_screen.dart';
 import 'package:focusflow/services/services.dart';
 
-
 // ------------------------------------------------------------
 //  Mock Auth Provider
 // ------------------------------------------------------------
@@ -56,7 +55,6 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   @override
   Future<void> signOut(BuildContext context) async {}
 }
-
 
 // ------------------------------------------------------------
 //  Mock Firebase User
@@ -111,7 +109,6 @@ class MockUser implements firebase_auth.User {
   Future<void> sendEmailVerification(
       [firebase_auth.ActionCodeSettings? actionCodeSettings]) async {}
 
-
   Future<firebase_auth.User> updateEmail(String newEmail) async => this;
 
   @override
@@ -134,7 +131,6 @@ class MockUser implements firebase_auth.User {
   @override
   firebase_auth.MultiFactor get multiFactor =>
       throw UnimplementedError();
-
 
   // ----- Required abstract methods introduced by Firebase Auth -----
   @override
@@ -190,12 +186,11 @@ class MockUser implements firebase_auth.User {
 
   @override
   Future<void> verifyBeforeUpdateEmail(String newEmail,
-          [firebase_auth.ActionCodeSettings? actionCodeSettings]) async {}
+      [firebase_auth.ActionCodeSettings? actionCodeSettings]) async {}
 
   @override
   String? get refreshToken => null;
 }
-
 
 // ------------------------------------------------------------
 //  Mock CoachProvider
@@ -212,6 +207,10 @@ class MockCoachProvider extends ChangeNotifier implements CoachProvider {
 
   @override
   bool get isLoading => false;
+
+  // --- FIX: Added errorMessage implementation ---
+  @override
+  String? get errorMessage => null; 
 
   @override
   List<ChallengeModel> get challenges => [];
@@ -303,7 +302,6 @@ class MockCoachProvider extends ChangeNotifier implements CoachProvider {
   // Not included in interface but required by your code
   Future<void> fetchAggregateFocusHistory() async {}
 }
-
 
 // ------------------------------------------------------------
 //  TESTS

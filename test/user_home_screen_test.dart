@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:focusflow/screens/user/user.dart';
-import 'package:focusflow/providers/user_provider.dart';
-import 'package:focusflow/providers/progress_provider.dart';
-import 'package:focusflow/models/models.dart'; // For UserModel, MessageModel, CoachRequestModel
+import 'package:focusflow/screens/user/user_home_screen.dart';
+import 'package:focusflow/providers/providers.dart';
+import 'package:focusflow/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Fakes
+// ------------------------------------------------------------
+//  Fakes
+// ------------------------------------------------------------
+
 class FakeUserModel extends UserModel {
   FakeUserModel()
       : super(
@@ -34,8 +36,11 @@ class FakeUserProvider extends ChangeNotifier implements UserProvider {
   @override
   List<String> pendingCoachIds = [];
 
+  // 🔥 FIX: Changed return type from Future<void> to Future<bool>
   @override
-  Future<void> fetchUser() async {}
+  Future<bool> fetchUser() async {
+    return true;
+  }
 
   @override
   void listenToPendingRequests() {}
@@ -129,6 +134,10 @@ class FakeProgressProvider extends ChangeNotifier implements ProgressProvider {
   String uid = '123';
 }
 
+// ------------------------------------------------------------
+//  Main Test
+// ------------------------------------------------------------
+
 void main() {
   testWidgets('UserHomeScreen displays username, tip and progress', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -141,10 +150,20 @@ void main() {
       ),
     );
 
+    // Wait for the frame callback (fetchDailyProgress) to complete
     await tester.pumpAndSettle();
 
+    // 1. Check Username with hardcoded "Good Morning" (as per your widget code)
     expect(find.textContaining('Good Morning, Test User!'), findsOneWidget);
+
+    // 2. Check for the static motivational text
     expect(find.textContaining('Every minute counts! Stay focused'), findsOneWidget);
+
+    // 3. Check Progress calculation:
+    // Target = 2.0 hours.
+    // Focused = 90 minutes.
+    // Widget logic: "$completedMinutes min / ${dailyTarget.toStringAsFixed(0)} hrs"
+    // Expect: "90 min / 2 hrs"
     expect(find.textContaining("Today's Progress: 90 min / 2 hrs"), findsOneWidget);
   });
 }

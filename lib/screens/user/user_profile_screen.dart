@@ -52,6 +52,7 @@ class UserProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
+    final progressProvider = context.watch<ProgressProvider>();
     final user = userProvider.user;
     final challengeProvider = context.watch<ChallengeProvider>();
 
@@ -68,6 +69,12 @@ class UserProfileScreen extends StatelessWidget {
 
     if (user == null && !userProvider.isLoading) {
       Future.microtask(() => userProvider.fetchUser());
+    }
+
+    if (user != null && progressProvider.uid != user.uid) {
+      Future.microtask(() {
+        context.read<ProgressProvider>().uid = user.uid;
+      });
     }
 
     return Scaffold(
@@ -93,7 +100,7 @@ class UserProfileScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            "-- hrs",
+                            "${progressProvider.totalFocusedHours} hrs",
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontStyle: FontStyle.italic,
                               color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),

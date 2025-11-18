@@ -56,8 +56,7 @@ class AdminUserMenuScreen extends StatelessWidget {
                 ManagementCard(
                   icon: Pixel.flag,
                   title: 'Reported Items',
-                  subtitle:
-                      '0 items awaiting review', // TODO: connect to provider
+                  subtitle: 'Check reported distraction logs awaiting review',
                   buttonText: 'Manage Reported Items',
                   onPressed: () {
                     Navigator.push(

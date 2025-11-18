@@ -27,16 +27,17 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     final userProvider = context.read<UserProvider>();
 
     try {
-      // First fetching attempt
+      // First attempt
       final success = await _fetchWithTimeout(userProvider);
       if (success && mounted) {
         _navigateToHome(userProvider);
         return;
       }
 
-      // Retry if first failed - Second attempt
+      // Retry once
       if (!_hasRetried) {
         _hasRetried = true;
+
         if (mounted) {
           CustomSnackBar.show(
             context,
@@ -54,7 +55,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
         }
       }
 
-      // If both attempts fail, show error and navigate to login
+      // Both attempts failed
       if (mounted) {
         CustomSnackBar.show(
           context,
@@ -64,7 +65,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
           duration: const Duration(seconds: 3),
         );
 
-        await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 2));
 
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
@@ -75,12 +76,14 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+
       CustomSnackBar.show(
         context,
         message: "An error occurred: $e",
         type: SnackBarType.error,
         position: SnackBarPosition.top,
       );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -88,10 +91,11 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
     }
   }
 
+  /// Ensures fetchUser completes AND the user document has arrived.
   Future<bool> _fetchWithTimeout(UserProvider userProvider) async {
     try {
-      await userProvider.fetchUser().timeout(const Duration(seconds: 10));
-      return userProvider.user != null;
+      // 🤝 Important fix: Wait for Firestore doc to arrive using a Completer inside UserProvider
+      return await userProvider.fetchUser().timeout(const Duration(seconds: 10));
     } on TimeoutException {
       return false;
     }
@@ -100,7 +104,7 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
   void _navigateToHome(UserProvider userProvider) {
     if (!mounted) return;
 
-    final roleString = userProvider.user?.role ?? 'user';
+    final roleString = userProvider.user?.role ?? "user";
     final userRole = UserRole.values.firstWhere(
       (e) => e.toString().split('.').last == roleString,
       orElse: () => UserRole.user,
@@ -114,7 +118,6 @@ class _UserLoadingScreenState extends State<UserLoadingScreen> {
       duration: const Duration(seconds: 2),
     );
 
-    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

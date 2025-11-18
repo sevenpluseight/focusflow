@@ -10,14 +10,19 @@ class UserProvider with ChangeNotifier {
   final AdminStatService _statsService;
 
   UserProvider({AdminStatService? statsService})
-    : _statsService = statsService ?? AdminStatService();
+      : _statsService = statsService ?? AdminStatService();
 
   UserModel? _user;
   CoachRequestModel? _connectedCoach;
   bool _isLoading = false;
+
   StreamSubscription? _pendingRequestsSubscription;
   StreamSubscription? _userDocSubscription;
+
   List<String> _pendingCoachIds = [];
+
+  // 🔥 NEW: Tracks when first user snapshot is received
+  Completer<bool>? _initialLoadCompleter;
 
   UserModel? get user => _user;
   CoachRequestModel? get connectedCoach => _connectedCoach;
@@ -32,7 +37,6 @@ class UserProvider with ChangeNotifier {
   }
 
   void _safeNotifyListeners() {
-    // Delay notifyListeners to avoid calling during build
     scheduleMicrotask(() {
       if (hasListeners) notifyListeners();
     });
@@ -43,55 +47,97 @@ class UserProvider with ChangeNotifier {
     _safeNotifyListeners();
   }
 
-  Future<void> fetchUser() async {
+  // -------------------------------------------
+  // 🔥 FIXED: fetchUser now WAITS for Firestore
+  // -------------------------------------------
+  Future<bool> fetchUser() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null) return false;
 
     _setLoading(true);
+
+    // Reset completer every fetch
+    _initialLoadCompleter = Completer<bool>();
+
     try {
-      listenToPendingRequests(); // Start listening
-      _userDocSubscription?.cancel(); // Cancel previous subscription if any
-      _userDocSubscription = _firestore.collection('users').doc(uid).snapshots().listen((doc) async {
-        if (doc.exists) {
-          _user = UserModel.fromFirestore(doc);
-          // If user has a coach, fetch the coach's details
-          if (_user?.coachId != null && _user!.coachId!.isNotEmpty) {
-            final coachDoc = await _firestore
-                .collection('coachRequests')
-                .doc(_user!.coachId)
-                .get();
-            if (coachDoc.exists) {
-              _connectedCoach = CoachRequestModel.fromFirestore(coachDoc);
-            } else {
-              _connectedCoach = null;
-            }
-          } else {
-            _connectedCoach = null;
-          }
-          _safeNotifyListeners();
+      // Listen to connection requests
+      listenToPendingRequests();
+
+      // Cancel previous listener
+      _userDocSubscription?.cancel();
+
+      _userDocSubscription = _firestore
+          .collection('users')
+          .doc(uid)
+          .snapshots()
+          .listen((doc) async {
+        if (!doc.exists) return;
+
+        // Parse user data
+        _user = UserModel.fromFirestore(doc);
+
+        // Fetch connected coach (if any)
+        if (_user?.coachId != null && _user!.coachId!.isNotEmpty) {
+          final coachDoc = await _firestore
+              .collection('coachRequests')
+              .doc(_user!.coachId)
+              .get();
+
+          _connectedCoach = coachDoc.exists
+              ? CoachRequestModel.fromFirestore(coachDoc)
+              : null;
+        } else {
+          _connectedCoach = null;
         }
+
+        // FIRST snapshot received → complete!
+        if (_initialLoadCompleter != null &&
+            !_initialLoadCompleter!.isCompleted) {
+          _initialLoadCompleter!.complete(true);
+        }
+
+        _safeNotifyListeners();
       });
+
+      // Wait for first snapshot (or timeout)
+      final result = await _initialLoadCompleter!.future;
+      return result;
+    } catch (e) {
+      if (_initialLoadCompleter != null &&
+          !_initialLoadCompleter!.isCompleted) {
+        _initialLoadCompleter!.complete(false);
+      }
+      return false;
     } finally {
       _setLoading(false);
     }
   }
 
+  // -------------------------------------------
+  // Listen to Pending Connection Requests
+  // -------------------------------------------
   void listenToPendingRequests() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
     _pendingRequestsSubscription?.cancel();
+
     _pendingRequestsSubscription = _firestore
         .collection('connectionRequests')
         .where('userId', isEqualTo: uid)
         .where('status', isEqualTo: 'pending')
         .snapshots()
         .listen((snapshot) {
-      _pendingCoachIds = snapshot.docs.map((doc) => doc['coachId'] as String).toList();
+      _pendingCoachIds =
+          snapshot.docs.map((doc) => doc['coachId'] as String).toList();
+
       _safeNotifyListeners();
     });
   }
 
+  // -------------------------------------------
+  // Create User
+  // -------------------------------------------
   Future<void> createUser({
     required String uid,
     required String username,
@@ -120,51 +166,51 @@ class UserProvider with ChangeNotifier {
       lastFocusDate: null,
     );
 
-    // create the new user
     batch.set(userDoc, newUser.toMap(), SetOptions(merge: true));
-    // _statsService.updateUserCount(batch, 'user', true);
-
     await batch.commit();
 
-    // loca state update
     _user = newUser;
     _safeNotifyListeners();
   }
 
+  // -------------------------------------------
+  // Update User Streak
+  // -------------------------------------------
   Future<void> updateStreak() async {
     if (_user == null) return;
+
     final userRef = _firestore.collection('users').doc(_user!.uid);
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+
     final lastFocusDate = _user!.lastFocusDate?.toDate();
-    int currentStreak = _user!.currentStreak ?? 0;
-    int longestStreak = _user!.longestStreak ?? 0;
+    int current = _user!.currentStreak ?? 0;
+    int longest = _user!.longestStreak ?? 0;
 
     if (lastFocusDate != null) {
       final diff = today.difference(lastFocusDate).inDays;
       if (diff == 1) {
-        currentStreak += 1;
-        longestStreak = currentStreak > longestStreak
-            ? currentStreak
-            : longestStreak;
+        current += 1;
+        if (current > longest) longest = current;
       } else if (diff > 1) {
-        currentStreak = 1;
+        current = 1;
       }
     } else {
-      currentStreak = 1;
-      longestStreak = 1;
+      current = 1;
+      longest = 1;
     }
 
     await userRef.update({
-      'currentStreak': currentStreak,
-      'longestStreak': longestStreak,
+      'currentStreak': current,
+      'longestStreak': longest,
       'lastFocusDate': today,
     });
-
-    await fetchUser();
   }
 
+  // -------------------------------------------
+  // Update Settings
+  // -------------------------------------------
   Future<void> updateSettings({
     double? dailyTargetHours,
     int? workInterval,
@@ -175,18 +221,19 @@ class UserProvider with ChangeNotifier {
     if (uid == null) return;
 
     final updates = <String, dynamic>{};
-    if (dailyTargetHours != null)
-      updates['dailyTargetHours'] = dailyTargetHours;
+    if (dailyTargetHours != null) updates['dailyTargetHours'] = dailyTargetHours;
     if (workInterval != null) updates['workInterval'] = workInterval;
     if (breakInterval != null) updates['breakInterval'] = breakInterval;
     if (focusType != null) updates['focusType'] = focusType;
 
     if (updates.isNotEmpty) {
       await _firestore.collection('users').doc(uid).update(updates);
-      // No need to call fetchUser() here, as the listener will handle it
     }
   }
 
+  // -------------------------------------------
+  // Submit Coach Application
+  // -------------------------------------------
   Future<void> submitCoachApplication({
     required String fullName,
     required String expertise,
@@ -199,12 +246,11 @@ class UserProvider with ChangeNotifier {
     }
 
     _setLoading(true);
+
     try {
       final newRequestRef = _firestore.collection('coachRequests').doc(uid);
 
-      // Check if a request already exists
-      final doc = await newRequestRef.get();
-      if (doc.exists) {
+      if ((await newRequestRef.get()).exists) {
         throw Exception('You already have a pending application.');
       }
 
@@ -220,13 +266,14 @@ class UserProvider with ChangeNotifier {
       );
 
       await newRequestRef.set(newRequest.toMap());
-    } catch (e) {
-      throw Exception(e.toString());
     } finally {
       _setLoading(false);
     }
   }
 
+  // -------------------------------------------
+  // Send Connection Request
+  // -------------------------------------------
   Future<void> sendConnectionRequest(String coachId) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (_user == null || uid == null) {
@@ -234,20 +281,20 @@ class UserProvider with ChangeNotifier {
     }
 
     _setLoading(true);
+
     try {
-      final requestQuery = await _firestore
+      final existing = await _firestore
           .collection('connectionRequests')
           .where('userId', isEqualTo: uid)
           .where('coachId', isEqualTo: coachId)
           .limit(1)
           .get();
 
-      if (requestQuery.docs.isNotEmpty) {
-        throw Exception('You have already sent a request to this coach.');
+      if (existing.docs.isNotEmpty) {
+        throw Exception('You already sent a request to this coach.');
       }
 
-      final newRequestRef = _firestore.collection('connectionRequests').doc();
-      await newRequestRef.set({
+      await _firestore.collection('connectionRequests').add({
         'coachId': coachId,
         'userId': uid,
         'username': _user!.username,
@@ -259,20 +306,18 @@ class UserProvider with ChangeNotifier {
         _pendingCoachIds.add(coachId);
         _safeNotifyListeners();
       }
-    } catch (e) {
-      throw Exception(e.toString());
     } finally {
       _setLoading(false);
     }
   }
 
+  // -------------------------------------------
+  // Chat Messages Stream
+  // -------------------------------------------
   Stream<List<MessageModel>> getMessagesStream(String coachId) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      return Stream.value([]);
-    }
+    if (uid == null) return Stream.value([]);
 
-    // Canonical chat ID
     final ids = [uid, coachId]..sort();
     final chatId = ids.join('_');
 
@@ -282,11 +327,7 @@ class UserProvider with ChangeNotifier {
         .collection('messages')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-      if (snapshot.docs.isEmpty) {
-        return [];
-      }
-      return snapshot.docs.map((doc) => MessageModel.fromFirestore(doc)).toList();
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => MessageModel.fromFirestore(doc)).toList());
   }
 }

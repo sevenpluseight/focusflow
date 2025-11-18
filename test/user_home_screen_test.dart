@@ -153,7 +153,7 @@ void main() {
     // Wait for the frame callback (fetchDailyProgress) to complete
     await tester.pumpAndSettle();
 
-    // 1. Check Username with hardcoded "Good Morning" (as per your widget code)
+    // 1. Check Username with hardcoded "Good Morning" 
     expect(find.textContaining('Good Morning, Test User!'), findsOneWidget);
 
     // 2. Check for the static motivational text

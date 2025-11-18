@@ -9,9 +9,7 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/screens/coach/coach_home_screen.dart';
 import 'package:focusflow/services/services.dart';
 
-// ------------------------------------------------------------
 //  Mock Auth Provider
-// ------------------------------------------------------------
 class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   @override
   firebase_auth.User? get user => MockUser();
@@ -56,9 +54,7 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   Future<void> signOut(BuildContext context) async {}
 }
 
-// ------------------------------------------------------------
 //  Mock Firebase User
-// ------------------------------------------------------------
 class MockUser implements firebase_auth.User {
   @override
   String get uid => "fake_coach_id";
@@ -192,9 +188,7 @@ class MockUser implements firebase_auth.User {
   String? get refreshToken => null;
 }
 
-// ------------------------------------------------------------
 //  Mock CoachProvider
-// ------------------------------------------------------------
 class MockCoachProvider extends ChangeNotifier implements CoachProvider {
   List<UserModel> _connectedUsers = [];
   List<ConnectionRequestModel> _pendingRequests = [];
@@ -303,9 +297,6 @@ class MockCoachProvider extends ChangeNotifier implements CoachProvider {
   Future<void> fetchAggregateFocusHistory() async {}
 }
 
-// ------------------------------------------------------------
-//  TESTS
-// ------------------------------------------------------------
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

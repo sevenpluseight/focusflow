@@ -6,10 +6,6 @@ import 'package:focusflow/providers/providers.dart';
 import 'package:focusflow/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// ------------------------------------------------------------
-//  Fakes
-// ------------------------------------------------------------
-
 class FakeUserModel extends UserModel {
   FakeUserModel()
       : super(
@@ -36,7 +32,7 @@ class FakeUserProvider extends ChangeNotifier implements UserProvider {
   @override
   List<String> pendingCoachIds = [];
 
-  // 🔥 FIX: Changed return type from Future<void> to Future<bool>
+  // FIX: Changed return type from Future<void> to Future<bool>
   @override
   Future<bool> fetchUser() async {
     return true;
@@ -133,10 +129,6 @@ class FakeProgressProvider extends ChangeNotifier implements ProgressProvider {
   @override
   String uid = '123';
 }
-
-// ------------------------------------------------------------
-//  Main Test
-// ------------------------------------------------------------
 
 void main() {
   testWidgets('UserHomeScreen displays username, tip and progress', (WidgetTester tester) async {

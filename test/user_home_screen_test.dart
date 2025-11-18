@@ -91,6 +91,12 @@ class FakeProgressProvider extends ChangeNotifier implements ProgressProvider {
   int get minutesFocusedToday => 90;
 
   @override
+  int get totalFocusedMinutes => 1500;
+
+  @override
+  String get totalFocusedHours => (totalFocusedMinutes / 60).toStringAsFixed(1);
+
+  @override
   Future<void> fetchDailyProgress() async {}
 
   @override
@@ -103,19 +109,26 @@ class FakeProgressProvider extends ChangeNotifier implements ProgressProvider {
 
   @override
   double todayProgress(double dailyTargetHours) {
-    return (minutesFocusedToday / 60) / dailyTargetHours;
+    if (dailyTargetHours <= 0) return 0.0;
+    return (minutesFocusedToday / (dailyTargetHours * 60)).clamp(0.0, 1.0);
   }
 
   @override
   String getFormattedProgress(double dailyTargetHours) {
-    return '$minutesFocusedToday / ${dailyTargetHours.toStringAsFixed(0)} hrs';
+    final minutesToday = minutesFocusedToday;
+    if (minutesToday < 60) {
+      final targetMinutes = (dailyTargetHours * 60).round();
+      return "$minutesToday / $targetMinutes min";
+    } else {
+      final hoursToday = minutesToday / 60;
+      return "${hoursToday.toStringAsFixed(1)} / ${dailyTargetHours.toStringAsFixed(1)} hrs";
+    }
   }
 
   @override
   String uid = '123';
 }
 
-// ⚠ The main entry point of the test
 void main() {
   testWidgets('UserHomeScreen displays username, tip and progress', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focusflow/models/challenge_model.dart';
 import 'package:focusflow/providers/challenge_provider.dart';
-import 'package:focusflow/widgets/widgets.dart'; // For Primary/Secondary Button
-import 'package:pixelarticons/pixelarticons.dart';
+import 'package:focusflow/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -63,14 +62,14 @@ class ChallengeRequestDetailsSheet extends StatelessWidget {
                 Text(
                   'Submitted on $createdDate',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'By Coach: ${request.coachId}', // TODO: Fetch coach name if needed
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 24),

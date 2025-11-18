@@ -93,7 +93,7 @@ class _MainNavigationControllerState extends State<MainNavigationController> {
           AdminUserMenuScreen(),
           AdminChallengeMenuScreen(),
           AdminNotificationViewScreen(),
-          PlaceholderPage(title: 'Reports'),
+          AdminAnalyticsScreen(),
         ];
         _iconList = const [
           Pixel.dashbaord,

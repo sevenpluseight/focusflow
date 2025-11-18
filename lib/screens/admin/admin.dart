@@ -15,3 +15,6 @@ export 'challenge_request_details_screen.dart';
 export 'challenges_ongoing_menu_section.dart';
 export 'distraction_log_report_details.dart';
 export 'distraction_log_reports_view_screen.dart';
+export 'analytics_reports.dart';
+export 'focus_trends_chart.dart';
+export 'distraction_trends_chart.dart';

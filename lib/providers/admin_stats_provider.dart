@@ -1,10 +1,6 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:focusflow/services/services.dart';
-import 'package:intl/intl.dart'; // Import for date formatting
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:focusflow/models/models.dart';
 
 class AdminStatsProvider with ChangeNotifier {
   final AdminStatService _statsService;

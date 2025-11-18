@@ -85,6 +85,26 @@ class ProgressProvider with ChangeNotifier {
     }
   }
 
+  /// Total minutes focused across all time
+  int get totalFocusedMinutes {
+    if (_dailyFocusMap.isEmpty) {
+      return 0;
+    }
+    return _dailyFocusMap.values
+        .map((progress) => progress.focusedMinutes)
+        .reduce((a, b) => a + b);
+  }
+
+  /// Total focused hours for display
+  String get totalFocusedHours {
+    final totalMinutes = totalFocusedMinutes;
+    if (totalMinutes == 0) {
+      return "0";
+    }
+    final hours = totalMinutes / 60;
+    return hours.toStringAsFixed(1);
+  }
+
   /// Called when a focus session ends
   Future<String> endSession(int durationSeconds) async {
     String sessionId = '';
